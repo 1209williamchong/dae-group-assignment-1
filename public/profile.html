@@ -34,12 +34,18 @@
         <!-- 個人資料區 -->
         <div class="profile-header">
             <div class="profile-avatar">
-                <img src="https://picsum.photos/seed/avatar/150/150" alt="頭像">
+                <img src="https://via.placeholder.com/150" alt="用戶頭像" id="profile-avatar">
+                <button class="edit-avatar-btn">
+                    <ion-icon name="camera"></ion-icon>
+                </button>
             </div>
             <div class="profile-info">
                 <div class="profile-name">
-                    <h2>用戶名稱</h2>
+                    <h2 id="profile-username">用戶名稱</h2>
                     <button class="edit-profile-btn">編輯個人檔案</button>
+                    <button class="settings-btn">
+                        <ion-icon name="settings-outline"></ion-icon>
+                    </button>
                 </div>
                 <div class="profile-stats">
                     <div class="stat">
@@ -157,6 +163,57 @@
                     <button type="submit" class="save-btn">儲存變更</button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- 設置面板 -->
+    <div class="settings-panel">
+        <div class="settings-header">
+            <h3>設置</h3>
+            <button class="close-settings">
+                <ion-icon name="close"></ion-icon>
+            </button>
+        </div>
+        <div class="settings-content">
+            <div class="settings-section">
+                <h4>帳號設置</h4>
+                <div class="settings-item">
+                    <label>更改密碼</label>
+                    <button class="settings-action-btn">修改</button>
+                </div>
+                <div class="settings-item">
+                    <label>電子郵件</label>
+                    <button class="settings-action-btn">修改</button>
+                </div>
+            </div>
+            <div class="settings-section">
+                <h4>隱私設置</h4>
+                <div class="settings-item">
+                    <label>貼文可見性</label>
+                    <select class="settings-select">
+                        <option value="public">公開</option>
+                        <option value="private">私人</option>
+                    </select>
+                </div>
+                <div class="settings-item">
+                    <label>訊息通知</label>
+                    <div class="toggle-switch">
+                        <input type="checkbox" id="notifications" checked>
+                        <label for="notifications"></label>
+                    </div>
+                </div>
+            </div>
+            <div class="settings-section">
+                <h4>主題設置</h4>
+                <div class="theme-options">
+                    <button class="theme-option" data-theme="dark">深色主題</button>
+                    <button class="theme-option" data-theme="light">淺色主題</button>
+                </div>
+            </div>
+            <div class="settings-section">
+                <h4>帳號管理</h4>
+                <button class="delete-account-btn">刪除帳號</button>
+            </div>
         </div>
     </div>
 

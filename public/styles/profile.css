@@ -472,4 +472,212 @@
     .bio-edit textarea {
         min-height: 120px;
     }
+}
+
+/* 設置按鈕 */
+.settings-btn {
+    background: none;
+    border: none;
+    color: #666;
+    font-size: 1.5rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    padding: 8px;
+    border-radius: 50%;
+}
+
+.settings-btn:hover {
+    background-color: #2d2d2d;
+    color: #ff6b00;
+}
+
+/* 設置面板 */
+.settings-panel {
+    position: fixed;
+    top: 0;
+    right: -400px;
+    width: 400px;
+    height: 100vh;
+    background-color: #1e1e1e;
+    box-shadow: -4px 0 20px rgba(0, 0, 0, 0.3);
+    transition: right 0.3s ease;
+    z-index: 1000;
+    overflow-y: auto;
+}
+
+.settings-panel.active {
+    right: 0;
+}
+
+.settings-header {
+    padding: 20px;
+    border-bottom: 1px solid #333;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.settings-header h3 {
+    font-size: 1.5rem;
+    color: #ffffff;
+}
+
+.close-settings {
+    background: none;
+    border: none;
+    color: #666;
+    font-size: 1.5rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.close-settings:hover {
+    color: #ff6b00;
+}
+
+.settings-content {
+    padding: 20px;
+}
+
+.settings-section {
+    margin-bottom: 30px;
+}
+
+.settings-section h4 {
+    color: #ffffff;
+    margin-bottom: 15px;
+    font-size: 1.1rem;
+}
+
+.settings-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid #333;
+}
+
+.settings-item label {
+    color: #ffffff;
+}
+
+.settings-action-btn {
+    padding: 6px 15px;
+    background-color: #2d2d2d;
+    border: none;
+    border-radius: 15px;
+    color: #ffffff;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.settings-action-btn:hover {
+    background-color: #3d3d3d;
+    color: #ff6b00;
+}
+
+.settings-select {
+    padding: 6px 12px;
+    background-color: #2d2d2d;
+    border: 1px solid #333;
+    border-radius: 15px;
+    color: #ffffff;
+    cursor: pointer;
+}
+
+/* 開關按鈕 */
+.toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 24px;
+}
+
+.toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.toggle-switch label {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #2d2d2d;
+    transition: .4s;
+    border-radius: 24px;
+}
+
+.toggle-switch label:before {
+    position: absolute;
+    content: "";
+    height: 16px;
+    width: 16px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+}
+
+.toggle-switch input:checked + label {
+    background-color: #ff6b00;
+}
+
+.toggle-switch input:checked + label:before {
+    transform: translateX(26px);
+}
+
+/* 主題選項 */
+.theme-options {
+    display: flex;
+    gap: 10px;
+}
+
+.theme-option {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid #333;
+    border-radius: 8px;
+    background-color: #2d2d2d;
+    color: #ffffff;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.theme-option:hover {
+    background-color: #3d3d3d;
+}
+
+.theme-option.active {
+    background-color: #ff6b00;
+    border-color: #ff6b00;
+}
+
+/* 刪除帳號按鈕 */
+.delete-account-btn {
+    width: 100%;
+    padding: 12px;
+    background-color: #ff4444;
+    border: none;
+    border-radius: 8px;
+    color: #ffffff;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.delete-account-btn:hover {
+    background-color: #ff6666;
+}
+
+/* 響應式設計 */
+@media (max-width: 768px) {
+    .settings-panel {
+        width: 100%;
+        right: -100%;
+    }
 } 

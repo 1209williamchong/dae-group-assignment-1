@@ -14,6 +14,13 @@ const avatarPreview = document.querySelector('.avatar-preview img');
 const uploadBtn = document.querySelector('.upload-btn');
 const logoutBtn = document.getElementById('logout-btn');
 
+// 設置面板功能
+const settingsBtn = document.querySelector('.settings-btn');
+const settingsPanel = document.querySelector('.settings-panel');
+const closeSettings = document.querySelector('.close-settings');
+const themeOptions = document.querySelectorAll('.theme-option');
+const deleteAccountBtn = document.querySelector('.delete-account-btn');
+
 // 檢查登入狀態
 function checkAuthStatus() {
     const currentUser = authService.getCurrentUser();
@@ -198,4 +205,72 @@ async function loadUserProfile() {
         console.error('載入個人資料失敗:', error);
         alert('載入個人資料失敗，請稍後再試');
     }
-} 
+}
+
+// 打開設置面板
+settingsBtn.addEventListener('click', () => {
+    settingsPanel.classList.add('active');
+});
+
+// 關閉設置面板
+closeSettings.addEventListener('click', () => {
+    settingsPanel.classList.remove('active');
+});
+
+// 主題切換
+themeOptions.forEach(option => {
+    option.addEventListener('click', () => {
+        themeOptions.forEach(opt => opt.classList.remove('active'));
+        option.classList.add('active');
+        const theme = option.dataset.theme;
+        document.body.className = theme;
+        localStorage.setItem('theme', theme);
+    });
+});
+
+// 載入保存的主題
+const savedTheme = localStorage.getItem('theme');
+if (savedTheme) {
+    document.body.className = savedTheme;
+    themeOptions.forEach(option => {
+        if (option.dataset.theme === savedTheme) {
+            option.classList.add('active');
+        }
+    });
+}
+
+// 刪除帳號確認
+deleteAccountBtn.addEventListener('click', () => {
+    if (confirm('確定要刪除帳號嗎？此操作無法復原。')) {
+        // 這裡添加刪除帳號的 API 調用
+        console.log('刪除帳號');
+    }
+});
+
+// 切換通知設置
+const notificationToggle = document.getElementById('notifications');
+notificationToggle.addEventListener('change', (e) => {
+    // 這裡添加通知設置的 API 調用
+    console.log('通知設置已更改:', e.target.checked);
+});
+
+// 貼文可見性設置
+const postVisibility = document.querySelector('.settings-select');
+postVisibility.addEventListener('change', (e) => {
+    // 這裡添加貼文可見性設置的 API 調用
+    console.log('貼文可見性已更改:', e.target.value);
+});
+
+// 修改密碼
+const changePasswordBtn = document.querySelector('.settings-action-btn');
+changePasswordBtn.addEventListener('click', () => {
+    // 這裡添加修改密碼的邏輯
+    console.log('修改密碼');
+});
+
+// 修改電子郵件
+const changeEmailBtn = document.querySelectorAll('.settings-action-btn')[1];
+changeEmailBtn.addEventListener('click', () => {
+    // 這裡添加修改電子郵件的邏輯
+    console.log('修改電子郵件');
+}); 
