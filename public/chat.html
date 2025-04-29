@@ -16,6 +16,9 @@
                 <button id="new-chat-btn" class="new-chat-btn">
                     <i class="fas fa-plus"></i> 新對話
                 </button>
+                <button id="change-wallpaper-btn" title="更換背景">
+                    <i class="fas fa-image"></i>
+                </button>
             </div>
             <div class="search-box">
                 <input type="text" id="chat-search" placeholder="搜尋對話...">
@@ -50,6 +53,40 @@
                 <button id="attach-file-btn"><i class="fas fa-paperclip"></i></button>
                 <input type="text" id="message-input" placeholder="輸入訊息...">
                 <button id="send-message-btn"><i class="fas fa-paper-plane"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 背景選擇彈窗 -->
+    <div id="wallpaper-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>選擇背景</h3>
+                <button class="close-modal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="wallpaper-options">
+                <div class="wallpaper-option" data-wallpaper="default">
+                    <img src="/images/wallpapers/default.jpg" alt="默認背景">
+                    <span>默認</span>
+                </div>
+                <div class="wallpaper-option" data-wallpaper="nature">
+                    <img src="/images/wallpapers/nature.jpg" alt="自然">
+                    <span>自然</span>
+                </div>
+                <div class="wallpaper-option" data-wallpaper="gradient">
+                    <img src="/images/wallpapers/gradient.jpg" alt="漸變">
+                    <span>漸變</span>
+                </div>
+                <div class="wallpaper-option" data-wallpaper="custom">
+                    <i class="fas fa-plus"></i>
+                    <span>自定義</span>
+                </div>
+            </div>
+            <div class="custom-wallpaper-upload" style="display: none;">
+                <input type="file" id="custom-wallpaper" accept="image/*">
+                <button id="upload-wallpaper">上傳</button>
             </div>
         </div>
     </div>

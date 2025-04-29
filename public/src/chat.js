@@ -1,6 +1,15 @@
 import { ajax } from './services/ajax.js';
 import { isLoggedIn, logout } from './services/auth.js';
 
+// 背景相關的常量和變量
+const WALLPAPER_KEY = 'chat_wallpaper';
+const DEFAULT_WALLPAPER = '/images/wallpapers/default.jpg';
+const WALLPAPER_OPTIONS = {
+    default: '/images/wallpapers/default.jpg',
+    nature: '/images/wallpapers/nature.jpg',
+    gradient: '/images/wallpapers/gradient.jpg'
+};
+
 // DOM 元素
 const chatList = document.getElementById('chat-list');
 const messagesContainer = document.getElementById('messages-container');
@@ -11,6 +20,14 @@ const chatSearch = document.getElementById('chat-search');
 const chatAvatar = document.getElementById('chat-avatar');
 const chatName = document.getElementById('chat-name');
 const chatStatus = document.getElementById('chat-status');
+const chatContainer = document.querySelector('.chat-container');
+const changeWallpaperBtn = document.getElementById('change-wallpaper-btn');
+const wallpaperModal = document.getElementById('wallpaper-modal');
+const closeModalBtn = document.querySelector('.close-modal');
+const wallpaperOptions = document.querySelectorAll('.wallpaper-option');
+const customWallpaperUpload = document.querySelector('.custom-wallpaper-upload');
+const customWallpaperInput = document.getElementById('custom-wallpaper');
+const uploadWallpaperBtn = document.getElementById('upload-wallpaper');
 
 // 狀態變量
 let currentChatId = null;
@@ -39,6 +56,9 @@ async function init() {
     // 初始化 WebSocket
     initWebSocket();
 
+    // 初始化背景
+    initWallpaper();
+
     // 事件監聽器
     sendMessageBtn.addEventListener('click', sendMessage);
     messageInput.addEventListener('keypress', (e) => {
@@ -46,6 +66,24 @@ async function init() {
     });
     newChatBtn.addEventListener('click', createNewChat);
     chatSearch.addEventListener('input', searchChats);
+    changeWallpaperBtn.addEventListener('click', showWallpaperModal);
+    closeModalBtn.addEventListener('click', hideWallpaperModal);
+
+    wallpaperOptions.forEach(option => {
+        option.addEventListener('click', () => {
+            const wallpaper = option.dataset.wallpaper;
+            handleWallpaperSelection(wallpaper);
+        });
+    });
+
+    customWallpaperInput.addEventListener('change', handleCustomWallpaperUpload);
+
+    // 點擊彈窗外部關閉
+    window.addEventListener('click', (event) => {
+        if (event.target === wallpaperModal) {
+            hideWallpaperModal();
+        }
+    });
 }
 
 // 初始化 WebSocket
@@ -209,6 +247,53 @@ function scrollToBottom() {
 function formatTime(timestamp) {
     const date = new Date(timestamp);
     return date.toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit' });
+}
+
+// 初始化背景
+function initWallpaper() {
+    const savedWallpaper = localStorage.getItem(WALLPAPER_KEY) || DEFAULT_WALLPAPER;
+    setWallpaper(savedWallpaper);
+}
+
+// 設置背景
+function setWallpaper(url) {
+    chatContainer.style.backgroundImage = `url(${url})`;
+    localStorage.setItem(WALLPAPER_KEY, url);
+}
+
+// 顯示背景選擇彈窗
+function showWallpaperModal() {
+    wallpaperModal.style.display = 'block';
+}
+
+// 隱藏背景選擇彈窗
+function hideWallpaperModal() {
+    wallpaperModal.style.display = 'none';
+    customWallpaperUpload.style.display = 'none';
+}
+
+// 處理背景選擇
+function handleWallpaperSelection(wallpaper) {
+    if (wallpaper === 'custom') {
+        customWallpaperUpload.style.display = 'flex';
+    } else {
+        const wallpaperUrl = WALLPAPER_OPTIONS[wallpaper];
+        setWallpaper(wallpaperUrl);
+        hideWallpaperModal();
+    }
+}
+
+// 處理自定義背景上傳
+function handleCustomWallpaperUpload(event) {
+    const file = event.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            setWallpaper(e.target.result);
+            hideWallpaperModal();
+        };
+        reader.readAsDataURL(file);
+    }
 }
 
 // 初始化應用
