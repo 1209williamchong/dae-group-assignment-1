@@ -1,4 +1,5 @@
 import { authService } from '../src/services/auth.js';
+import { postsApi, bookmarksApi } from '../src/services/api.js';
 
 const API_BASE_URL = 'http://localhost:3000/api';
 
@@ -14,43 +15,101 @@ class Post {
     }
 }
 
+// 錯誤處理函數
+function handleApiError(error) {
+    console.error('API 錯誤:', error);
+    let errorMessage = '發生錯誤，請稍後再試';
+    
+    if (error.status === 400) {
+        errorMessage = '請求無效，請檢查輸入的資料';
+    } else if (error.status === 401) {
+        errorMessage = '請先登入';
+        window.location.href = '/login.html';
+    } else if (error.status === 403) {
+        errorMessage = '沒有權限執行此操作';
+    } else if (error.status === 404) {
+        errorMessage = '找不到請求的資源';
+    } else if (error.status === 500) {
+        errorMessage = '伺服器發生錯誤，請稍後再試';
+    }
+    
+    // 顯示錯誤訊息
+    const errorDiv = document.createElement('div');
+    errorDiv.className = 'error-message';
+    errorDiv.textContent = errorMessage;
+    document.body.appendChild(errorDiv);
+    
+    // 3秒後自動移除錯誤訊息
+    setTimeout(() => {
+        errorDiv.remove();
+    }, 3000);
+}
+
 // API 函數
 async function fetchPosts() {
-    const response = await fetch(`${API_BASE_URL}/posts`);
-    return await response.json();
+    try {
+        const response = await fetch(`${API_BASE_URL}/posts`);
+        if (!response.ok) {
+            throw { status: response.status, message: response.statusText };
+        }
+        return await response.json();
+    } catch (error) {
+        handleApiError(error);
+        return [];
+    }
 }
 
 async function createPost(content, image) {
-    const formData = new FormData();
-    formData.append('content', content);
-    if (image) {
-        formData.append('image', image);
-    }
+    try {
+        const formData = new FormData();
+        formData.append('content', content);
+        if (image) {
+            formData.append('image', image);
+        }
 
-    const response = await fetch(`${API_BASE_URL}/posts`, {
-        method: 'POST',
-        body: formData
-    });
-    return await response.json();
+        const response = await fetch(`${API_BASE_URL}/posts`, {
+            method: 'POST',
+            body: formData
+        });
+        
+        if (!response.ok) {
+            throw { status: response.status, message: response.statusText };
+        }
+        
+        return await response.json();
+    } catch (error) {
+        handleApiError(error);
+        throw error;
+    }
 }
 
 async function toggleLike(postId) {
-    const currentUser = authService.getCurrentUser();
-    if (!currentUser) {
-        throw new Error('請先登入');
-    }
+    try {
+        const currentUser = authService.getCurrentUser();
+        if (!currentUser) {
+            throw { status: 401, message: '請先登入' };
+        }
 
-    const response = await fetch(`${API_BASE_URL}/likes`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            postId,
-            userId: currentUser.id
-        })
-    });
-    return await response.json();
+        const response = await fetch(`${API_BASE_URL}/likes`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                postId,
+                userId: currentUser.id
+            })
+        });
+        
+        if (!response.ok) {
+            throw { status: response.status, message: response.statusText };
+        }
+        
+        return await response.json();
+    } catch (error) {
+        handleApiError(error);
+        throw error;
+    }
 }
 
 // 初始化應用程式
@@ -85,25 +144,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     // 載入貼文
     async function loadPosts() {
         try {
-            const posts = await fetchPosts();
+            const posts = await postsApi.getPosts();
             postsContainer.innerHTML = '';
             
             for (const post of posts) {
                 const postElement = createPostElement(post);
                 postsContainer.appendChild(postElement);
-                
-                // 更新按讚狀態
-                const likeCount = await authService.getPostLikes(post.id);
-                const hasLiked = await authService.hasUserLiked(post.id);
-                
-                const likeButton = postElement.querySelector('.like-button');
-                const likeCountSpan = postElement.querySelector('.like-count');
-                
-                likeCountSpan.textContent = likeCount.toString();
-                likeButton.classList.toggle('liked', hasLiked);
             }
         } catch (error) {
-            console.error('載入貼文失敗:', error);
+            handleApiError(error);
         }
     }
 
@@ -117,26 +166,30 @@ document.addEventListener('DOMContentLoaded', async () => {
             <div class="post-actions">
                 <button class="like-button">
                     <span class="like-icon">❤️</span>
-                    <span class="like-count">0</span>
+                    <span class="like-count">${post.likes}</span>
                 </button>
                 <button class="comment-button">💬 留言</button>
                 <button class="share-button">↗️ 分享</button>
+                <button class="bookmark-button">
+                    <span class="bookmark-icon">🔖</span>
+                </button>
             </div>
             <div class="comments-section"></div>
         `;
 
-        // 添加按讚事件監聽器
-        const likeButton = postElement.querySelector('.like-button');
-        likeButton.addEventListener('click', async () => {
+        // 添加書籤事件監聽器
+        const bookmarkButton = postElement.querySelector('.bookmark-button');
+        bookmarkButton.addEventListener('click', async () => {
             try {
-                const result = await toggleLike(post.id);
-                const likeCount = await authService.getPostLikes(post.id);
-                
-                likeButton.classList.toggle('liked', result.liked);
-                likeButton.querySelector('.like-count').textContent = likeCount.toString();
+                if (bookmarkButton.classList.contains('active')) {
+                    await bookmarksApi.removeBookmark(post.id);
+                    bookmarkButton.classList.remove('active');
+                } else {
+                    await bookmarksApi.addBookmark(post.id);
+                    bookmarkButton.classList.add('active');
+                }
             } catch (error) {
-                console.error('按讚失敗:', error);
-                alert(error.message);
+                handleApiError(error);
             }
         });
 
@@ -156,12 +209,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         try {
-            await createPost(content, image);
+            await postsApi.createPost(content, image);
             await loadPosts();
             postForm.reset();
         } catch (error) {
-            console.error('發布貼文失敗:', error);
-            alert('發布貼文失敗，請稍後再試');
+            handleApiError(error);
         }
     });
 
