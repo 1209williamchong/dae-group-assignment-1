@@ -1,0 +1,272 @@
+/* 全局樣式 */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f0f2f5;
+    color: #1a1a1a;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* 導航欄 */
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 0;
+    margin-bottom: 20px;
+}
+
+.logo h1 {
+    font-size: 2rem;
+    color: #1877f2;
+}
+
+.nav-buttons {
+    display: flex;
+    gap: 15px;
+}
+
+.nav-buttons button {
+    background: none;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 20px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: background-color 0.2s;
+}
+
+.nav-buttons button:hover {
+    background-color: #e9ecef;
+}
+
+/* 主內容區域 */
+.main-content {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* 貼文表單 */
+.post-form-container {
+    background-color: white;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+#post-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+#post-content {
+    width: 100%;
+    min-height: 100px;
+    padding: 15px;
+    border: 1px solid #e9ecef;
+    border-radius: 10px;
+    resize: vertical;
+    font-size: 1rem;
+}
+
+.post-form-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+#youtube-link {
+    width: 100%;
+    padding: 10px 15px;
+    border: 1px solid #e9ecef;
+    border-radius: 20px;
+    font-size: 0.9rem;
+}
+
+#youtube-preview {
+    position: relative;
+    margin-top: 10px;
+}
+
+.youtube-preview {
+    position: relative;
+    width: 100%;
+    margin-bottom: 10px;
+}
+
+.remove-preview-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: rgba(0, 0, 0, 0.5);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.remove-preview-btn:hover {
+    background: rgba(0, 0, 0, 0.7);
+}
+
+#post-form button[type="submit"] {
+    align-self: flex-end;
+    background-color: #1877f2;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+#post-form button[type="submit"]:hover {
+    background-color: #166fe5;
+}
+
+/* 搜尋框 */
+.search-container {
+    background-color: white;
+    border-radius: 10px;
+    padding: 15px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+#search-form {
+    display: flex;
+    gap: 10px;
+}
+
+#search-input {
+    flex: 1;
+    padding: 10px 15px;
+    border: 1px solid #e9ecef;
+    border-radius: 20px;
+    font-size: 0.9rem;
+}
+
+#search-form button {
+    background: none;
+    border: none;
+    color: #666;
+    cursor: pointer;
+    padding: 0 10px;
+}
+
+/* 貼文列表 */
+.posts-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.post {
+    background-color: white;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.post-header {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.post-header img {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+}
+
+.post-info h3 {
+    font-size: 1.1rem;
+    margin-bottom: 5px;
+}
+
+.post-info .time {
+    color: #666;
+    font-size: 0.9rem;
+}
+
+.post-content {
+    margin-bottom: 15px;
+    line-height: 1.5;
+}
+
+.youtube-embed {
+    margin: 15px 0;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.youtube-embed iframe {
+    border: none;
+    border-radius: 10px;
+}
+
+.post-actions {
+    display: flex;
+    gap: 20px;
+    padding-top: 15px;
+    border-top: 1px solid #e9ecef;
+}
+
+.post-actions button {
+    background: none;
+    border: none;
+    color: #666;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.post-actions button:hover {
+    color: #1877f2;
+}
+
+/* 響應式設計 */
+@media (max-width: 768px) {
+    .container {
+        padding: 10px;
+    }
+
+    .navbar {
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .nav-buttons {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .post-form-actions {
+        flex-direction: column;
+    }
+
+    .youtube-embed iframe {
+        height: 200px;
+    }
+} 
