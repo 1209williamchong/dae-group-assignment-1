@@ -68,6 +68,18 @@
                                     <ion-icon name="flag-outline"></ion-icon>
                                     <input type="text" id="end-location" placeholder="終點">
                                 </div>
+                                <div class="offline-map-options">
+                                    <button type="button" id="download-map-btn" title="下載離線地圖">
+                                        <ion-icon name="download-outline"></ion-icon>
+                                        <span>下載離線地圖</span>
+                                    </button>
+                                    <div class="map-download-progress" style="display: none;">
+                                        <div class="progress-bar">
+                                            <div class="progress"></div>
+                                        </div>
+                                        <span class="progress-text">0%</span>
+                                    </div>
+                                </div>
                             </div>
                             <div id="route-map" class="route-map"></div>
                             <div class="route-details">
