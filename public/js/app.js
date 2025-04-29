@@ -14,6 +14,20 @@ class Post {
 
 // 初始化應用程式
 document.addEventListener('DOMContentLoaded', async () => {
+    // 檢查認證狀態
+    try {
+        const response = await api.checkAuth();
+        if (!response.user_id) {
+            // 未登入，跳轉到登入頁面
+            window.location.href = '/login.html';
+            return;
+        }
+    } catch (error) {
+        console.error('檢查認證狀態失敗:', error);
+        window.location.href = '/login.html';
+        return;
+    }
+
     const postForm = document.getElementById('postForm');
     const postsContainer = document.getElementById('posts');
 

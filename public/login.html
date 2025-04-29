@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>登入 - Fresh</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div id="app">
+        <header>
+            <h1>Fresh</h1>
+        </header>
+        
+        <main>
+            <section class="auth-section">
+                <div class="auth-tabs">
+                    <button class="auth-tab active" data-tab="login">登入</button>
+                    <button class="auth-tab" data-tab="signup">註冊</button>
+                </div>
+
+                <form id="loginForm" class="auth-form">
+                    <div class="form-group">
+                        <label for="loginUsername">用戶名稱</label>
+                        <input type="text" id="loginUsername" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="loginPassword">密碼</label>
+                        <input type="password" id="loginPassword" required>
+                    </div>
+                    <button type="submit" class="auth-button">登入</button>
+                </form>
+
+                <form id="signupForm" class="auth-form" style="display: none;">
+                    <div class="form-group">
+                        <label for="signupUsername">用戶名稱</label>
+                        <input type="text" id="signupUsername" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="signupPassword">密碼</label>
+                        <input type="password" id="signupPassword" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="confirmPassword">確認密碼</label>
+                        <input type="password" id="confirmPassword" required>
+                    </div>
+                    <button type="submit" class="auth-button">註冊</button>
+                </form>
+            </section>
+        </main>
+
+        <footer>
+            <p>&copy; 2025 Fresh</p>
+        </footer>
+    </div>
+    <script src="/js/login.js"></script>
+</body>
+</html> 
