@@ -12,6 +12,17 @@ const editProfileForm = document.getElementById('editProfileForm');
 const avatarInput = document.getElementById('edit-avatar');
 const avatarPreview = document.querySelector('.avatar-preview img');
 const uploadBtn = document.querySelector('.upload-btn');
+const logoutBtn = document.getElementById('logout-btn');
+
+// 檢查登入狀態
+function checkAuthStatus() {
+    const currentUser = authService.getCurrentUser();
+    if (!currentUser) {
+        window.location.href = '/register.html';
+        return;
+    }
+    return currentUser;
+}
 
 // 顯示編輯個人檔案彈出視窗
 function showEditProfileModal() {
@@ -74,19 +85,34 @@ async function updateProfile(event) {
     }
 }
 
-// 事件監聽器
-editProfileBtn.addEventListener('click', showEditProfileModal);
-closeModalBtn.addEventListener('click', hideEditProfileModal);
-cancelBtn.addEventListener('click', hideEditProfileModal);
-editProfileForm.addEventListener('submit', updateProfile);
-avatarInput.addEventListener('change', handleAvatarPreview);
-uploadBtn.addEventListener('click', () => avatarInput.click());
+// 處理登出
+function handleLogout() {
+    authService.logout();
+    window.location.href = '/register.html';
+}
 
-// 點擊彈出視窗外部關閉
-editProfileModal.addEventListener('click', (event) => {
-    if (event.target === editProfileModal) {
-        hideEditProfileModal();
-    }
+// 事件監聽器
+document.addEventListener('DOMContentLoaded', () => {
+    const currentUser = checkAuthStatus();
+    if (!currentUser) return;
+
+    editProfileBtn.addEventListener('click', showEditProfileModal);
+    closeModalBtn.addEventListener('click', hideEditProfileModal);
+    cancelBtn.addEventListener('click', hideEditProfileModal);
+    editProfileForm.addEventListener('submit', updateProfile);
+    avatarInput.addEventListener('change', handleAvatarPreview);
+    uploadBtn.addEventListener('click', () => avatarInput.click());
+    logoutBtn.addEventListener('click', handleLogout);
+
+    // 點擊彈出視窗外部關閉
+    editProfileModal.addEventListener('click', (event) => {
+        if (event.target === editProfileModal) {
+            hideEditProfileModal();
+        }
+    });
+
+    // 載入用戶資料
+    loadUserProfile();
 });
 
 // API 函數
@@ -128,111 +154,48 @@ async function fetchPosts(userId) {
     }
 }
 
-// 初始化個人資料頁面
-document.addEventListener('DOMContentLoaded', async () => {
-    // 檢查登入狀態
-    if (!authService.isAuthenticated()) {
-        window.location.href = '/login.html';
-        return;
-    }
-
+// 載入用戶資料和貼文
+async function loadUserProfile() {
     const currentUser = authService.getCurrentUser();
-    const profileContainer = document.querySelector('.profile-container');
     const userId = new URLSearchParams(window.location.search).get('id') || currentUser.id;
 
-    // 載入用戶資料
-    async function loadUserProfile() {
-        try {
-            const user = await fetchUserProfile(userId);
-            const isFollowing = await authService.isFollowing(userId);
-            
-            // 更新個人資料區塊
-            profileContainer.innerHTML = `
-                <div class="profile-header">
-                    <div class="profile-avatar">
-                        <img src="${user.avatar || 'https://picsum.photos/seed/avatar/150/150'}" alt="用戶頭像">
+    try {
+        const user = await fetchUserProfile(userId);
+        const isFollowing = await authService.isFollowing(userId);
+        
+        // 更新個人資料區塊
+        document.querySelector('.profile-name h2').textContent = user.username;
+        document.querySelector('.profile-bio p').textContent = user.bio || '這個用戶還沒有個人簡介';
+        
+        // 更新統計數字
+        document.querySelector('.stat:nth-child(1) .stat-number').textContent = user.postsCount || 0;
+        document.querySelector('.stat:nth-child(2) .stat-number').textContent = user.followersCount || 0;
+        document.querySelector('.stat:nth-child(3) .stat-number').textContent = user.followingCount || 0;
+
+        // 更新頭像
+        document.querySelector('.profile-avatar img').src = user.avatar || 'https://picsum.photos/seed/avatar/150/150';
+
+        // 載入貼文
+        const posts = await fetchPosts(userId);
+        const gridRow = document.querySelector('.grid-row');
+        gridRow.innerHTML = '';
+
+        posts.forEach(post => {
+            const postElement = document.createElement('div');
+            postElement.className = 'grid-item';
+            postElement.innerHTML = `
+                <img src="${post.image || 'https://picsum.photos/seed/1/600/600'}" alt="貼文">
+                <div class="post-overlay">
+                    <div class="post-stats">
+                        <span><ion-icon name="heart-outline"></ion-icon> ${post.likes || 0}</span>
+                        <span><ion-icon name="chatbubble-outline"></ion-icon> ${post.comments?.length || 0}</span>
                     </div>
-                    <div class="profile-info">
-                        <div class="profile-name">
-                            <h2>${user.username}</h2>
-                            ${userId === currentUser.id ? `
-                                <button class="edit-profile-btn">編輯個人檔案</button>
-                            ` : ''}
-                        </div>
-                        <div class="profile-stats">
-                            <div class="stat">
-                                <span class="stat-number">${user.postsCount || 0}</span>
-                                <span class="stat-label">貼文</span>
-                            </div>
-                            <div class="stat">
-                                <span class="stat-number">${user.followersCount || 0}</span>
-                                <span class="stat-label">追蹤者</span>
-                            </div>
-                            <div class="stat">
-                                <span class="stat-number">${user.followingCount || 0}</span>
-                                <span class="stat-label">追蹤中</span>
-                            </div>
-                        </div>
-                        <div class="profile-bio">
-                            <p>${user.bio || '這個用戶還沒有個人簡介'}</p>
-                        </div>
-                        ${userId !== currentUser.id ? `
-                            <button class="follow-button ${isFollowing ? 'following' : ''}">
-                                ${isFollowing ? '取消追蹤' : '追蹤'}
-                            </button>
-                        ` : ''}
-                    </div>
-                </div>
-                <div class="posts-grid">
-                    <div class="grid-row"></div>
                 </div>
             `;
-
-            // 如果是其他用戶的個人資料，添加追蹤按鈕事件監聽器
-            if (userId !== currentUser.id) {
-                const followButton = profileContainer.querySelector('.follow-button');
-                followButton.addEventListener('click', async () => {
-                    try {
-                        const result = await toggleFollow(userId);
-                        const user = await fetchUserProfile(userId);
-                        
-                        followButton.classList.toggle('following');
-                        followButton.textContent = result.following ? '取消追蹤' : '追蹤';
-                        
-                        // 更新追蹤者數量
-                        const followersCount = profileContainer.querySelector('.stat:nth-child(2) .stat-number');
-                        followersCount.textContent = user.followersCount;
-                    } catch (error) {
-                        console.error('追蹤操作失敗:', error);
-                        alert(error.message);
-                    }
-                });
-            }
-
-            // 載入用戶的貼文
-            const gridRow = profileContainer.querySelector('.grid-row');
-            const posts = await fetchPosts(userId);
-            
-            posts.forEach(post => {
-                const postElement = document.createElement('div');
-                postElement.className = 'grid-item';
-                postElement.innerHTML = `
-                    <img src="${post.image || 'https://picsum.photos/seed/1/600/600'}" alt="貼文">
-                    <div class="post-overlay">
-                        <div class="post-stats">
-                            <span><ion-icon name="heart-outline"></ion-icon> ${post.likes || 0}</span>
-                            <span><ion-icon name="chatbubble-outline"></ion-icon> ${post.comments?.length || 0}</span>
-                        </div>
-                    </div>
-                `;
-                gridRow.appendChild(postElement);
-            });
-        } catch (error) {
-            console.error('載入個人資料失敗:', error);
-            alert('載入個人資料失敗，請稍後再試');
-        }
+            gridRow.appendChild(postElement);
+        });
+    } catch (error) {
+        console.error('載入個人資料失敗:', error);
+        alert('載入個人資料失敗，請稍後再試');
     }
-
-    // 載入用戶資料
-    await loadUserProfile();
-}); 
+} 
