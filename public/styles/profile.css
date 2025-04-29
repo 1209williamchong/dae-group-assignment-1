@@ -3,6 +3,8 @@
     max-width: 935px;
     margin: 0 auto;
     padding: 2rem 1rem;
+    background-color: #121212;
+    color: #ffffff;
 }
 
 /* 個人資料區 */
@@ -10,6 +12,9 @@
     display: flex;
     gap: 2rem;
     margin-bottom: 3rem;
+    padding: 1rem;
+    background-color: #1e1e1e;
+    border-radius: 12px;
 }
 
 .profile-avatar {
@@ -17,7 +22,7 @@
     height: 150px;
     border-radius: 50%;
     overflow: hidden;
-    border: 1px solid #e0e0e0;
+    border: 2px solid #333;
 }
 
 .profile-avatar img {
@@ -40,21 +45,23 @@
 .profile-name h2 {
     font-size: 1.5rem;
     font-weight: 600;
-    color: #262626;
+    color: #ffffff;
 }
 
 .edit-profile-btn {
     padding: 0.5rem 1rem;
-    background-color: #f0f0f0;
+    background-color: #2d2d2d;
     border: none;
     border-radius: 8px;
+    color: #ffffff;
     font-weight: 500;
     cursor: pointer;
     transition: all 0.3s ease;
 }
 
 .edit-profile-btn:hover {
-    background-color: #e0e0e0;
+    background-color: #3d3d3d;
+    color: #bb86fc;
 }
 
 .profile-stats {
@@ -71,7 +78,7 @@
 
 .stat-number {
     font-weight: 600;
-    color: #262626;
+    color: #ffffff;
 }
 
 .stat-label {
@@ -80,7 +87,7 @@
 }
 
 .profile-bio p {
-    color: #262626;
+    color: #ffffff;
     line-height: 1.5;
 }
 
@@ -103,6 +110,7 @@
     overflow: hidden;
     border-radius: 8px;
     cursor: pointer;
+    background-color: #1e1e1e;
 }
 
 .grid-item img {
@@ -150,6 +158,30 @@
 
 .grid-item:hover .post-overlay {
     opacity: 1;
+}
+
+/* 追蹤按鈕 */
+.follow-button {
+    padding: 0.5rem 1.5rem;
+    background-color: #2d2d2d;
+    border: none;
+    border-radius: 8px;
+    color: #ffffff;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.follow-button:hover {
+    background-color: #3d3d3d;
+}
+
+.follow-button.following {
+    background-color: #bb86fc;
+}
+
+.follow-button.following:hover {
+    background-color: #9c64d4;
 }
 
 /* 編輯個人檔案彈出視窗 */
