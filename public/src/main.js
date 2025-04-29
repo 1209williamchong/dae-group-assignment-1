@@ -9,6 +9,7 @@ const logoutBtn = document.getElementById('logout-btn');
 const searchInput = document.getElementById('search-input');
 const searchForm = document.getElementById('search-form');
 const showBookmarksBtn = document.getElementById('show-bookmarks-btn');
+const youtubeLinkInput = document.getElementById('youtube-link');
 
 // 狀態變量
 let currentPage = 1;
@@ -33,6 +34,7 @@ async function init() {
     searchForm.addEventListener('submit', handleSearch);
     searchInput.addEventListener('input', handleSearchInput);
     showBookmarksBtn.addEventListener('click', toggleBookmarksView);
+    youtubeLinkInput.addEventListener('input', handleYoutubeLinkInput);
     
     // 添加滾動事件監聽器
     window.addEventListener('scroll', handleScroll);
@@ -151,6 +153,86 @@ function renderPosts(posts, append = false) {
     });
 }
 
+// 處理 YouTube 連結輸入
+function handleYoutubeLinkInput(e) {
+    const link = e.target.value.trim();
+    if (isValidYoutubeUrl(link)) {
+        const videoId = extractYoutubeId(link);
+        if (videoId) {
+            // 預覽 YouTube 影片
+            previewYoutubeVideo(videoId);
+        }
+    }
+}
+
+// 檢查是否為有效的 YouTube URL
+function isValidYoutubeUrl(url) {
+    const pattern = /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\/.+$/;
+    return pattern.test(url);
+}
+
+// 提取 YouTube 影片 ID
+function extractYoutubeId(url) {
+    const regExp = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#&?]*).*/;
+    const match = url.match(regExp);
+    return (match && match[7].length === 11) ? match[7] : null;
+}
+
+// 預覽 YouTube 影片
+function previewYoutubeVideo(videoId) {
+    const previewContainer = document.getElementById('youtube-preview');
+    if (!previewContainer) return;
+
+    previewContainer.innerHTML = `
+        <div class="youtube-preview">
+            <iframe 
+                width="100%" 
+                height="315" 
+                src="https://www.youtube.com/embed/${videoId}" 
+                frameborder="0" 
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                allowfullscreen>
+            </iframe>
+            <button class="remove-preview-btn" onclick="removeYoutubePreview()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    `;
+}
+
+// 移除 YouTube 預覽
+function removeYoutubePreview() {
+    const previewContainer = document.getElementById('youtube-preview');
+    if (previewContainer) {
+        previewContainer.innerHTML = '';
+    }
+    youtubeLinkInput.value = '';
+}
+
+// 處理貼文提交
+async function handlePostSubmit(e) {
+    e.preventDefault();
+    const content = postContent.value.trim();
+    const youtubeLink = youtubeLinkInput.value.trim();
+    
+    if (!content && !youtubeLink) return;
+
+    try {
+        const postData = {
+            content,
+            youtubeLink: youtubeLink || null
+        };
+        
+        const newPost = await ajax.posts.create(postData);
+        postContent.value = '';
+        youtubeLinkInput.value = '';
+        removeYoutubePreview();
+        loadPosts(); // 重新載入貼文
+    } catch (error) {
+        console.error('發布貼文失敗:', error);
+    }
+}
+
 // 創建貼文元素
 function createPostElement(post) {
     const div = document.createElement('div');
@@ -164,6 +246,18 @@ function createPostElement(post) {
             </div>
         </div>
         <div class="post-content">${post.content}</div>
+        ${post.youtubeLink ? `
+            <div class="youtube-embed">
+                <iframe 
+                    width="100%" 
+                    height="315" 
+                    src="https://www.youtube.com/embed/${extractYoutubeId(post.youtubeLink)}" 
+                    frameborder="0" 
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                    allowfullscreen>
+                </iframe>
+            </div>
+        ` : ''}
         <div class="post-actions">
             <button class="like-btn" data-post-id="${post.id}">
                 <i class="fas fa-heart"></i> ${post.likes}
@@ -177,21 +271,6 @@ function createPostElement(post) {
         </div>
     `;
     return div;
-}
-
-// 處理貼文提交
-async function handlePostSubmit(e) {
-    e.preventDefault();
-    const content = postContent.value.trim();
-    if (!content) return;
-
-    try {
-        const newPost = await ajax.posts.create({ content });
-        postContent.value = '';
-        loadPosts(); // 重新載入貼文
-    } catch (error) {
-        console.error('發布貼文失敗:', error);
-    }
 }
 
 // 格式化時間
