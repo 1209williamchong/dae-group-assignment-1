@@ -1003,4 +1003,224 @@ removeLocationBtn.addEventListener('click', () => {
     GEOLOCATION.stopWatching();
     currentLocation = null;
     locationInfo.style.display = 'none';
+});
+
+// 地圖整合相關功能
+const MAP = {
+    // 初始化地圖
+    init(containerId) {
+        this.map = L.map(containerId).setView([25.0330, 121.5654], 13); // 預設台北市中心
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(this.map);
+
+        this.markers = [];
+        this.route = null;
+        return this.map;
+    },
+
+    // 添加位置標記
+    addMarker(lat, lng, title, content) {
+        const marker = L.marker([lat, lng])
+            .addTo(this.map)
+            .bindPopup(content || title);
+
+        if (title) {
+            marker.bindTooltip(title, {
+                permanent: false,
+                direction: 'top'
+            });
+        }
+
+        this.markers.push(marker);
+        return marker;
+    },
+
+    // 清除所有標記
+    clearMarkers() {
+        this.markers.forEach(marker => marker.remove());
+        this.markers = [];
+    },
+
+    // 規劃路線
+    async planRoute(start, end) {
+        try {
+            // 使用 OSRM API 規劃路線
+            const response = await fetch(
+                `https://router.project-osrm.org/route/v1/driving/${start.lng},${start.lat};${end.lng},${end.lat}?overview=full&geometries=geojson`
+            );
+            const data = await response.json();
+
+            if (data.routes && data.routes.length > 0) {
+                const route = data.routes[0];
+                
+                // 清除現有路線
+                if (this.route) {
+                    this.map.removeLayer(this.route);
+                }
+
+                // 繪製新路線
+                this.route = L.geoJSON(route.geometry, {
+                    style: {
+                        color: '#3388ff',
+                        weight: 5,
+                        opacity: 0.7
+                    }
+                }).addTo(this.map);
+
+                // 添加起點和終點標記
+                this.clearMarkers();
+                this.addMarker(start.lat, start.lng, '起點', '起點位置');
+                this.addMarker(end.lat, end.lng, '終點', '終點位置');
+
+                // 調整地圖視圖以顯示完整路線
+                this.map.fitBounds(this.route.getBounds());
+
+                return {
+                    distance: route.distance, // 米
+                    duration: route.duration, // 秒
+                    geometry: route.geometry
+                };
+            }
+        } catch (error) {
+            console.error('路線規劃失敗:', error);
+            throw error;
+        }
+    },
+
+    // 添加自定義圖標
+    createCustomIcon(iconUrl, iconSize = [25, 41], iconAnchor = [12, 41]) {
+        return L.icon({
+            iconUrl: iconUrl,
+            iconSize: iconSize,
+            iconAnchor: iconAnchor,
+            popupAnchor: [1, -34],
+            shadowUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png',
+            shadowSize: [41, 41]
+        });
+    },
+
+    // 添加圓形標記
+    addCircleMarker(lat, lng, radius, options = {}) {
+        const circle = L.circleMarker([lat, lng], {
+            radius: radius,
+            fillColor: options.fillColor || '#3388ff',
+            color: options.color || '#3388ff',
+            weight: options.weight || 1,
+            opacity: options.opacity || 1,
+            fillOpacity: options.fillOpacity || 0.2,
+            ...options
+        }).addTo(this.map);
+
+        this.markers.push(circle);
+        return circle;
+    },
+
+    // 添加多邊形
+    addPolygon(latlngs, options = {}) {
+        const polygon = L.polygon(latlngs, {
+            color: options.color || '#3388ff',
+            weight: options.weight || 1,
+            opacity: options.opacity || 0.7,
+            fillOpacity: options.fillOpacity || 0.2,
+            ...options
+        }).addTo(this.map);
+
+        this.markers.push(polygon);
+        return polygon;
+    },
+
+    // 添加圓形
+    addCircle(lat, lng, radius, options = {}) {
+        const circle = L.circle([lat, lng], {
+            radius: radius,
+            color: options.color || '#3388ff',
+            weight: options.weight || 1,
+            opacity: options.opacity || 0.7,
+            fillOpacity: options.fillOpacity || 0.2,
+            ...options
+        }).addTo(this.map);
+
+        this.markers.push(circle);
+        return circle;
+    },
+
+    // 添加資訊視窗
+    addInfoWindow(content, lat, lng) {
+        const popup = L.popup()
+            .setLatLng([lat, lng])
+            .setContent(content)
+            .openOn(this.map);
+
+        return popup;
+    },
+
+    // 清除路線
+    clearRoute() {
+        if (this.route) {
+            this.map.removeLayer(this.route);
+            this.route = null;
+        }
+    }
+};
+
+// 初始化地圖
+document.addEventListener('DOMContentLoaded', () => {
+    const mapContainer = document.getElementById('route-map');
+    if (mapContainer) {
+        MAP.init('route-map');
+    }
+});
+
+// 路線規劃按鈕點擊事件
+routeBtn.addEventListener('click', async () => {
+    try {
+        const startLocation = document.getElementById('start-location').value;
+        const endLocation = document.getElementById('end-location').value;
+
+        if (!startLocation || !endLocation) {
+            alert('請輸入起點和終點位置');
+            return;
+        }
+
+        // 使用 Nominatim API 獲取座標
+        const startResponse = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(startLocation)}`);
+        const endResponse = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(endLocation)}`);
+        
+        const [startData, endData] = await Promise.all([startResponse.json(), endResponse.json()]);
+
+        if (startData.length === 0 || endData.length === 0) {
+            alert('無法找到指定的位置');
+            return;
+        }
+
+        const start = {
+            lat: parseFloat(startData[0].lat),
+            lng: parseFloat(startData[0].lon)
+        };
+
+        const end = {
+            lat: parseFloat(endData[0].lat),
+            lng: parseFloat(endData[0].lon)
+        };
+
+        const routeInfo = await MAP.planRoute(start, end);
+        
+        // 更新路線信息
+        document.getElementById('route-distance').textContent = `距離: ${(routeInfo.distance / 1000).toFixed(1)} 公里`;
+        document.getElementById('route-duration').textContent = `時間: ${Math.ceil(routeInfo.duration / 60)} 分鐘`;
+
+        // 顯示路線信息區域
+        document.getElementById('route-info').style.display = 'block';
+    } catch (error) {
+        console.error('路線規劃失敗:', error);
+        alert('路線規劃失敗，請稍後再試');
+    }
+});
+
+// 移除路線按鈕點擊事件
+document.getElementById('remove-route').addEventListener('click', () => {
+    MAP.clearRoute();
+    MAP.clearMarkers();
+    document.getElementById('route-info').style.display = 'none';
 }); 
