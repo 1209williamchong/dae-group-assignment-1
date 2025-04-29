@@ -1,9 +1,12 @@
 const express = require('express');
 const path = require('path');
 const cors = require('cors');
+const jwt = require('jsonwebtoken');
+const db = require('./src/db/init');
 
 const app = express();
 const port = 3000;
+const JWT_SECRET = 'your-secret-key'; // 在生產環境中應該使用環境變數
 
 // 啟用 CORS
 app.use(cors());
@@ -14,108 +17,157 @@ app.use(express.json());
 // 設置靜態文件目錄
 app.use(express.static(path.join(__dirname, 'public')));
 
+// 驗證 JWT 中間件
+function authenticateToken(req, res, next) {
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1];
+
+    if (!token) {
+        return res.status(401).json({ error: '未授權' });
+    }
+
+    jwt.verify(token, JWT_SECRET, (err, user) => {
+        if (err) {
+            return res.status(403).json({ error: '無效的 token' });
+        }
+        req.user = user;
+        next();
+    });
+}
+
+// API 路由
+app.get('/api/posts', (req, res) => {
+    db.all(`
+        SELECT p.*, u.username, u.avatar,
+        (SELECT COUNT(*) FROM likes WHERE post_id = p.id) as likes_count,
+        (SELECT COUNT(*) FROM comments WHERE post_id = p.id) as comments_count
+        FROM posts p
+        JOIN users u ON p.user_id = u.id
+        ORDER BY p.created_at DESC
+    `, (err, posts) => {
+        if (err) {
+            return res.status(500).json({ error: '獲取貼文失敗' });
+        }
+        res.json(posts);
+    });
+});
+
+app.post('/api/posts', authenticateToken, (req, res) => {
+    const { content, image_url } = req.body;
+    if (!content) {
+        return res.status(400).json({ error: '貼文內容不能為空' });
+    }
+
+    db.run(
+        'INSERT INTO posts (user_id, content, image_url) VALUES (?, ?, ?)',
+        [req.user.id, content, image_url],
+        function(err) {
+            if (err) {
+                return res.status(500).json({ error: '發布貼文失敗' });
+            }
+            res.json({
+                id: this.lastID,
+                user_id: req.user.id,
+                content,
+                image_url,
+                created_at: new Date().toISOString()
+            });
+        }
+    );
+});
+
+app.post('/api/likes', authenticateToken, (req, res) => {
+    const { postId } = req.body;
+    if (!postId) {
+        return res.status(400).json({ error: '缺少必要參數' });
+    }
+
+    // 檢查是否已經按讚
+    db.get(
+        'SELECT id FROM likes WHERE user_id = ? AND post_id = ?',
+        [req.user.id, postId],
+        (err, row) => {
+            if (err) {
+                return res.status(500).json({ error: '檢查按讚狀態失敗' });
+            }
+
+            if (row) {
+                // 取消按讚
+                db.run(
+                    'DELETE FROM likes WHERE user_id = ? AND post_id = ?',
+                    [req.user.id, postId],
+                    (err) => {
+                        if (err) {
+                            return res.status(500).json({ error: '取消按讚失敗' });
+                        }
+                        res.json({ liked: false });
+                    }
+                );
+            } else {
+                // 新增按讚
+                db.run(
+                    'INSERT INTO likes (user_id, post_id) VALUES (?, ?)',
+                    [req.user.id, postId],
+                    (err) => {
+                        if (err) {
+                            return res.status(500).json({ error: '按讚失敗' });
+                        }
+                        res.json({ liked: true });
+                    }
+                );
+            }
+        }
+    );
+});
+
+app.post('/api/follows', authenticateToken, (req, res) => {
+    const { followedId } = req.body;
+    if (!followedId) {
+        return res.status(400).json({ error: '缺少必要參數' });
+    }
+
+    // 檢查是否已經關注
+    db.get(
+        'SELECT id FROM follows WHERE follower_id = ? AND followed_id = ?',
+        [req.user.id, followedId],
+        (err, row) => {
+            if (err) {
+                return res.status(500).json({ error: '檢查關注狀態失敗' });
+            }
+
+            if (row) {
+                // 取消關注
+                db.run(
+                    'DELETE FROM follows WHERE follower_id = ? AND followed_id = ?',
+                    [req.user.id, followedId],
+                    (err) => {
+                        if (err) {
+                            return res.status(500).json({ error: '取消關注失敗' });
+                        }
+                        res.json({ following: false });
+                    }
+                );
+            } else {
+                // 新增關注
+                db.run(
+                    'INSERT INTO follows (follower_id, followed_id) VALUES (?, ?)',
+                    [req.user.id, followedId],
+                    (err) => {
+                        if (err) {
+                            return res.status(500).json({ error: '關注失敗' });
+                        }
+                        res.json({ following: true });
+                    }
+                );
+            }
+        }
+    );
+});
+
 // 錯誤處理中間件
 app.use((err, req, res, next) => {
     console.error(err.stack);
     res.status(500).json({ error: '伺服器內部錯誤' });
-});
-
-// API 路由
-app.get('/api/posts', (req, res) => {
-    try {
-        // 從 localStorage 獲取貼文
-        const posts = JSON.parse(localStorage.getItem('posts') || '[]');
-        res.json(posts);
-    } catch (error) {
-        res.status(500).json({ error: '獲取貼文失敗' });
-    }
-});
-
-app.post('/api/posts', (req, res) => {
-    try {
-        if (!req.body.content) {
-            return res.status(400).json({ error: '貼文內容不能為空' });
-        }
-
-        // 保存新貼文到 localStorage
-        const posts = JSON.parse(localStorage.getItem('posts') || '[]');
-        const newPost = {
-            id: Date.now(),
-            ...req.body,
-            timestamp: new Date().toISOString()
-        };
-        posts.unshift(newPost);
-        localStorage.setItem('posts', JSON.stringify(posts));
-        res.json(newPost);
-    } catch (error) {
-        res.status(500).json({ error: '發布貼文失敗' });
-    }
-});
-
-app.post('/api/likes', (req, res) => {
-    try {
-        const { postId, userId } = req.body;
-        if (!postId || !userId) {
-            return res.status(400).json({ error: '缺少必要參數' });
-        }
-
-        // 處理按讚
-        const likes = JSON.parse(localStorage.getItem('likes') || '[]');
-        const existingLike = likes.find(like => like.post_id === postId && like.user_id === userId);
-
-        if (existingLike) {
-            // 取消按讚
-            const newLikes = likes.filter(like => like.like_id !== existingLike.like_id);
-            localStorage.setItem('likes', JSON.stringify(newLikes));
-            res.json({ liked: false });
-        } else {
-            // 新增按讚
-            const newLike = {
-                like_id: Date.now(),
-                post_id: postId,
-                user_id: userId
-            };
-            likes.push(newLike);
-            localStorage.setItem('likes', JSON.stringify(likes));
-            res.json({ liked: true });
-        }
-    } catch (error) {
-        res.status(500).json({ error: '處理按讚失敗' });
-    }
-});
-
-app.post('/api/follows', (req, res) => {
-    try {
-        const { followerId, followedId } = req.body;
-        if (!followerId || !followedId) {
-            return res.status(400).json({ error: '缺少必要參數' });
-        }
-
-        // 處理關注
-        const follows = JSON.parse(localStorage.getItem('follows') || '[]');
-        const existingFollow = follows.find(
-            follow => follow.follower_id === followerId && follow.followed_id === followedId
-        );
-
-        if (existingFollow) {
-            // 取消關注
-            const newFollows = follows.filter(follow => follow.follow_id !== existingFollow.follow_id);
-            localStorage.setItem('follows', JSON.stringify(newFollows));
-            res.json({ following: false });
-        } else {
-            // 新增關注
-            const newFollow = {
-                follow_id: Date.now(),
-                follower_id: followerId,
-                followed_id: followedId
-            };
-            follows.push(newFollow);
-            localStorage.setItem('follows', JSON.stringify(newFollows));
-            res.json({ following: true });
-        }
-    } catch (error) {
-        res.status(500).json({ error: '處理關注失敗' });
-    }
 });
 
 // 404 處理
