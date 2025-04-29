@@ -36,6 +36,196 @@ const locationInfo = document.getElementById('location-info');
 const locationText = document.getElementById('location-text');
 const removeLocationBtn = document.getElementById('remove-location');
 
+// 離線資料儲存相關功能
+const OFFLINE_STORAGE = {
+    // 初始化離線儲存
+    init() {
+        if (!window.indexedDB) {
+            console.warn('您的瀏覽器不支援 IndexedDB，離線功能將受到限制');
+            return;
+        }
+
+        const request = indexedDB.open('FreshOfflineDB', 1);
+
+        request.onerror = (event) => {
+            console.error('無法開啟 IndexedDB:', event.target.error);
+        };
+
+        request.onupgradeneeded = (event) => {
+            const db = event.target.result;
+            
+            // 創建貼文儲存
+            if (!db.objectStoreNames.contains('posts')) {
+                const postsStore = db.createObjectStore('posts', { keyPath: 'id' });
+                postsStore.createIndex('timestamp', 'timestamp', { unique: false });
+            }
+
+            // 創建地圖資料儲存
+            if (!db.objectStoreNames.contains('maps')) {
+                const mapsStore = db.createObjectStore('maps', { keyPath: 'id' });
+                mapsStore.createIndex('area', 'area', { unique: false });
+            }
+
+            // 創建用戶資料儲存
+            if (!db.objectStoreNames.contains('users')) {
+                const usersStore = db.createObjectStore('users', { keyPath: 'id' });
+                usersStore.createIndex('username', 'username', { unique: true });
+            }
+        };
+    },
+
+    // 儲存貼文
+    async savePost(post) {
+        return new Promise((resolve, reject) => {
+            const request = indexedDB.open('FreshOfflineDB', 1);
+
+            request.onsuccess = (event) => {
+                const db = event.target.result;
+                const transaction = db.transaction(['posts'], 'readwrite');
+                const store = transaction.objectStore('posts');
+
+                const request = store.put(post);
+
+                request.onsuccess = () => resolve();
+                request.onerror = () => reject(request.error);
+            };
+
+            request.onerror = () => reject(request.error);
+        });
+    },
+
+    // 獲取所有離線貼文
+    async getAllPosts() {
+        return new Promise((resolve, reject) => {
+            const request = indexedDB.open('FreshOfflineDB', 1);
+
+            request.onsuccess = (event) => {
+                const db = event.target.result;
+                const transaction = db.transaction(['posts'], 'readonly');
+                const store = transaction.objectStore('posts');
+                const index = store.index('timestamp');
+
+                const request = index.getAll();
+
+                request.onsuccess = () => resolve(request.result);
+                request.onerror = () => reject(request.error);
+            };
+
+            request.onerror = () => reject(request.error);
+        });
+    },
+
+    // 儲存地圖資料
+    async saveMapData(area, data) {
+        return new Promise((resolve, reject) => {
+            const request = indexedDB.open('FreshOfflineDB', 1);
+
+            request.onsuccess = (event) => {
+                const db = event.target.result;
+                const transaction = db.transaction(['maps'], 'readwrite');
+                const store = transaction.objectStore('maps');
+
+                const mapData = {
+                    id: area,
+                    area: area,
+                    data: data,
+                    timestamp: Date.now()
+                };
+
+                const request = store.put(mapData);
+
+                request.onsuccess = () => resolve();
+                request.onerror = () => reject(request.error);
+            };
+
+            request.onerror = () => reject(request.error);
+        });
+    },
+
+    // 獲取地圖資料
+    async getMapData(area) {
+        return new Promise((resolve, reject) => {
+            const request = indexedDB.open('FreshOfflineDB', 1);
+
+            request.onsuccess = (event) => {
+                const db = event.target.result;
+                const transaction = db.transaction(['maps'], 'readonly');
+                const store = transaction.objectStore('maps');
+
+                const request = store.get(area);
+
+                request.onsuccess = () => resolve(request.result);
+                request.onerror = () => reject(request.error);
+            };
+
+            request.onerror = () => reject(request.error);
+        });
+    },
+
+    // 儲存用戶資料
+    async saveUserData(user) {
+        return new Promise((resolve, reject) => {
+            const request = indexedDB.open('FreshOfflineDB', 1);
+
+            request.onsuccess = (event) => {
+                const db = event.target.result;
+                const transaction = db.transaction(['users'], 'readwrite');
+                const store = transaction.objectStore('users');
+
+                const request = store.put(user);
+
+                request.onsuccess = () => resolve();
+                request.onerror = () => reject(request.error);
+            };
+
+            request.onerror = () => reject(request.error);
+        });
+    },
+
+    // 獲取用戶資料
+    async getUserData(userId) {
+        return new Promise((resolve, reject) => {
+            const request = indexedDB.open('FreshOfflineDB', 1);
+
+            request.onsuccess = (event) => {
+                const db = event.target.result;
+                const transaction = db.transaction(['users'], 'readonly');
+                const store = transaction.objectStore('users');
+
+                const request = store.get(userId);
+
+                request.onsuccess = () => resolve(request.result);
+                request.onerror = () => reject(request.error);
+            };
+
+            request.onerror = () => reject(request.error);
+        });
+    },
+
+    // 檢查離線儲存空間
+    async checkStorageSpace() {
+        if (navigator.storage && navigator.storage.estimate) {
+            const estimate = await navigator.storage.estimate();
+            const used = estimate.usage;
+            const quota = estimate.quota;
+            const percentage = (used / quota) * 100;
+            
+            return {
+                used,
+                quota,
+                percentage,
+                available: quota - used
+            };
+        }
+        return null;
+    }
+};
+
+// 初始化離線儲存
+document.addEventListener('DOMContentLoaded', () => {
+    OFFLINE_STORAGE.init();
+});
+
 // 初始化
 async function init() {
     if (!isLoggedIn()) {
