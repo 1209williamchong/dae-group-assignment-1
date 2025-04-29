@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>個人資料 - fresh</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div id="app">
+        <header>
+            <h1>fresh</h1>
+            <nav>
+                <a href="/">首頁</a>
+                <a href="/profile" class="active">個人資料</a>
+                <a href="/settings">設定</a>
+            </nav>
+        </header>
+        
+        <main>
+            <section class="profile-section">
+                <div class="profile-header">
+                    <img src="https://via.placeholder.com/150" alt="個人頭像" class="profile-avatar">
+                    <h2>用戶名稱</h2>
+                    <p>@username</p>
+                    <button class="edit-profile">編輯個人資料</button>
+                </div>
+
+                <div class="profile-stats">
+                    <div class="stat">
+                        <span class="number">100</span>
+                        <span class="label">貼文</span>
+                    </div>
+                    <div class="stat">
+                        <span class="number">1,000</span>
+                        <span class="label">追蹤者</span>
+                    </div>
+                    <div class="stat">
+                        <span class="number">500</span>
+                        <span class="label">追蹤中</span>
+                    </div>
+                </div>
+
+                <div class="profile-posts">
+                    <h3>我的貼文</h3>
+                    <div id="userPosts"></div>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p>&copy; 2025 Fresh</p>
+        </footer>
+    </div>
+    <script src="/js/profile.js"></script>
+</body>
+</html> 
