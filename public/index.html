@@ -12,15 +12,18 @@
 <body>
     <div class="container">
         <!-- 導航欄 -->
-        <nav class="navbar">
-            <div class="logo">
-                <h1>fresh</h1>
+        <nav class="nav">
+            <div class="nav-left">
+                <a href="/" class="logo">fresh</a>
             </div>
-            <div class="nav-buttons">
-                <button id="show-bookmarks-btn" title="收藏">
+            <div class="nav-right">
+                <button id="show-bookmarks-btn" class="icon-btn">
                     <ion-icon name="bookmark-outline"></ion-icon>
                 </button>
-                <button id="logout-btn" title="登出">
+                <button id="route-btn" class="icon-btn">
+                    <ion-icon name="map-outline"></ion-icon>
+                </button>
+                <button id="logout-btn" class="icon-btn">
                     <ion-icon name="log-out-outline"></ion-icon>
                 </button>
             </div>
@@ -97,19 +100,15 @@
                 </form>
             </div>
 
-            <!-- 搜尋框 -->
-            <div class="search-container">
-                <form id="search-form">
-                    <div class="input-with-icon">
-                        <ion-icon name="search-outline"></ion-icon>
-                        <input type="text" id="search-input" placeholder="搜尋貼文...">
-                    </div>
-                </form>
+            <!-- 貼文切換選項 -->
+            <div class="post-tabs">
+                <button class="tab-btn active" data-tab="following">關注的人</button>
+                <button class="tab-btn" data-tab="all">全部貼文</button>
             </div>
 
             <!-- 貼文列表 -->
-            <div id="posts-container" class="posts-container">
-                <!-- 貼文將由 JavaScript 動態生成 -->
+            <div class="posts-container" id="posts-container">
+                <!-- 貼文將在這裡動態顯示 -->
             </div>
         </main>
     </div>

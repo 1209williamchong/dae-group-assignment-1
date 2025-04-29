@@ -1416,4 +1416,184 @@ document.getElementById('remove-route').addEventListener('click', () => {
     MAP.clearRoute();
     MAP.clearMarkers();
     document.getElementById('route-info').style.display = 'none';
+});
+
+// 貼文管理
+const POSTS = {
+    currentTab: 'following',
+    posts: [],
+    followingPosts: [],
+
+    init() {
+        this.setupEventListeners();
+        this.loadPosts();
+    },
+
+    setupEventListeners() {
+        // 貼文切換按鈕
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                this.currentTab = btn.dataset.tab;
+                this.loadPosts();
+            });
+        });
+    },
+
+    async loadPosts() {
+        try {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                window.location.href = '/login.html';
+                return;
+            }
+
+            // 根據當前選項獲取貼文
+            const endpoint = this.currentTab === 'following' ? '/api/posts/following' : '/api/posts';
+            const response = await fetch(endpoint, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error('獲取貼文失敗');
+            }
+
+            const posts = await response.json();
+            this.posts = posts;
+            this.renderPosts();
+        } catch (error) {
+            console.error('載入貼文失敗:', error);
+            alert('載入貼文失敗，請稍後再試');
+        }
+    },
+
+    renderPosts() {
+        const container = document.getElementById('posts-container');
+        container.innerHTML = '';
+
+        this.posts.forEach(post => {
+            const postElement = this.createPostElement(post);
+            container.appendChild(postElement);
+        });
+    },
+
+    createPostElement(post) {
+        const div = document.createElement('div');
+        div.className = 'post';
+        div.innerHTML = `
+            <div class="post-header">
+                <img src="${post.avatar || '/images/default-avatar.png'}" alt="${post.username}" class="post-avatar">
+                <div class="post-info">
+                    <span class="post-username">${post.username}</span>
+                    <span class="post-time">${this.formatTime(post.created_at)}</span>
+                </div>
+            </div>
+            <div class="post-content">${post.content}</div>
+            ${post.media ? `<img src="${post.media}" alt="貼文圖片" class="post-media">` : ''}
+            ${post.youtube_url ? this.createYoutubeEmbed(post.youtube_url) : ''}
+            <div class="post-actions">
+                <button class="post-action" data-action="like">
+                    <ion-icon name="heart-outline"></ion-icon>
+                    <span>${post.likes_count || 0}</span>
+                </button>
+                <button class="post-action" data-action="comment">
+                    <ion-icon name="chatbubble-outline"></ion-icon>
+                    <span>${post.comments_count || 0}</span>
+                </button>
+                <button class="post-action" data-action="share">
+                    <ion-icon name="share-outline"></ion-icon>
+                </button>
+            </div>
+        `;
+
+        // 添加互動事件監聽器
+        this.setupPostInteractions(div, post);
+        return div;
+    },
+
+    setupPostInteractions(postElement, post) {
+        const token = localStorage.getItem('token');
+        if (!token) return;
+
+        // 點讚功能
+        const likeBtn = postElement.querySelector('[data-action="like"]');
+        likeBtn.addEventListener('click', async () => {
+            try {
+                const response = await fetch(`/api/posts/${post.id}/like`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error('點讚失敗');
+                }
+
+                const data = await response.json();
+                likeBtn.querySelector('span').textContent = data.likes;
+                likeBtn.classList.toggle('active');
+            } catch (error) {
+                console.error('點讚失敗:', error);
+                alert('點讚失敗，請稍後再試');
+            }
+        });
+
+        // 評論功能
+        const commentBtn = postElement.querySelector('[data-action="comment"]');
+        commentBtn.addEventListener('click', () => {
+            // 實現評論功能
+        });
+
+        // 分享功能
+        const shareBtn = postElement.querySelector('[data-action="share"]');
+        shareBtn.addEventListener('click', () => {
+            // 實現分享功能
+        });
+    },
+
+    formatTime(timestamp) {
+        const date = new Date(timestamp);
+        const now = new Date();
+        const diff = now - date;
+
+        if (diff < 60000) { // 1分鐘內
+            return '剛剛';
+        } else if (diff < 3600000) { // 1小時內
+            return `${Math.floor(diff / 60000)}分鐘前`;
+        } else if (diff < 86400000) { // 1天內
+            return `${Math.floor(diff / 3600000)}小時前`;
+        } else {
+            return date.toLocaleDateString();
+        }
+    },
+
+    createYoutubeEmbed(url) {
+        const videoId = this.extractYoutubeId(url);
+        return `
+            <div class="youtube-embed">
+                <iframe 
+                    src="https://www.youtube.com/embed/${videoId}"
+                    frameborder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowfullscreen>
+                </iframe>
+            </div>
+        `;
+    },
+
+    extractYoutubeId(url) {
+        const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+        const match = url.match(regExp);
+        return (match && match[2].length === 11) ? match[2] : null;
+    }
+};
+
+// 初始化貼文功能
+document.addEventListener('DOMContentLoaded', () => {
+    POSTS.init();
 }); 
