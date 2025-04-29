@@ -1,3 +1,5 @@
+import { api } from './api.js';
+
 // 定義 Post 類別
 class Post {
     constructor(content, image = null) {
@@ -11,18 +13,22 @@ class Post {
 }
 
 // 初始化應用程式
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     const postForm = document.getElementById('postForm');
     const postsContainer = document.getElementById('posts');
-    let posts = JSON.parse(localStorage.getItem('posts')) || [];
 
-    // 渲染所有貼文
-    function renderPosts() {
-        postsContainer.innerHTML = '';
-        posts.forEach(post => {
-            const postElement = createPostElement(post);
-            postsContainer.appendChild(postElement);
-        });
+    // 載入貼文
+    async function loadPosts() {
+        try {
+            const posts = await api.getPosts();
+            postsContainer.innerHTML = '';
+            posts.forEach(post => {
+                const postElement = createPostElement(post);
+                postsContainer.appendChild(postElement);
+            });
+        } catch (error) {
+            console.error('Failed to load posts:', error);
+        }
     }
 
     // 創建貼文元素
@@ -30,55 +36,108 @@ document.addEventListener('DOMContentLoaded', () => {
         const postElement = document.createElement('div');
         postElement.className = 'post';
         postElement.innerHTML = `
-            <p>${post.content}</p>
-            ${post.image ? `<img src="${post.image}" alt="貼文圖片">` : ''}
+            <div class="post-header">
+                <img src="${post.user.avatar || 'https://via.placeholder.com/40'}" alt="用戶頭像" class="post-avatar">
+                <div class="post-user-info">
+                    <span class="post-username">${post.user.username}</span>
+                    <span class="post-time">${formatTime(post.createdAt)}</span>
+                </div>
+            </div>
+            <div class="post-content">${post.content}</div>
+            ${post.image ? `<img src="${post.image}" alt="貼文圖片" class="post-image">` : ''}
             <div class="post-actions">
-                <button onclick="likePost(${post.id})">❤️ ${post.likes}</button>
-                <button onclick="commentPost(${post.id})">💬 留言</button>
+                <button class="like-button" data-post-id="${post.id}">
+                    <span class="like-count">${post.likes}</span> 讚
+                </button>
+                <button class="comment-button" data-post-id="${post.id}">
+                    <span class="comment-count">${post.comments}</span> 留言
+                </button>
+                <button class="share-button">分享</button>
             </div>
-            <div class="comments" id="comments-${post.id}">
-                ${post.comments.map(comment => `
-                    <div class="comment">
-                        <p>${comment}</p>
-                    </div>
-                `).join('')}
-            </div>
+            <div class="comments-section" id="comments-${post.id}"></div>
         `;
+
+        // 添加事件監聽器
+        const likeButton = postElement.querySelector('.like-button');
+        likeButton.addEventListener('click', async () => {
+            try {
+                await api.likePost(post.id);
+                const likeCount = likeButton.querySelector('.like-count');
+                likeCount.textContent = parseInt(likeCount.textContent) + 1;
+            } catch (error) {
+                console.error('Failed to like post:', error);
+            }
+        });
+
+        const commentButton = postElement.querySelector('.comment-button');
+        commentButton.addEventListener('click', () => {
+            const commentsSection = postElement.querySelector(`#comments-${post.id}`);
+            if (commentsSection.style.display === 'none') {
+                loadComments(post.id);
+                commentsSection.style.display = 'block';
+            } else {
+                commentsSection.style.display = 'none';
+            }
+        });
+
         return postElement;
+    }
+
+    // 載入評論
+    async function loadComments(postId) {
+        try {
+            const comments = await api.getComments(postId);
+            const commentsSection = document.getElementById(`comments-${postId}`);
+            commentsSection.innerHTML = comments.map(comment => `
+                <div class="comment">
+                    <div class="comment-user">
+                        <img src="${comment.user.avatar || 'https://via.placeholder.com/30'}" alt="用戶頭像" class="comment-avatar">
+                        <span class="comment-username">${comment.user.username}</span>
+                    </div>
+                    <div class="comment-content">${comment.content}</div>
+                    <div class="comment-time">${formatTime(comment.createdAt)}</div>
+                </div>
+            `).join('');
+        } catch (error) {
+            console.error('Failed to load comments:', error);
+        }
+    }
+
+    // 格式化時間
+    function formatTime(timestamp) {
+        const date = new Date(timestamp);
+        const now = new Date();
+        const diff = now - date;
+        
+        const seconds = Math.floor(diff / 1000);
+        const minutes = Math.floor(seconds / 60);
+        const hours = Math.floor(minutes / 60);
+        const days = Math.floor(hours / 24);
+
+        if (days > 0) return `${days} 天前`;
+        if (hours > 0) return `${hours} 小時前`;
+        if (minutes > 0) return `${minutes} 分鐘前`;
+        return '剛剛';
     }
 
     // 處理表單提交
     postForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const content = postForm.querySelector('textarea').value;
-        const imageInput = document.getElementById('imageInput');
-        let image = null;
+        const imageInput = postForm.querySelector('#imageInput');
+        const image = imageInput.files[0];
 
-        if (imageInput.files[0]) {
-            image = await readFileAsDataURL(imageInput.files[0]);
+        try {
+            await api.createPost(content, image);
+            postForm.reset();
+            loadPosts();
+        } catch (error) {
+            console.error('Failed to create post:', error);
         }
-
-        const post = new Post(content, image);
-        posts.unshift(post);
-        localStorage.setItem('posts', JSON.stringify(posts));
-        renderPosts();
-
-        // 重置表單
-        postForm.reset();
     });
 
-    // 讀取檔案為 Data URL
-    function readFileAsDataURL(file) {
-        return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onload = () => resolve(reader.result);
-            reader.onerror = reject;
-            reader.readAsDataURL(file);
-        });
-    }
-
-    // 初始化渲染
-    renderPosts();
+    // 初始載入貼文
+    loadPosts();
 });
 
 // 全局函數
