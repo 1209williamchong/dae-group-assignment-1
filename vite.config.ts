@@ -3,7 +3,7 @@ import vue from '@vitejs/plugin-vue';
 
 export default defineConfig({
   plugins: [vue()],
-  root: './src',
+  root: './public',
   build: {
     outDir: '../www',
     minify: false,
