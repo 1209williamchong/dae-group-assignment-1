@@ -1,4 +1,5 @@
 import { api } from './api.js';
+import { authService } from '../src/services/auth.js';
 
 // 定義 Post 類別
 class Post {
@@ -14,19 +15,29 @@ class Post {
 
 // 初始化應用程式
 document.addEventListener('DOMContentLoaded', async () => {
-    // 檢查認證狀態
-    try {
-        const response = await api.checkAuth();
-        if (!response.user_id) {
-            // 未登入，跳轉到登入頁面
-            window.location.href = '/login.html';
-            return;
-        }
-    } catch (error) {
-        console.error('檢查認證狀態失敗:', error);
+    // 檢查登入狀態
+    if (!authService.isAuthenticated()) {
         window.location.href = '/login.html';
         return;
     }
+
+    const currentUser = authService.getCurrentUser();
+    const header = document.querySelector('header');
+    
+    // 添加用戶資訊和登出按鈕
+    const userInfo = document.createElement('div');
+    userInfo.className = 'user-info';
+    userInfo.innerHTML = `
+        <span>歡迎，${currentUser?.username}</span>
+        <button id="logoutButton">登出</button>
+    `;
+    header.appendChild(userInfo);
+
+    // 登出功能
+    document.getElementById('logoutButton').addEventListener('click', () => {
+        authService.logout();
+        window.location.href = '/login.html';
+    });
 
     const postForm = document.getElementById('postForm');
     const postsContainer = document.getElementById('posts');
@@ -34,9 +45,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     // 載入貼文
     async function loadPosts() {
         try {
-            const posts = await api.getPosts();
+            const [posts, bookmarks] = await Promise.all([
+                api.getPosts(),
+                api.getBookmarks()
+            ]);
+
             postsContainer.innerHTML = '';
             posts.forEach(post => {
+                post.isBookmarked = bookmarks.item_ids.includes(post.id);
                 const postElement = createPostElement(post);
                 postsContainer.appendChild(postElement);
             });
@@ -66,6 +82,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                 <button class="comment-button" data-post-id="${post.id}">
                     <span class="comment-count">${post.comments}</span> 留言
                 </button>
+                <button class="bookmark-button" data-post-id="${post.id}">
+                    <span class="bookmark-icon">${post.isBookmarked ? '★' : '☆'}</span> 收藏
+                </button>
                 <button class="share-button">分享</button>
             </div>
             <div class="comments-section" id="comments-${post.id}"></div>
@@ -91,6 +110,22 @@ document.addEventListener('DOMContentLoaded', async () => {
                 commentsSection.style.display = 'block';
             } else {
                 commentsSection.style.display = 'none';
+            }
+        });
+
+        const bookmarkButton = postElement.querySelector('.bookmark-button');
+        bookmarkButton.addEventListener('click', async () => {
+            try {
+                const bookmarkIcon = bookmarkButton.querySelector('.bookmark-icon');
+                if (bookmarkIcon.textContent === '☆') {
+                    await api.addBookmark(post.id);
+                    bookmarkIcon.textContent = '★';
+                } else {
+                    await api.removeBookmark(post.id);
+                    bookmarkIcon.textContent = '☆';
+                }
+            } catch (error) {
+                console.error('Failed to toggle bookmark:', error);
             }
         });
 

@@ -1,26 +1,26 @@
-import { api } from './api.js';
+import { authService } from '../src/services/auth.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     const loginForm = document.getElementById('loginForm');
     const signupForm = document.getElementById('signupForm');
     const authTabs = document.querySelectorAll('.auth-tab');
+    const errorMessage = document.createElement('div');
+    errorMessage.className = 'error-message';
+    loginForm.parentNode.insertBefore(errorMessage, loginForm);
 
     // 切換登入/註冊表單
     authTabs.forEach(tab => {
         tab.addEventListener('click', () => {
-            const tabName = tab.dataset.tab;
-            
-            // 更新標籤狀態
+            const target = tab.dataset.tab;
             authTabs.forEach(t => t.classList.remove('active'));
             tab.classList.add('active');
-            
-            // 切換表單顯示
-            if (tabName === 'login') {
-                loginForm.style.display = 'flex';
+
+            if (target === 'login') {
+                loginForm.style.display = 'block';
                 signupForm.style.display = 'none';
             } else {
                 loginForm.style.display = 'none';
-                signupForm.style.display = 'flex';
+                signupForm.style.display = 'block';
             }
         });
     });
@@ -28,43 +28,42 @@ document.addEventListener('DOMContentLoaded', () => {
     // 處理登入
     loginForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-        
-        const username = document.getElementById('loginUsername').value;
-        const password = document.getElementById('loginPassword').value;
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
 
         try {
-            const response = await api.login(username, password);
-            // 登入成功，跳轉到首頁
+            await authService.login(username, password);
             window.location.href = '/';
         } catch (error) {
-            console.error('登入失敗:', error);
-            alert('登入失敗，請檢查用戶名稱和密碼');
+            showError(error.message);
         }
     });
 
     // 處理註冊
     signupForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-        
         const username = document.getElementById('signupUsername').value;
         const password = document.getElementById('signupPassword').value;
         const confirmPassword = document.getElementById('confirmPassword').value;
 
-        // 驗證密碼
         if (password !== confirmPassword) {
-            alert('密碼不一致');
+            showError('密碼不匹配');
             return;
         }
 
         try {
-            const response = await api.signup(username, password);
-            // 註冊成功，跳轉到首頁
-            window.location.href = '/';
+            await authService.register(username, password);
+            showError('註冊成功！請登入', 'success');
+            document.querySelector('[data-tab="login"]').click();
         } catch (error) {
-            console.error('註冊失敗:', error);
-            alert('註冊失敗，請稍後再試');
+            showError(error.message);
         }
     });
+
+    function showError(message, type = 'error') {
+        errorMessage.textContent = message;
+        errorMessage.className = `error-message ${type}`;
+    }
 
     // 檢查是否已登入
     async function checkAuth() {

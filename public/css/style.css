@@ -94,17 +94,36 @@ nav a:hover {
     background-color: var(--accent-hover);
 }
 
+.post-actions {
+    display: flex;
+    gap: 15px;
+    margin-top: 10px;
+}
+
 .post-actions button {
-    color: var(--accent-color);
     background: none;
     border: none;
+    color: var(--text-color);
     cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 5px;
     padding: 5px 10px;
-    transition: color 0.3s ease;
+    border-radius: 4px;
+    transition: all 0.3s ease;
 }
 
 .post-actions button:hover {
-    color: var(--accent-hover);
+    background-color: var(--hover-color);
+}
+
+.bookmark-button .bookmark-icon {
+    color: var(--accent-color);
+    font-size: 1.2em;
+}
+
+.bookmark-button.active .bookmark-icon {
+    color: #ffd700; /* 金色 */
 }
 
 .feed {
@@ -307,4 +326,116 @@ input:checked + .slider:before {
 nav a.active {
     color: var(--accent-color);
     font-weight: bold;
+}
+
+/* 認證相關樣式 */
+.auth-section {
+    max-width: 400px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.auth-tabs {
+    display: flex;
+    margin-bottom: 2rem;
+    border-bottom: 1px solid #eee;
+}
+
+.auth-tab {
+    flex: 1;
+    padding: 1rem;
+    text-align: center;
+    cursor: pointer;
+    border: none;
+    background: none;
+    font-size: 1rem;
+    color: #666;
+}
+
+.auth-tab.active {
+    color: #333;
+    border-bottom: 2px solid #333;
+}
+
+.auth-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.form-group label {
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.form-group input {
+    padding: 0.5rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 1rem;
+}
+
+.auth-button {
+    padding: 0.75rem;
+    background: #333;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1rem;
+}
+
+.auth-button:hover {
+    background: #444;
+}
+
+.error-message {
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border-radius: 4px;
+    text-align: center;
+}
+
+.error-message.error {
+    background: #ffebee;
+    color: #c62828;
+}
+
+.error-message.success {
+    background: #e8f5e9;
+    color: #2e7d32;
+}
+
+/* 用戶資訊樣式 */
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-left: auto;
+}
+
+.user-info span {
+    color: #666;
+}
+
+#logoutButton {
+    padding: 0.5rem 1rem;
+    background: #f44336;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+#logoutButton:hover {
+    background: #d32f2f;
 } 

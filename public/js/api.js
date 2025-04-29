@@ -153,6 +153,23 @@ class ApiService {
             method: 'POST'
         });
     }
+
+    // 收藏相關 API
+    async addBookmark(itemId) {
+        return this.request(`/bookmarks/${itemId}`, {
+            method: 'POST'
+        });
+    }
+
+    async removeBookmark(itemId) {
+        return this.request(`/bookmarks/${itemId}`, {
+            method: 'DELETE'
+        });
+    }
+
+    async getBookmarks() {
+        return this.request('/bookmarks');
+    }
 }
 
 // 創建全局 API 實例
