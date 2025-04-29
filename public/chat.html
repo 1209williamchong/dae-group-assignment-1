@@ -4,93 +4,57 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>聊天室 - fresh</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="stylesheet" href="/styles/chat.css">
+    <link rel="stylesheet" href="styles/chat.css">
+    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
 </head>
 <body>
+    <nav class="nav">
+        <div class="nav-left">
+            <a href="/" class="logo">fresh</a>
+        </div>
+        <div class="nav-right">
+            <a href="/chat.html" class="nav-link active">
+                <ion-icon name="chatbubbles-outline"></ion-icon>
+                <span>聊天室</span>
+            </a>
+            <a href="/profile.html" class="nav-link">
+                <ion-icon name="person-outline"></ion-icon>
+                <span>個人檔案</span>
+            </a>
+            <button id="logout-btn" class="nav-link">
+                <ion-icon name="log-out-outline"></ion-icon>
+                <span>登出</span>
+            </button>
+        </div>
+    </nav>
+
     <div class="chat-container">
-        <!-- 側邊欄 -->
-        <div class="sidebar">
-            <div class="sidebar-header">
-                <h2>聊天室</h2>
-                <button id="new-chat-btn" class="new-chat-btn">
-                    <i class="fas fa-plus"></i> 新對話
-                </button>
-                <button id="change-wallpaper-btn" title="更換背景">
-                    <i class="fas fa-image"></i>
-                </button>
+        <div class="chat-sidebar">
+            <div class="search-container">
+                <input type="text" placeholder="搜尋聊天室...">
+                <span class="search-icon">🔍</span>
             </div>
-            <div class="search-box">
-                <input type="text" id="chat-search" placeholder="搜尋對話...">
-            </div>
-            <div class="chat-list" id="chat-list">
-                <!-- 聊天列表將由 JavaScript 動態生成 -->
+            <div class="chat-list">
+                <!-- 聊天室列表將由 JavaScript 動態生成 -->
             </div>
         </div>
-
-        <!-- 主聊天區域 -->
         <div class="main-chat">
             <div class="chat-header">
-                <div class="chat-info">
-                    <img id="chat-avatar" src="" alt="用戶頭像">
-                    <div>
-                        <h3 id="chat-name">選擇對話</h3>
-                        <span id="chat-status">離線</span>
-                    </div>
-                </div>
-                <div class="chat-actions">
-                    <button id="video-call-btn"><i class="fas fa-video"></i></button>
-                    <button id="voice-call-btn"><i class="fas fa-phone"></i></button>
-                    <button id="more-options-btn"><i class="fas fa-ellipsis-v"></i></button>
-                </div>
+                <div class="chat-title">選擇一個聊天室開始對話</div>
             </div>
-
-            <div class="messages-container" id="messages-container">
+            <div class="chat-messages">
                 <!-- 訊息將由 JavaScript 動態生成 -->
             </div>
-
-            <div class="message-input">
-                <button id="attach-file-btn"><i class="fas fa-paperclip"></i></button>
-                <input type="text" id="message-input" placeholder="輸入訊息...">
-                <button id="send-message-btn"><i class="fas fa-paper-plane"></i></button>
+            <div class="chat-input">
+                <input type="text" placeholder="輸入訊息...">
+                <button class="upload-button">📎</button>
+                <button class="send-button">發送</button>
             </div>
         </div>
     </div>
 
-    <!-- 背景選擇彈窗 -->
-    <div id="wallpaper-modal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>選擇背景</h3>
-                <button class="close-modal">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <div class="wallpaper-options">
-                <div class="wallpaper-option" data-wallpaper="default">
-                    <img src="/images/wallpapers/default.jpg" alt="默認背景">
-                    <span>默認</span>
-                </div>
-                <div class="wallpaper-option" data-wallpaper="nature">
-                    <img src="/images/wallpapers/nature.jpg" alt="自然">
-                    <span>自然</span>
-                </div>
-                <div class="wallpaper-option" data-wallpaper="gradient">
-                    <img src="/images/wallpapers/gradient.jpg" alt="漸變">
-                    <span>漸變</span>
-                </div>
-                <div class="wallpaper-option" data-wallpaper="custom">
-                    <i class="fas fa-plus"></i>
-                    <span>自定義</span>
-                </div>
-            </div>
-            <div class="custom-wallpaper-upload" style="display: none;">
-                <input type="file" id="custom-wallpaper" accept="image/*">
-                <button id="upload-wallpaper">上傳</button>
-            </div>
-        </div>
-    </div>
-
-    <script type="module" src="/src/chat.js"></script>
+    <script src="src/main.js"></script>
+    <script src="src/chat.js"></script>
 </body>
 </html> 

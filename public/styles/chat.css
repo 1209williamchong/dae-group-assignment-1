@@ -6,389 +6,286 @@
 }
 
 body {
+    background-color: #121212;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: #f0f2f5;
-    color: #1a1a1a;
-    height: 100vh;
-    overflow: hidden;
+    color: #ffffff;
 }
 
 /* 聊天容器 */
 .chat-container {
     display: flex;
     height: 100vh;
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    transition: background-image 0.3s ease;
+    background-color: #121212;
 }
 
 /* 側邊欄 */
-.sidebar {
+.chat-sidebar {
     width: 300px;
-    background-color: rgba(255, 255, 255, 0.9);
-    border-right: 1px solid #e9ecef;
+    background-color: #1e1e1e;
+    border-right: 1px solid #333;
     display: flex;
     flex-direction: column;
 }
 
-.sidebar-header {
-    padding: 20px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-bottom: 1px solid #e9ecef;
+/* 搜尋框 */
+.search-container {
+    padding: 15px;
+    border-bottom: 1px solid #333;
 }
 
-.sidebar-header h2 {
-    font-size: 1.5rem;
-    color: #1877f2;
-}
-
-#change-wallpaper-btn {
-    background: none;
-    border: none;
-    padding: 10px;
-    border-radius: 50%;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: background-color 0.2s;
-}
-
-#change-wallpaper-btn:hover {
-    background-color: #e9ecef;
-}
-
-#change-wallpaper-btn ion-icon {
-    font-size: 1.5rem;
-    color: #666;
-}
-
-.new-chat-btn {
-    background-color: #1877f2;
-    color: white;
-    border: none;
-    padding: 8px 16px;
-    border-radius: 20px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.new-chat-btn:hover {
-    background-color: #166fe5;
-}
-
-.search-box {
-    padding: 10px;
-    border-bottom: 1px solid #e9ecef;
-}
-
-.search-box input {
+.search-container input {
     width: 100%;
-    padding: 10px;
-    border: 1px solid #e9ecef;
+    padding: 10px 15px;
+    border: 1px solid #333;
     border-radius: 20px;
-    outline: none;
+    background-color: #2d2d2d;
+    color: #ffffff;
+    font-size: 0.9rem;
 }
 
+.search-container input:focus {
+    outline: none;
+    border-color: #bb86fc;
+}
+
+/* 聊天列表 */
 .chat-list {
     flex: 1;
     overflow-y: auto;
 }
 
-/* 聊天項目 */
 .chat-item {
+    padding: 15px;
+    border-bottom: 1px solid #333;
+    cursor: pointer;
+    transition: all 0.3s ease;
     display: flex;
     align-items: center;
-    padding: 15px;
-    cursor: pointer;
-    transition: background-color 0.2s;
+    gap: 10px;
 }
 
 .chat-item:hover {
-    background-color: #f5f5f5;
+    background-color: #2d2d2d;
 }
 
 .chat-item.active {
-    background-color: #e9ecef;
+    background-color: #2d2d2d;
+    border-left: 3px solid #bb86fc;
 }
 
-.chat-item img {
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    margin-right: 15px;
-}
-
-.chat-item-info {
-    flex: 1;
-}
-
-.chat-item-info h3 {
-    font-size: 1rem;
-    margin-bottom: 5px;
-}
-
-.chat-item-info p {
-    color: #666;
-    font-size: 0.9rem;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-/* 主聊天區域 */
-.main-chat {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    background-color: rgba(255, 255, 255, 0.8);
-}
-
-.chat-header {
-    padding: 15px 20px;
-    border-bottom: 1px solid #e9ecef;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.chat-info {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-}
-
-.chat-info img {
+.chat-avatar {
     width: 40px;
     height: 40px;
     border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #333;
 }
 
-.chat-info h3 {
-    font-size: 1.1rem;
+.chat-info {
+    flex: 1;
 }
 
-.chat-info span {
-    color: #666;
+.chat-name {
+    font-weight: 600;
+    color: #ffffff;
+    margin-bottom: 5px;
+}
+
+.chat-preview {
     font-size: 0.9rem;
+    color: #999;
 }
 
-.chat-actions {
-    display: flex;
-    gap: 15px;
-}
-
-.chat-actions button {
-    background: none;
-    border: none;
-    font-size: 1.2rem;
+.chat-time {
+    font-size: 0.8rem;
     color: #666;
-    cursor: pointer;
 }
 
-.chat-actions button:hover {
-    color: #1877f2;
+/* 主聊天區域 */
+.chat-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background-color: #121212;
 }
 
-/* 訊息容器 */
-.messages-container {
+/* 聊天頭部 */
+.chat-header {
+    padding: 15px;
+    border-bottom: 1px solid #333;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background-color: #1e1e1e;
+}
+
+.chat-header-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #333;
+}
+
+.chat-header-info {
+    flex: 1;
+}
+
+.chat-header-name {
+    font-weight: 600;
+    color: #ffffff;
+}
+
+.chat-header-status {
+    font-size: 0.8rem;
+    color: #666;
+}
+
+/* 聊天消息區域 */
+.chat-messages {
     flex: 1;
     padding: 20px;
     overflow-y: auto;
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 15px;
 }
 
+/* 消息樣式 */
 .message {
     max-width: 70%;
-    padding: 10px 15px;
-    border-radius: 20px;
-    margin-bottom: 10px;
+    padding: 12px 16px;
+    border-radius: 15px;
+    position: relative;
+    word-wrap: break-word;
 }
 
 .message.sent {
     align-self: flex-end;
-    background-color: #1877f2;
-    color: white;
+    background-color: #bb86fc;
+    color: #000000;
+    border-bottom-right-radius: 5px;
 }
 
 .message.received {
     align-self: flex-start;
-    background-color: #e9ecef;
-    color: #1a1a1a;
+    background-color: #2d2d2d;
+    color: #ffffff;
+    border-bottom-left-radius: 5px;
 }
 
 .message-time {
-    font-size: 0.8rem;
+    font-size: 0.7rem;
     color: #666;
     margin-top: 5px;
     text-align: right;
 }
 
-/* 訊息輸入區域 */
-.message-input {
-    padding: 15px;
-    border-top: 1px solid #e9ecef;
+/* 文件消息樣式 */
+.file-message {
     display: flex;
     align-items: center;
     gap: 10px;
+    padding: 10px;
+    border-radius: 10px;
+    background-color: rgba(45, 45, 45, 0.5);
 }
 
-.message-input input {
+.file-icon {
+    font-size: 1.5rem;
+    color: #bb86fc;
+}
+
+.file-info {
     flex: 1;
-    padding: 10px 15px;
-    border: 1px solid #e9ecef;
-    border-radius: 20px;
+}
+
+.file-name {
+    font-weight: 500;
+    color: #ffffff;
+    margin-bottom: 5px;
+}
+
+.file-size {
+    font-size: 0.8rem;
+    color: #666;
+}
+
+.download-btn {
+    background: none;
+    border: none;
+    color: #bb86fc;
+    cursor: pointer;
+    padding: 5px;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+}
+
+.download-btn:hover {
+    background-color: rgba(187, 134, 252, 0.1);
+}
+
+/* 輸入區域 */
+.chat-input {
+    padding: 15px;
+    border-top: 1px solid #333;
+    background-color: #1e1e1e;
+    display: flex;
+    gap: 10px;
+}
+
+.input-wrapper {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    background-color: #2d2d2d;
+    border-radius: 25px;
+    padding: 0 15px;
+}
+
+.chat-input input {
+    flex: 1;
+    border: none;
+    background: none;
+    padding: 12px 0;
+    color: #ffffff;
+    font-size: 0.9rem;
+}
+
+.chat-input input:focus {
     outline: none;
 }
 
-.message-input button {
+.attach-btn,
+.send-btn {
     background: none;
     border: none;
-    font-size: 1.2rem;
-    color: #666;
+    color: #bb86fc;
     cursor: pointer;
-}
-
-.message-input button:hover {
-    color: #1877f2;
-}
-
-/* 背景選擇彈窗 */
-.modal {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-    z-index: 1000;
-}
-
-.modal-content {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background-color: white;
-    padding: 20px;
-    border-radius: 10px;
-    width: 90%;
-    max-width: 500px;
-}
-
-.modal-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-}
-
-.close-modal {
-    background: none;
-    border: none;
-    padding: 5px;
-    cursor: pointer;
-}
-
-.close-modal ion-icon {
-    font-size: 1.5rem;
-    color: #666;
-}
-
-.wallpaper-options {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 15px;
-}
-
-.wallpaper-option {
-    position: relative;
-    cursor: pointer;
-    border-radius: 8px;
-    overflow: hidden;
-    aspect-ratio: 16/9;
-}
-
-.wallpaper-option img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.wallpaper-option span {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
     padding: 10px;
-    background: rgba(0, 0, 0, 0.5);
-    color: white;
-    text-align: center;
+    border-radius: 50%;
+    transition: all 0.3s ease;
 }
 
-.wallpaper-option[data-wallpaper="custom"] {
-    background-color: #f0f2f5;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-}
-
-.wallpaper-option[data-wallpaper="custom"] ion-icon {
-    font-size: 2rem;
-    color: #666;
-    margin-bottom: 10px;
-}
-
-.custom-wallpaper-upload {
-    margin-top: 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-#custom-wallpaper {
-    padding: 10px;
-    border: 1px solid #e9ecef;
-    border-radius: 5px;
-}
-
-#upload-wallpaper {
-    background-color: #1877f2;
-    color: white;
-    border: none;
-    padding: 10px;
-    border-radius: 5px;
-    cursor: pointer;
-}
-
-#upload-wallpaper:hover {
-    background-color: #166fe5;
+.attach-btn:hover,
+.send-btn:hover {
+    background-color: rgba(187, 134, 252, 0.1);
 }
 
 /* 響應式設計 */
 @media (max-width: 768px) {
-    .sidebar {
+    .chat-container {
+        flex-direction: column;
+    }
+
+    .chat-sidebar {
         width: 100%;
-        position: absolute;
-        z-index: 1;
-        transform: translateX(-100%);
-        transition: transform 0.3s ease;
+        height: auto;
+        border-right: none;
+        border-bottom: 1px solid #333;
     }
 
-    .sidebar.active {
-        transform: translateX(0);
-    }
-
-    .wallpaper-options {
-        grid-template-columns: 1fr;
+    .chat-main {
+        height: calc(100vh - 200px);
     }
 } 

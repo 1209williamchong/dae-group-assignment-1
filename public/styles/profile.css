@@ -1,0 +1,178 @@
+/* 個人檔案容器 */
+.profile-container {
+    max-width: 935px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+}
+
+/* 個人資料區 */
+.profile-header {
+    display: flex;
+    gap: 2rem;
+    margin-bottom: 3rem;
+}
+
+.profile-avatar {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 1px solid #e0e0e0;
+}
+
+.profile-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.profile-info {
+    flex: 1;
+}
+
+.profile-name {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.profile-name h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #262626;
+}
+
+.edit-profile-btn {
+    padding: 0.5rem 1rem;
+    background-color: #f0f0f0;
+    border: none;
+    border-radius: 8px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.edit-profile-btn:hover {
+    background-color: #e0e0e0;
+}
+
+.profile-stats {
+    display: flex;
+    gap: 2rem;
+    margin-bottom: 1.5rem;
+}
+
+.stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.stat-number {
+    font-weight: 600;
+    color: #262626;
+}
+
+.stat-label {
+    color: #8e8e8e;
+    font-size: 0.9rem;
+}
+
+.profile-bio p {
+    color: #262626;
+    line-height: 1.5;
+}
+
+/* 貼文網格 */
+.posts-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.grid-row {
+    display: flex;
+    gap: 1.5rem;
+}
+
+.grid-item {
+    flex: 1;
+    aspect-ratio: 1;
+    position: relative;
+    overflow: hidden;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.grid-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.post-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.post-stats {
+    display: flex;
+    gap: 2rem;
+    color: white;
+    font-weight: 500;
+}
+
+.post-stats span {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.post-stats ion-icon {
+    font-size: 1.2rem;
+}
+
+/* 懸停效果 */
+.grid-item:hover img {
+    transform: scale(1.05);
+}
+
+.grid-item:hover .post-overlay {
+    opacity: 1;
+}
+
+/* 響應式設計 */
+@media (max-width: 768px) {
+    .profile-header {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+
+    .profile-stats {
+        justify-content: center;
+    }
+
+    .profile-name {
+        justify-content: center;
+    }
+
+    .grid-row {
+        flex-direction: column;
+    }
+
+    .grid-item {
+        aspect-ratio: 1;
+    }
+} 

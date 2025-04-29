@@ -34,6 +34,211 @@ let currentChatId = null;
 let currentUserId = null;
 let socket = null;
 
+// 聊天室功能
+const CHAT = {
+    // 初始化聊天室
+    init() {
+        this.currentChat = null;
+        this.socket = null;
+        this.setupEventListeners();
+        this.connectToServer();
+    },
+
+    // 設置事件監聽器
+    setupEventListeners() {
+        // 搜索聊天室
+        document.getElementById('chat-search').addEventListener('input', (e) => {
+            this.searchChats(e.target.value);
+        });
+
+        // 發送訊息
+        document.getElementById('send-message').addEventListener('click', () => {
+            this.sendMessage();
+        });
+
+        // 按 Enter 發送訊息
+        document.getElementById('message-input').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                this.sendMessage();
+            }
+        });
+
+        // 上傳檔案
+        document.getElementById('upload-file').addEventListener('click', () => {
+            this.uploadFile();
+        });
+    },
+
+    // 連接到 WebSocket 伺服器
+    connectToServer() {
+        this.socket = new WebSocket('ws://localhost:3000/chat');
+
+        this.socket.onopen = () => {
+            console.log('已連接到聊天伺服器');
+        };
+
+        this.socket.onmessage = (event) => {
+            const message = JSON.parse(event.data);
+            this.handleMessage(message);
+        };
+
+        this.socket.onclose = () => {
+            console.log('與聊天伺服器的連接已關閉');
+            // 嘗試重新連接
+            setTimeout(() => this.connectToServer(), 5000);
+        };
+
+        this.socket.onerror = (error) => {
+            console.error('WebSocket 錯誤:', error);
+        };
+    },
+
+    // 搜尋聊天室
+    searchChats(query) {
+        const chatList = document.getElementById('chat-list');
+        const chats = chatList.getElementsByClassName('chat-item');
+
+        Array.from(chats).forEach(chat => {
+            const name = chat.querySelector('.chat-item-name').textContent.toLowerCase();
+            if (name.includes(query.toLowerCase())) {
+                chat.style.display = 'flex';
+            } else {
+                chat.style.display = 'none';
+            }
+        });
+    },
+
+    // 選擇聊天室
+    selectChat(chatId) {
+        this.currentChat = chatId;
+        this.loadChatHistory(chatId);
+        this.updateActiveChat(chatId);
+    },
+
+    // 更新當前選中的聊天室
+    updateActiveChat(chatId) {
+        const chats = document.getElementsByClassName('chat-item');
+        Array.from(chats).forEach(chat => {
+            if (chat.dataset.chatId === chatId) {
+                chat.classList.add('active');
+            } else {
+                chat.classList.remove('active');
+            }
+        });
+    },
+
+    // 載入聊天歷史
+    async loadChatHistory(chatId) {
+        try {
+            const response = await fetch(`/api/chats/${chatId}/messages`);
+            const messages = await response.json();
+            this.displayMessages(messages);
+        } catch (error) {
+            console.error('載入聊天歷史失敗:', error);
+        }
+    },
+
+    // 顯示訊息
+    displayMessages(messages) {
+        const messagesContainer = document.getElementById('chat-messages');
+        messagesContainer.innerHTML = '';
+
+        messages.forEach(message => {
+            const messageElement = this.createMessageElement(message);
+            messagesContainer.appendChild(messageElement);
+        });
+
+        // 滾動到底部
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    },
+
+    // 創建訊息元素
+    createMessageElement(message) {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `message ${message.sender === USER.id ? 'sent' : 'received'}`;
+        
+        const content = document.createElement('div');
+        content.className = 'message-content';
+        content.textContent = message.content;
+        
+        const time = document.createElement('div');
+        time.className = 'message-time';
+        time.textContent = new Date(message.timestamp).toLocaleTimeString();
+        
+        messageDiv.appendChild(content);
+        messageDiv.appendChild(time);
+        
+        return messageDiv;
+    },
+
+    // 發送訊息
+    sendMessage() {
+        if (!this.currentChat) return;
+
+        const input = document.getElementById('message-input');
+        const content = input.value.trim();
+        
+        if (!content) return;
+
+        const message = {
+            type: 'message',
+            chatId: this.currentChat,
+            content: content,
+            timestamp: new Date().toISOString()
+        };
+
+        this.socket.send(JSON.stringify(message));
+        input.value = '';
+    },
+
+    // 處理接收到的訊息
+    handleMessage(message) {
+        if (message.type === 'message' && message.chatId === this.currentChat) {
+            const messagesContainer = document.getElementById('chat-messages');
+            const messageElement = this.createMessageElement(message);
+            messagesContainer.appendChild(messageElement);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+    },
+
+    // 上傳檔案
+    async uploadFile() {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = 'image/*,video/*,audio/*';
+        
+        input.onchange = async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('chatId', this.currentChat);
+
+            try {
+                const response = await fetch('/api/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    this.sendMessage({
+                        type: 'file',
+                        chatId: this.currentChat,
+                        fileUrl: result.url,
+                        fileName: file.name
+                    });
+                }
+            } catch (error) {
+                console.error('上傳檔案失敗:', error);
+            }
+        };
+
+        input.click();
+    }
+};
+
 // 初始化
 async function init() {
     if (!isLoggedIn()) {
@@ -297,4 +502,9 @@ function handleCustomWallpaperUpload(event) {
 }
 
 // 初始化應用
-init(); 
+init();
+
+// 初始化聊天室
+document.addEventListener('DOMContentLoaded', () => {
+    CHAT.init();
+}); 

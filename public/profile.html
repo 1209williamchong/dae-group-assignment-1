@@ -3,35 +3,128 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>個人資料 - fresh</title>
-    <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="css/profile.css">
+    <title>個人檔案 - fresh</title>
+    <link rel="stylesheet" href="styles/main.css">
+    <link rel="stylesheet" href="styles/profile.css">
+    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
 </head>
 <body>
-    <header>
-        <nav>
-            <div class="nav-left">
-                <a href="/" class="logo">fresh</a>
-            </div>
-            <div class="nav-right">
-                <a href="/" class="nav-link">首頁</a>
-                <a href="/profile.html" class="nav-link">個人資料</a>
-                <a href="/settings.html" class="nav-link">設定</a>
-                <button id="logoutButton" class="button">登出</button>
-            </div>
-        </nav>
-    </header>
-
-    <main>
-        <div class="profile-container">
-            <!-- 個人資料內容將由 JavaScript 動態生成 -->
+    <nav class="nav">
+        <div class="nav-left">
+            <a href="/" class="logo">fresh</a>
         </div>
-    </main>
+        <div class="nav-right">
+            <a href="/chat.html" class="nav-link">
+                <ion-icon name="chatbubbles-outline"></ion-icon>
+                <span>聊天室</span>
+            </a>
+            <a href="/profile.html" class="nav-link active">
+                <ion-icon name="person-outline"></ion-icon>
+                <span>個人檔案</span>
+            </a>
+            <button id="logout-btn" class="nav-link">
+                <ion-icon name="log-out-outline"></ion-icon>
+                <span>登出</span>
+            </button>
+        </div>
+    </nav>
 
-    <footer>
-        <p>&copy; 2025 fresh</p>
-    </footer>
+    <div class="profile-container">
+        <!-- 個人資料區 -->
+        <div class="profile-header">
+            <div class="profile-avatar">
+                <img src="https://picsum.photos/seed/avatar/150/150" alt="頭像">
+            </div>
+            <div class="profile-info">
+                <div class="profile-name">
+                    <h2>用戶名稱</h2>
+                    <button class="edit-profile-btn">編輯個人檔案</button>
+                </div>
+                <div class="profile-stats">
+                    <div class="stat">
+                        <span class="stat-number">123</span>
+                        <span class="stat-label">貼文</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-number">456</span>
+                        <span class="stat-label">追蹤者</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-number">789</span>
+                        <span class="stat-label">追蹤中</span>
+                    </div>
+                </div>
+                <div class="profile-bio">
+                    <p>這是個人簡介，可以寫一些關於自己的內容。</p>
+                </div>
+            </div>
+        </div>
 
-    <script type="module" src="js/profile.js"></script>
+        <!-- 貼文網格 -->
+        <div class="posts-grid">
+            <div class="grid-row">
+                <div class="grid-item">
+                    <img src="https://picsum.photos/seed/1/600/600" alt="貼文">
+                    <div class="post-overlay">
+                        <div class="post-stats">
+                            <span><ion-icon name="heart-outline"></ion-icon> 123</span>
+                            <span><ion-icon name="chatbubble-outline"></ion-icon> 45</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="grid-item">
+                    <img src="https://picsum.photos/seed/2/600/600" alt="貼文">
+                    <div class="post-overlay">
+                        <div class="post-stats">
+                            <span><ion-icon name="heart-outline"></ion-icon> 456</span>
+                            <span><ion-icon name="chatbubble-outline"></ion-icon> 78</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="grid-item">
+                    <img src="https://picsum.photos/seed/3/600/600" alt="貼文">
+                    <div class="post-overlay">
+                        <div class="post-stats">
+                            <span><ion-icon name="heart-outline"></ion-icon> 789</span>
+                            <span><ion-icon name="chatbubble-outline"></ion-icon> 90</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="grid-row">
+                <div class="grid-item">
+                    <img src="https://picsum.photos/seed/4/600/600" alt="貼文">
+                    <div class="post-overlay">
+                        <div class="post-stats">
+                            <span><ion-icon name="heart-outline"></ion-icon> 234</span>
+                            <span><ion-icon name="chatbubble-outline"></ion-icon> 56</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="grid-item">
+                    <img src="https://picsum.photos/seed/5/600/600" alt="貼文">
+                    <div class="post-overlay">
+                        <div class="post-stats">
+                            <span><ion-icon name="heart-outline"></ion-icon> 567</span>
+                            <span><ion-icon name="chatbubble-outline"></ion-icon> 89</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="grid-item">
+                    <img src="https://picsum.photos/seed/6/600/600" alt="貼文">
+                    <div class="post-overlay">
+                        <div class="post-stats">
+                            <span><ion-icon name="heart-outline"></ion-icon> 890</span>
+                            <span><ion-icon name="chatbubble-outline"></ion-icon> 12</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="src/main.js"></script>
+    <script src="src/profile.js"></script>
 </body>
 </html> 

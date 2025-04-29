@@ -6,9 +6,9 @@
 }
 
 body {
+    background-color: #121212;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: #f0f2f5;
-    color: #1a1a1a;
+    color: #ffffff;
 }
 
 .container {
@@ -18,58 +18,145 @@ body {
 }
 
 /* 導航欄 */
-.navbar {
+.nav {
+    background-color: #1e1e1e;
+    padding: 1rem 2rem;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 15px 0;
-    margin-bottom: 20px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
-.logo h1 {
-    font-size: 2rem;
-    color: #1877f2;
-}
-
-.nav-buttons {
-    display: flex;
-    gap: 15px;
-}
-
-.nav-buttons button {
-    background: none;
-    border: none;
-    padding: 10px;
-    border-radius: 50%;
-    cursor: pointer;
+.nav-left {
     display: flex;
     align-items: center;
-    justify-content: center;
-    transition: background-color 0.2s;
 }
 
-.nav-buttons button:hover {
-    background-color: #e9ecef;
+.logo {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #ffffff;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
 }
 
-.nav-buttons ion-icon {
-    font-size: 1.5rem;
-    color: #666;
+.logo:hover {
+    color: #bb86fc;
+    background-color: #2d2d2d;
 }
 
-/* 主內容區域 */
-.main-content {
+.nav-right {
     display: flex;
-    flex-direction: column;
-    gap: 20px;
+    align-items: center;
+    gap: 1rem;
+}
+
+.nav-link {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.8rem 1.2rem;
+    color: #ffffff;
+    text-decoration: none;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    font-weight: 500;
+    position: relative;
+    background-color: #2d2d2d;
+}
+
+.nav-link:hover {
+    background-color: #3d3d3d;
+    color: #bb86fc;
+    transform: translateY(-1px);
+}
+
+.nav-link.active {
+    background-color: #3d3d3d;
+    color: #bb86fc;
+}
+
+.nav-link.active::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 20px;
+    height: 3px;
+    background-color: #bb86fc;
+    border-radius: 3px;
+}
+
+.nav-link ion-icon {
+    font-size: 1.4rem;
+    transition: transform 0.3s ease;
+}
+
+.nav-link:hover ion-icon {
+    transform: scale(1.1);
+}
+
+.nav-link span {
+    font-size: 1rem;
+    font-weight: 500;
+}
+
+#logout-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.8rem 1.2rem;
+    color: #ffffff;
+    text-decoration: none;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    font-weight: 500;
+    position: relative;
+    background-color: #2d2d2d;
+    border: none;
+    cursor: pointer;
+}
+
+#logout-btn:hover {
+    background-color: #3d3d3d;
+    color: #ff4444;
+    transform: translateY(-1px);
+}
+
+#logout-btn ion-icon {
+    font-size: 1.4rem;
+    transition: transform 0.3s ease;
+}
+
+#logout-btn:hover ion-icon {
+    transform: scale(1.1);
+}
+
+#logout-btn span {
+    font-size: 1rem;
+    font-weight: 500;
+}
+
+/* 主內容區域調整 */
+.main-content {
+    margin-top: 4rem;
+    padding: 2rem;
 }
 
 /* 貼文表單 */
 .post-form-container {
-    background-color: white;
+    background-color: #1e1e1e;
     border-radius: 10px;
     padding: 20px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 #post-form {
@@ -82,10 +169,12 @@ body {
     width: 100%;
     min-height: 100px;
     padding: 15px;
-    border: 1px solid #e9ecef;
+    border: 1px solid #333;
     border-radius: 10px;
     resize: vertical;
     font-size: 1rem;
+    background-color: #2d2d2d;
+    color: #ffffff;
 }
 
 .post-form-actions {
@@ -110,9 +199,11 @@ body {
 .input-with-icon input {
     width: 100%;
     padding: 10px 15px 10px 45px;
-    border: 1px solid #e9ecef;
+    border: 1px solid #333;
     border-radius: 20px;
     font-size: 0.9rem;
+    background-color: #2d2d2d;
+    color: #ffffff;
 }
 
 #youtube-preview {
@@ -220,10 +311,10 @@ body {
 }
 
 .post {
-    background: white;
+    background: #1e1e1e;
     border-radius: 10px;
     padding: 1rem;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 .post-header {
@@ -238,16 +329,17 @@ body {
     height: 40px;
     border-radius: 50%;
     object-fit: cover;
+    border: 2px solid #333;
 }
 
 .post-username {
     font-weight: bold;
-    color: #333;
+    color: #ffffff;
 }
 
 .post-content {
     margin: 0.5rem 0;
-    color: #333;
+    color: #ffffff;
 }
 
 .post-media {
@@ -270,14 +362,15 @@ body {
     gap: 0.25rem;
     color: #666;
     cursor: pointer;
+    transition: all 0.3s ease;
 }
 
 .post-action:hover {
-    color: #007bff;
+    color: #bb86fc;
 }
 
 .post-action.active {
-    color: #007bff;
+    color: #bb86fc;
 }
 
 /* 媒體操作按鈕 */
@@ -400,7 +493,7 @@ body {
 }
 
 .camera-controls button {
-    background: none;
+    background: #2d2d2d;
     border: none;
     padding: 15px;
     border-radius: 50%;
@@ -408,20 +501,131 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: background-color 0.2s;
+    transition: all 0.3s ease;
 }
 
 .camera-controls button:hover {
-    background-color: #e9ecef;
+    background-color: #3d3d3d;
+    transform: scale(1.1);
 }
 
 .camera-controls ion-icon {
     font-size: 2rem;
-    color: #666;
+    color: #ffffff;
+}
+
+#capture-btn {
+    background-color: #bb86fc;
+}
+
+#capture-btn:hover {
+    background-color: #a370e0;
 }
 
 #capture-btn ion-icon {
+    color: #000000;
+}
+
+/* 相機切換按鈕 */
+#switch-camera-btn {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: rgba(45, 45, 45, 0.8);
+    border: none;
+    padding: 10px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+#switch-camera-btn:hover {
+    background: rgba(61, 61, 61, 0.9);
+    transform: scale(1.1);
+}
+
+#switch-camera-btn ion-icon {
+    font-size: 1.5rem;
+    color: #ffffff;
+}
+
+/* 相機權限提示 */
+.camera-permission {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    text-align: center;
+    background-color: #2d2d2d;
+    border-radius: 10px;
+    margin-bottom: 20px;
+}
+
+.camera-permission ion-icon {
+    font-size: 3rem;
+    color: #bb86fc;
+    margin-bottom: 10px;
+}
+
+.camera-permission p {
+    color: #ffffff;
+    margin-bottom: 15px;
+}
+
+.camera-permission button {
+    background-color: #bb86fc;
+    color: #000000;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.camera-permission button:hover {
+    background-color: #a370e0;
+}
+
+/* 相機錯誤提示 */
+.camera-error {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    text-align: center;
+    background-color: #2d2d2d;
+    border-radius: 10px;
+    margin-bottom: 20px;
+}
+
+.camera-error ion-icon {
+    font-size: 3rem;
     color: #ff4444;
+    margin-bottom: 10px;
+}
+
+.camera-error p {
+    color: #ffffff;
+    margin-bottom: 15px;
+}
+
+.camera-error button {
+    background-color: #ff4444;
+    color: #ffffff;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.camera-error button:hover {
+    background-color: #ff1a2c;
 }
 
 /* 路線規劃 */
@@ -546,6 +750,57 @@ body {
     border-radius: 4px;
     font-size: 0.8rem;
     z-index: 1000;
+}
+
+/* 按鈕樣式 */
+.btn {
+    padding: 0.8rem 1.5rem;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: none;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.btn-primary {
+    background-color: #bb86fc;
+    color: #000000;
+}
+
+.btn-primary:hover {
+    background-color: #a370e0;
+}
+
+.btn-secondary {
+    background-color: #2d2d2d;
+    color: #ffffff;
+}
+
+.btn-secondary:hover {
+    background-color: #3d3d3d;
+}
+
+.btn-outline {
+    background: none;
+    border: 1px solid #333;
+    color: #ffffff;
+}
+
+.btn-outline:hover {
+    background-color: #2d2d2d;
+}
+
+.btn-danger {
+    background-color: #ff4444;
+    color: #ffffff;
+}
+
+.btn-danger:hover {
+    background-color: #ff1a2c;
 }
 
 /* 響應式設計 */
