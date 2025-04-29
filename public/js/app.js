@@ -45,19 +45,25 @@ document.addEventListener('DOMContentLoaded', async () => {
     // 載入貼文
     async function loadPosts() {
         try {
-            const [posts, bookmarks] = await Promise.all([
-                api.getPosts(),
-                api.getBookmarks()
-            ]);
-
+            const posts = JSON.parse(localStorage.getItem('posts') || '[]');
             postsContainer.innerHTML = '';
-            posts.forEach(post => {
-                post.isBookmarked = bookmarks.item_ids.includes(post.id);
+            
+            for (const post of posts) {
                 const postElement = createPostElement(post);
                 postsContainer.appendChild(postElement);
-            });
+                
+                // 更新按讚狀態
+                const likeCount = await authService.getPostLikes(post.id);
+                const hasLiked = await authService.hasUserLiked(post.id);
+                
+                const likeButton = postElement.querySelector('.like-button');
+                const likeCountSpan = postElement.querySelector('.like-count');
+                
+                likeCountSpan.textContent = likeCount.toString();
+                likeButton.classList.toggle('liked', hasLiked);
+            }
         } catch (error) {
-            console.error('Failed to load posts:', error);
+            console.error('載入貼文失敗:', error);
         }
     }
 
@@ -76,8 +82,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             <div class="post-content">${post.content}</div>
             ${post.image ? `<img src="${post.image}" alt="貼文圖片" class="post-image">` : ''}
             <div class="post-actions">
-                <button class="like-button" data-post-id="${post.id}">
-                    <span class="like-count">${post.likes}</span> 讚
+                <button class="like-button">
+                    <span class="like-icon">❤️</span>
+                    <span class="like-count">0</span>
                 </button>
                 <button class="comment-button" data-post-id="${post.id}">
                     <span class="comment-count">${post.comments}</span> 留言
@@ -90,15 +97,18 @@ document.addEventListener('DOMContentLoaded', async () => {
             <div class="comments-section" id="comments-${post.id}"></div>
         `;
 
-        // 添加事件監聽器
+        // 添加按讚事件監聽器
         const likeButton = postElement.querySelector('.like-button');
         likeButton.addEventListener('click', async () => {
             try {
-                await api.likePost(post.id);
-                const likeCount = likeButton.querySelector('.like-count');
-                likeCount.textContent = parseInt(likeCount.textContent) + 1;
+                const isLiked = await authService.toggleLike(post.id);
+                const likeCount = await authService.getPostLikes(post.id);
+                
+                likeButton.classList.toggle('liked', isLiked);
+                likeButton.querySelector('.like-count').textContent = likeCount.toString();
             } catch (error) {
-                console.error('Failed to like post:', error);
+                console.error('按讚失敗:', error);
+                alert(error.message);
             }
         });
 
@@ -176,17 +186,27 @@ document.addEventListener('DOMContentLoaded', async () => {
         const imageInput = postForm.querySelector('#imageInput');
         const image = imageInput.files[0];
 
-        try {
-            await api.createPost(content, image);
-            postForm.reset();
-            loadPosts();
-        } catch (error) {
-            console.error('Failed to create post:', error);
+        if (!content && !image) {
+            alert('請輸入內容或上傳圖片');
+            return;
         }
+
+        const newPost = new Post(content, image ? URL.createObjectURL(image) : null);
+        
+        // 儲存貼文
+        const posts = JSON.parse(localStorage.getItem('posts') || '[]');
+        posts.unshift(newPost);
+        localStorage.setItem('posts', JSON.stringify(posts));
+
+        // 重新載入貼文
+        await loadPosts();
+
+        // 清空表單
+        postForm.reset();
     });
 
     // 初始載入貼文
-    loadPosts();
+    await loadPosts();
 });
 
 // 全局函數

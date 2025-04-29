@@ -96,8 +96,10 @@ nav a:hover {
 
 .post-actions {
     display: flex;
-    gap: 15px;
-    margin-top: 10px;
+    gap: 1rem;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #eee;
 }
 
 .post-actions button {
@@ -438,4 +440,63 @@ nav a.active {
 
 #logoutButton:hover {
     background: #d32f2f;
+}
+
+/* 貼文按讚樣式 */
+.like-button {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #666;
+    transition: all 0.3s ease;
+}
+
+.like-button:hover {
+    color: #e0245e;
+}
+
+.like-button.liked {
+    color: #e0245e;
+}
+
+.like-button.liked .like-icon {
+    animation: like-animation 0.3s ease;
+}
+
+@keyframes like-animation {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.2);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+.like-count {
+    font-size: 0.9rem;
+}
+
+.comment-button,
+.share-button {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #666;
+    transition: all 0.3s ease;
+}
+
+.comment-button:hover,
+.share-button:hover {
+    color: #1da1f2;
 } 
