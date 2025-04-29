@@ -149,6 +149,7 @@
 
 .post-stats ion-icon {
     font-size: 1.2rem;
+    color: white;
 }
 
 /* 懸停效果 */
@@ -203,7 +204,7 @@
 }
 
 .modal-content {
-    background-color: white;
+    background-color: #1e1e1e;
     border-radius: 12px;
     width: 100%;
     max-width: 500px;
@@ -222,7 +223,7 @@
 .modal-header h2 {
     font-size: 1.5rem;
     font-weight: 600;
-    color: #262626;
+    color: #ffffff;
 }
 
 .close-modal {
@@ -235,7 +236,12 @@
 }
 
 .close-modal:hover {
-    color: #262626;
+    color: #ffffff;
+}
+
+.close-modal ion-icon {
+    font-size: 1.5rem;
+    color: #ffffff;
 }
 
 .form-group {
@@ -246,23 +252,25 @@
     display: block;
     margin-bottom: 0.5rem;
     font-weight: 500;
-    color: #262626;
+    color: #ffffff;
 }
 
 .form-group input,
 .form-group textarea {
     width: 100%;
     padding: 0.75rem;
-    border: 1px solid #e0e0e0;
+    border: 1px solid #333;
     border-radius: 8px;
     font-size: 1rem;
+    background-color: #2d2d2d;
+    color: #ffffff;
     transition: border-color 0.3s ease;
 }
 
 .form-group input:focus,
 .form-group textarea:focus {
     outline: none;
-    border-color: #ff6b00;
+    border-color: #bb86fc;
 }
 
 .avatar-upload {
@@ -277,7 +285,7 @@
     height: 150px;
     border-radius: 50%;
     overflow: hidden;
-    border: 2px solid #e0e0e0;
+    border: 2px solid #333;
 }
 
 .avatar-preview img {
@@ -288,15 +296,16 @@
 
 .upload-btn {
     padding: 0.5rem 1rem;
-    background-color: #f0f0f0;
+    background-color: #2d2d2d;
     border: none;
     border-radius: 8px;
+    color: #ffffff;
     cursor: pointer;
     transition: all 0.3s ease;
 }
 
 .upload-btn:hover {
-    background-color: #e0e0e0;
+    background-color: #3d3d3d;
 }
 
 .form-actions {
@@ -316,23 +325,23 @@
 }
 
 .cancel-btn {
-    background-color: #f0f0f0;
+    background-color: #2d2d2d;
     border: none;
-    color: #262626;
+    color: #ffffff;
 }
 
 .cancel-btn:hover {
-    background-color: #e0e0e0;
+    background-color: #3d3d3d;
 }
 
 .save-btn {
-    background-color: #ff6b00;
+    background-color: #bb86fc;
     border: none;
-    color: white;
+    color: #ffffff;
 }
 
 .save-btn:hover {
-    background-color: #ff8533;
+    background-color: #9c64d4;
 }
 
 /* 響應式設計 */
