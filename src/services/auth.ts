@@ -11,11 +11,18 @@ interface Like {
     user_id: string;
 }
 
+interface Follow {
+    follow_id: number;
+    follower_id: string;
+    followed_id: string;
+}
+
 class AuthService {
     private static instance: AuthService;
     private currentUser: User | null = null;
     private users: User[] = [];
     private likes: Like[] = [];
+    private follows: Follow[] = [];
 
     private constructor() {
         // 從 localStorage 載入已註冊的用戶
@@ -34,6 +41,12 @@ class AuthService {
         const savedLikes = localStorage.getItem('likes');
         if (savedLikes) {
             this.likes = JSON.parse(savedLikes);
+        }
+
+        // 從 localStorage 載入關注記錄
+        const savedFollows = localStorage.getItem('follows');
+        if (savedFollows) {
+            this.follows = JSON.parse(savedFollows);
         }
     }
 
@@ -130,12 +143,70 @@ class AuthService {
         );
     }
 
+    // 關注相關方法
+    public async toggleFollow(followedId: string): Promise<boolean> {
+        if (!this.currentUser) {
+            throw new Error('請先登入');
+        }
+
+        if (this.currentUser.id === followedId) {
+            throw new Error('不能關注自己');
+        }
+
+        const existingFollow = this.follows.find(
+            follow => follow.follower_id === this.currentUser!.id && follow.followed_id === followedId
+        );
+
+        if (existingFollow) {
+            // 取消關注
+            this.follows = this.follows.filter(follow => follow.follow_id !== existingFollow.follow_id);
+        } else {
+            // 新增關注
+            const newFollow: Follow = {
+                follow_id: Date.now(),
+                follower_id: this.currentUser.id,
+                followed_id: followedId
+            };
+            this.follows.push(newFollow);
+        }
+
+        this.saveFollows();
+        return !existingFollow;
+    }
+
+    public async getFollowers(userId: string): Promise<User[]> {
+        const followerIds = this.follows
+            .filter(follow => follow.followed_id === userId)
+            .map(follow => follow.follower_id);
+        
+        return this.users.filter(user => followerIds.includes(user.id));
+    }
+
+    public async getFollowing(userId: string): Promise<User[]> {
+        const followingIds = this.follows
+            .filter(follow => follow.follower_id === userId)
+            .map(follow => follow.followed_id);
+        
+        return this.users.filter(user => followingIds.includes(user.id));
+    }
+
+    public async isFollowing(userId: string): Promise<boolean> {
+        if (!this.currentUser) return false;
+        return this.follows.some(
+            follow => follow.follower_id === this.currentUser!.id && follow.followed_id === userId
+        );
+    }
+
     private saveUsers(): void {
         localStorage.setItem('users', JSON.stringify(this.users));
     }
 
     private saveLikes(): void {
         localStorage.setItem('likes', JSON.stringify(this.likes));
+    }
+
+    private saveFollows(): void {
+        localStorage.setItem('follows', JSON.stringify(this.follows));
     }
 }
 

@@ -1,5 +1,6 @@
-import { api } from './api.js';
 import { authService } from '../src/services/auth.js';
+
+const API_BASE_URL = 'http://localhost:3000/api';
 
 // 定義 Post 類別
 class Post {
@@ -11,6 +12,45 @@ class Post {
         this.comments = [];
         this.timestamp = new Date();
     }
+}
+
+// API 函數
+async function fetchPosts() {
+    const response = await fetch(`${API_BASE_URL}/posts`);
+    return await response.json();
+}
+
+async function createPost(content, image) {
+    const formData = new FormData();
+    formData.append('content', content);
+    if (image) {
+        formData.append('image', image);
+    }
+
+    const response = await fetch(`${API_BASE_URL}/posts`, {
+        method: 'POST',
+        body: formData
+    });
+    return await response.json();
+}
+
+async function toggleLike(postId) {
+    const currentUser = authService.getCurrentUser();
+    if (!currentUser) {
+        throw new Error('請先登入');
+    }
+
+    const response = await fetch(`${API_BASE_URL}/likes`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            postId,
+            userId: currentUser.id
+        })
+    });
+    return await response.json();
 }
 
 // 初始化應用程式
@@ -45,7 +85,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // 載入貼文
     async function loadPosts() {
         try {
-            const posts = JSON.parse(localStorage.getItem('posts') || '[]');
+            const posts = await fetchPosts();
             postsContainer.innerHTML = '';
             
             for (const post of posts) {
@@ -72,13 +112,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         const postElement = document.createElement('div');
         postElement.className = 'post';
         postElement.innerHTML = `
-            <div class="post-header">
-                <img src="${post.user.avatar || 'https://via.placeholder.com/40'}" alt="用戶頭像" class="post-avatar">
-                <div class="post-user-info">
-                    <span class="post-username">${post.user.username}</span>
-                    <span class="post-time">${formatTime(post.createdAt)}</span>
-                </div>
-            </div>
             <div class="post-content">${post.content}</div>
             ${post.image ? `<img src="${post.image}" alt="貼文圖片" class="post-image">` : ''}
             <div class="post-actions">
@@ -86,25 +119,20 @@ document.addEventListener('DOMContentLoaded', async () => {
                     <span class="like-icon">❤️</span>
                     <span class="like-count">0</span>
                 </button>
-                <button class="comment-button" data-post-id="${post.id}">
-                    <span class="comment-count">${post.comments}</span> 留言
-                </button>
-                <button class="bookmark-button" data-post-id="${post.id}">
-                    <span class="bookmark-icon">${post.isBookmarked ? '★' : '☆'}</span> 收藏
-                </button>
-                <button class="share-button">分享</button>
+                <button class="comment-button">💬 留言</button>
+                <button class="share-button">↗️ 分享</button>
             </div>
-            <div class="comments-section" id="comments-${post.id}"></div>
+            <div class="comments-section"></div>
         `;
 
         // 添加按讚事件監聽器
         const likeButton = postElement.querySelector('.like-button');
         likeButton.addEventListener('click', async () => {
             try {
-                const isLiked = await authService.toggleLike(post.id);
+                const result = await toggleLike(post.id);
                 const likeCount = await authService.getPostLikes(post.id);
                 
-                likeButton.classList.toggle('liked', isLiked);
+                likeButton.classList.toggle('liked', result.liked);
                 likeButton.querySelector('.like-count').textContent = likeCount.toString();
             } catch (error) {
                 console.error('按讚失敗:', error);
@@ -112,71 +140,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         });
 
-        const commentButton = postElement.querySelector('.comment-button');
-        commentButton.addEventListener('click', () => {
-            const commentsSection = postElement.querySelector(`#comments-${post.id}`);
-            if (commentsSection.style.display === 'none') {
-                loadComments(post.id);
-                commentsSection.style.display = 'block';
-            } else {
-                commentsSection.style.display = 'none';
-            }
-        });
-
-        const bookmarkButton = postElement.querySelector('.bookmark-button');
-        bookmarkButton.addEventListener('click', async () => {
-            try {
-                const bookmarkIcon = bookmarkButton.querySelector('.bookmark-icon');
-                if (bookmarkIcon.textContent === '☆') {
-                    await api.addBookmark(post.id);
-                    bookmarkIcon.textContent = '★';
-                } else {
-                    await api.removeBookmark(post.id);
-                    bookmarkIcon.textContent = '☆';
-                }
-            } catch (error) {
-                console.error('Failed to toggle bookmark:', error);
-            }
-        });
-
         return postElement;
-    }
-
-    // 載入評論
-    async function loadComments(postId) {
-        try {
-            const comments = await api.getComments(postId);
-            const commentsSection = document.getElementById(`comments-${postId}`);
-            commentsSection.innerHTML = comments.map(comment => `
-                <div class="comment">
-                    <div class="comment-user">
-                        <img src="${comment.user.avatar || 'https://via.placeholder.com/30'}" alt="用戶頭像" class="comment-avatar">
-                        <span class="comment-username">${comment.user.username}</span>
-                    </div>
-                    <div class="comment-content">${comment.content}</div>
-                    <div class="comment-time">${formatTime(comment.createdAt)}</div>
-                </div>
-            `).join('');
-        } catch (error) {
-            console.error('Failed to load comments:', error);
-        }
-    }
-
-    // 格式化時間
-    function formatTime(timestamp) {
-        const date = new Date(timestamp);
-        const now = new Date();
-        const diff = now - date;
-        
-        const seconds = Math.floor(diff / 1000);
-        const minutes = Math.floor(seconds / 60);
-        const hours = Math.floor(minutes / 60);
-        const days = Math.floor(hours / 24);
-
-        if (days > 0) return `${days} 天前`;
-        if (hours > 0) return `${hours} 小時前`;
-        if (minutes > 0) return `${minutes} 分鐘前`;
-        return '剛剛';
     }
 
     // 處理表單提交
@@ -191,18 +155,14 @@ document.addEventListener('DOMContentLoaded', async () => {
             return;
         }
 
-        const newPost = new Post(content, image ? URL.createObjectURL(image) : null);
-        
-        // 儲存貼文
-        const posts = JSON.parse(localStorage.getItem('posts') || '[]');
-        posts.unshift(newPost);
-        localStorage.setItem('posts', JSON.stringify(posts));
-
-        // 重新載入貼文
-        await loadPosts();
-
-        // 清空表單
-        postForm.reset();
+        try {
+            await createPost(content, image);
+            await loadPosts();
+            postForm.reset();
+        } catch (error) {
+            console.error('發布貼文失敗:', error);
+            alert('發布貼文失敗，請稍後再試');
+        }
     });
 
     // 初始載入貼文

@@ -3,53 +3,35 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>個人檔案 - fresh</title>
-    <link rel="stylesheet" href="/css/style.css">
+    <title>個人資料 - fresh</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/profile.css">
 </head>
 <body>
-    <div id="app">
-        <header>
-            <h1>fresh</h1>
-            <nav>
-                <a href="/">首頁</a>
-                <a href="/profile.html" class="active">個人檔案</a>
-                <a href="/settings.html">設定</a>
-            </nav>
-        </header>
-        
-        <main>
-            <section class="profile-section">
-                <div class="profile-header">
-                    <img id="profileAvatar" src="/images/default-avatar.png" alt="用戶頭像">
-                    <h2 id="profileUsername">用戶名稱</h2>
-                    <p id="profileBio">個人簡介</p>
-                </div>
-                
-                <div class="profile-stats">
-                    <div class="stat">
-                        <span class="stat-value" id="postCount">0</span>
-                        <span class="stat-label">貼文</span>
-                    </div>
-                    <div class="stat">
-                        <span class="stat-value" id="followerCount">0</span>
-                        <span class="stat-label">追蹤者</span>
-                    </div>
-                    <div class="stat">
-                        <span class="stat-value" id="followingCount">0</span>
-                        <span class="stat-label">追蹤中</span>
-                    </div>
-                </div>
-                
-                <div class="profile-posts" id="profilePosts">
-                    <!-- 貼文將在這裡動態載入 -->
-                </div>
-            </section>
-        </main>
+    <header>
+        <nav>
+            <div class="nav-left">
+                <a href="/" class="logo">fresh</a>
+            </div>
+            <div class="nav-right">
+                <a href="/" class="nav-link">首頁</a>
+                <a href="/profile.html" class="nav-link">個人資料</a>
+                <a href="/settings.html" class="nav-link">設定</a>
+                <button id="logoutButton" class="button">登出</button>
+            </div>
+        </nav>
+    </header>
 
-        <footer>
-            <p>&copy; 2025 fresh</p>
-        </footer>
-    </div>
-    <script src="/js/profile.js"></script>
+    <main>
+        <div class="profile-container">
+            <!-- 個人資料內容將由 JavaScript 動態生成 -->
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 fresh</p>
+    </footer>
+
+    <script type="module" src="js/profile.js"></script>
 </body>
 </html> 
