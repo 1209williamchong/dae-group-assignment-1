@@ -803,4 +803,204 @@ galleryBtn.addEventListener('click', async () => {
         console.error('選擇照片失敗:', error);
         alert('無法訪問相簿，請檢查權限設置。');
     }
+});
+
+// Web Geolocation 相關功能
+const GEOLOCATION = {
+    // 獲取當前位置
+    async getCurrentPosition() {
+        return new Promise((resolve, reject) => {
+            const options = {
+                enableHighAccuracy: true,
+                timeout: 5000,
+                maximumAge: 0
+            };
+
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    resolve({
+                        latitude: position.coords.latitude,
+                        longitude: position.coords.longitude,
+                        accuracy: position.coords.accuracy,
+                        altitude: position.coords.altitude,
+                        altitudeAccuracy: position.coords.altitudeAccuracy,
+                        heading: position.coords.heading,
+                        speed: position.coords.speed,
+                        timestamp: position.timestamp
+                    });
+                },
+                (error) => {
+                    reject(this.handleGeolocationError(error));
+                },
+                options
+            );
+        });
+    },
+
+    // 即時追蹤位置
+    startWatching(callback) {
+        const options = {
+            enableHighAccuracy: true,
+            timeout: 5000,
+            maximumAge: 0
+        };
+
+        this.watchId = navigator.geolocation.watchPosition(
+            (position) => {
+                callback({
+                    latitude: position.coords.latitude,
+                    longitude: position.coords.longitude,
+                    accuracy: position.coords.accuracy,
+                    altitude: position.coords.altitude,
+                    altitudeAccuracy: position.coords.altitudeAccuracy,
+                    heading: position.coords.heading,
+                    speed: position.coords.speed,
+                    timestamp: position.timestamp
+                });
+            },
+            (error) => {
+                console.error('位置追蹤錯誤:', this.handleGeolocationError(error));
+            },
+            options
+        );
+    },
+
+    // 停止追蹤位置
+    stopWatching() {
+        if (this.watchId) {
+            navigator.geolocation.clearWatch(this.watchId);
+            this.watchId = null;
+        }
+    },
+
+    // 處理地理位置錯誤
+    handleGeolocationError(error) {
+        switch (error.code) {
+            case error.PERMISSION_DENIED:
+                return {
+                    code: 'PERMISSION_DENIED',
+                    message: '用戶拒絕了位置請求'
+                };
+            case error.POSITION_UNAVAILABLE:
+                return {
+                    code: 'POSITION_UNAVAILABLE',
+                    message: '無法獲取位置信息'
+                };
+            case error.TIMEOUT:
+                return {
+                    code: 'TIMEOUT',
+                    message: '獲取位置超時'
+                };
+            default:
+                return {
+                    code: 'UNKNOWN_ERROR',
+                    message: '未知錯誤'
+                };
+        }
+    },
+
+    // 檢查地理位置權限
+    async checkPermissions() {
+        return new Promise((resolve) => {
+            if (!navigator.permissions) {
+                resolve('not_supported');
+                return;
+            }
+
+            navigator.permissions.query({ name: 'geolocation' })
+                .then((permissionStatus) => {
+                    resolve(permissionStatus.state);
+                })
+                .catch(() => {
+                    resolve('not_supported');
+                });
+        });
+    },
+
+    // 獲取地址信息
+    async getAddress(latitude, longitude) {
+        try {
+            const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`);
+            const data = await response.json();
+            return {
+                displayName: data.display_name,
+                address: {
+                    road: data.address.road,
+                    suburb: data.address.suburb,
+                    city: data.address.city,
+                    state: data.address.state,
+                    country: data.address.country,
+                    postcode: data.address.postcode
+                }
+            };
+        } catch (error) {
+            console.error('獲取地址失敗:', error);
+            return null;
+        }
+    },
+
+    // 計算兩點之間的距離（米）
+    calculateDistance(lat1, lon1, lat2, lon2) {
+        const R = 6371e3; // 地球半徑（米）
+        const φ1 = lat1 * Math.PI / 180;
+        const φ2 = lat2 * Math.PI / 180;
+        const Δφ = (lat2 - lat1) * Math.PI / 180;
+        const Δλ = (lon2 - lon1) * Math.PI / 180;
+
+        const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) +
+                Math.cos(φ1) * Math.cos(φ2) *
+                Math.sin(Δλ/2) * Math.sin(Δλ/2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+
+        return R * c;
+    }
+};
+
+// 事件監聽器
+document.addEventListener('DOMContentLoaded', async () => {
+    // 檢查地理位置權限
+    const permissionStatus = await GEOLOCATION.checkPermissions();
+    if (permissionStatus === 'granted') {
+        console.log('地理位置權限已授予');
+    } else if (permissionStatus === 'prompt') {
+        console.log('等待用戶授予地理位置權限');
+    } else {
+        console.log('地理位置權限被拒絕或不受支援');
+    }
+});
+
+// 獲取位置按鈕點擊事件
+getLocationBtn.addEventListener('click', async () => {
+    try {
+        const position = await GEOLOCATION.getCurrentPosition();
+        const address = await GEOLOCATION.getAddress(position.latitude, position.longitude);
+
+        currentLocation = {
+            ...position,
+            address: address
+        };
+
+        locationText.textContent = address?.displayName || '未知位置';
+        locationInfo.style.display = 'flex';
+
+        // 開始追蹤位置
+        GEOLOCATION.startWatching((newPosition) => {
+            console.log('位置更新:', newPosition);
+            // 更新位置信息
+            currentLocation = {
+                ...newPosition,
+                address: currentLocation.address
+            };
+        });
+    } catch (error) {
+        console.error('獲取位置失敗:', error);
+        alert(error.message || '無法獲取位置信息');
+    }
+});
+
+// 移除位置按鈕點擊事件
+removeLocationBtn.addEventListener('click', () => {
+    GEOLOCATION.stopWatching();
+    currentLocation = null;
+    locationInfo.style.display = 'none';
 }); 
