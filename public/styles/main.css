@@ -39,17 +39,22 @@ body {
 .nav-buttons button {
     background: none;
     border: none;
-    padding: 8px 16px;
-    border-radius: 20px;
+    padding: 10px;
+    border-radius: 50%;
     cursor: pointer;
     display: flex;
     align-items: center;
-    gap: 8px;
+    justify-content: center;
     transition: background-color 0.2s;
 }
 
 .nav-buttons button:hover {
     background-color: #e9ecef;
+}
+
+.nav-buttons ion-icon {
+    font-size: 1.5rem;
+    color: #666;
 }
 
 /* 主內容區域 */
@@ -89,9 +94,22 @@ body {
     gap: 10px;
 }
 
-#youtube-link {
+.input-with-icon {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.input-with-icon ion-icon {
+    position: absolute;
+    left: 15px;
+    font-size: 1.2rem;
+    color: #666;
+}
+
+.input-with-icon input {
     width: 100%;
-    padding: 10px 15px;
+    padding: 10px 15px 10px 45px;
     border: 1px solid #e9ecef;
     border-radius: 20px;
     font-size: 0.9rem;
@@ -133,10 +151,16 @@ body {
     background-color: #1877f2;
     color: white;
     border: none;
-    padding: 10px 20px;
-    border-radius: 20px;
+    padding: 10px;
+    border-radius: 50%;
     cursor: pointer;
-    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#post-form button[type="submit"] ion-icon {
+    font-size: 1.5rem;
 }
 
 #post-form button[type="submit"]:hover {
@@ -154,22 +178,6 @@ body {
 #search-form {
     display: flex;
     gap: 10px;
-}
-
-#search-input {
-    flex: 1;
-    padding: 10px 15px;
-    border: 1px solid #e9ecef;
-    border-radius: 20px;
-    font-size: 0.9rem;
-}
-
-#search-form button {
-    background: none;
-    border: none;
-    color: #666;
-    cursor: pointer;
-    padding: 0 10px;
 }
 
 /* 貼文列表 */
@@ -244,6 +252,10 @@ body {
 
 .post-actions button:hover {
     color: #1877f2;
+}
+
+.post-actions ion-icon {
+    font-size: 1.2rem;
 }
 
 /* 響應式設計 */

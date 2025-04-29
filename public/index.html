@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>fresh</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ionicons@5.5.2/dist/ionicons/ionicons.min.css">
     <link rel="stylesheet" href="/styles/main.css">
 </head>
 <body>
@@ -15,11 +16,11 @@
                 <h1>fresh</h1>
             </div>
             <div class="nav-buttons">
-                <button id="show-bookmarks-btn">
-                    <i class="fas fa-bookmark"></i> 收藏
+                <button id="show-bookmarks-btn" title="收藏">
+                    <ion-icon name="bookmark-outline"></ion-icon>
                 </button>
-                <button id="logout-btn">
-                    <i class="fas fa-sign-out-alt"></i> 登出
+                <button id="logout-btn" title="登出">
+                    <ion-icon name="log-out-outline"></ion-icon>
                 </button>
             </div>
         </nav>
@@ -31,9 +32,14 @@
                 <form id="post-form">
                     <textarea id="post-content" placeholder="分享你的想法..."></textarea>
                     <div class="post-form-actions">
-                        <input type="text" id="youtube-link" placeholder="貼上 YouTube 連結...">
+                        <div class="input-with-icon">
+                            <ion-icon name="logo-youtube"></ion-icon>
+                            <input type="text" id="youtube-link" placeholder="貼上 YouTube 連結...">
+                        </div>
                         <div id="youtube-preview"></div>
-                        <button type="submit">發布</button>
+                        <button type="submit" title="發布">
+                            <ion-icon name="paper-plane-outline"></ion-icon>
+                        </button>
                     </div>
                 </form>
             </div>
@@ -41,8 +47,10 @@
             <!-- 搜尋框 -->
             <div class="search-container">
                 <form id="search-form">
-                    <input type="text" id="search-input" placeholder="搜尋貼文...">
-                    <button type="submit"><i class="fas fa-search"></i></button>
+                    <div class="input-with-icon">
+                        <ion-icon name="search-outline"></ion-icon>
+                        <input type="text" id="search-input" placeholder="搜尋貼文...">
+                    </div>
                 </form>
             </div>
 
@@ -53,6 +61,8 @@
         </main>
     </div>
 
+    <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
     <script type="module" src="/src/main.js"></script>
 </body>
 </html> 
