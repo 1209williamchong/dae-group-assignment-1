@@ -36,194 +36,387 @@ const locationInfo = document.getElementById('location-info');
 const locationText = document.getElementById('location-text');
 const removeLocationBtn = document.getElementById('remove-location');
 
-// 離線資料儲存相關功能
-const OFFLINE_STORAGE = {
-    // 初始化離線儲存
-    init() {
-        if (!window.indexedDB) {
-            console.warn('您的瀏覽器不支援 IndexedDB，離線功能將受到限制');
-            return;
+// 混合式存儲方案
+const STORAGE = {
+    // Web Storage 操作
+    webStorage: {
+        // 設置 localStorage 項目
+        setLocal(key, value) {
+            try {
+                const serializedValue = JSON.stringify(value);
+                localStorage.setItem(key, serializedValue);
+                return true;
+            } catch (error) {
+                console.error('localStorage 設置失敗:', error);
+                return false;
+            }
+        },
+
+        // 獲取 localStorage 項目
+        getLocal(key) {
+            try {
+                const value = localStorage.getItem(key);
+                return value ? JSON.parse(value) : null;
+            } catch (error) {
+                console.error('localStorage 獲取失敗:', error);
+                return null;
+            }
+        },
+
+        // 移除 localStorage 項目
+        removeLocal(key) {
+            try {
+                localStorage.removeItem(key);
+                return true;
+            } catch (error) {
+                console.error('localStorage 移除失敗:', error);
+                return false;
+            }
+        },
+
+        // 設置 sessionStorage 項目
+        setSession(key, value) {
+            try {
+                const serializedValue = JSON.stringify(value);
+                sessionStorage.setItem(key, serializedValue);
+                return true;
+            } catch (error) {
+                console.error('sessionStorage 設置失敗:', error);
+                return false;
+            }
+        },
+
+        // 獲取 sessionStorage 項目
+        getSession(key) {
+            try {
+                const value = sessionStorage.getItem(key);
+                return value ? JSON.parse(value) : null;
+            } catch (error) {
+                console.error('sessionStorage 獲取失敗:', error);
+                return null;
+            }
+        },
+
+        // 移除 sessionStorage 項目
+        removeSession(key) {
+            try {
+                sessionStorage.removeItem(key);
+                return true;
+            } catch (error) {
+                console.error('sessionStorage 移除失敗:', error);
+                return false;
+            }
         }
-
-        const request = indexedDB.open('FreshOfflineDB', 1);
-
-        request.onerror = (event) => {
-            console.error('無法開啟 IndexedDB:', event.target.error);
-        };
-
-        request.onupgradeneeded = (event) => {
-            const db = event.target.result;
-            
-            // 創建貼文儲存
-            if (!db.objectStoreNames.contains('posts')) {
-                const postsStore = db.createObjectStore('posts', { keyPath: 'id' });
-                postsStore.createIndex('timestamp', 'timestamp', { unique: false });
-            }
-
-            // 創建地圖資料儲存
-            if (!db.objectStoreNames.contains('maps')) {
-                const mapsStore = db.createObjectStore('maps', { keyPath: 'id' });
-                mapsStore.createIndex('area', 'area', { unique: false });
-            }
-
-            // 創建用戶資料儲存
-            if (!db.objectStoreNames.contains('users')) {
-                const usersStore = db.createObjectStore('users', { keyPath: 'id' });
-                usersStore.createIndex('username', 'username', { unique: true });
-            }
-        };
     },
 
-    // 儲存貼文
-    async savePost(post) {
-        return new Promise((resolve, reject) => {
-            const request = indexedDB.open('FreshOfflineDB', 1);
+    // IndexedDB 操作
+    indexedDB: {
+        db: null,
+        dbName: 'FreshDB',
+        dbVersion: 1,
 
-            request.onsuccess = (event) => {
-                const db = event.target.result;
-                const transaction = db.transaction(['posts'], 'readwrite');
-                const store = transaction.objectStore('posts');
+        // 初始化資料庫
+        async init() {
+            return new Promise((resolve, reject) => {
+                const request = indexedDB.open(this.dbName, this.dbVersion);
 
-                const request = store.put(post);
-
-                request.onsuccess = () => resolve();
                 request.onerror = () => reject(request.error);
-            };
-
-            request.onerror = () => reject(request.error);
-        });
-    },
-
-    // 獲取所有離線貼文
-    async getAllPosts() {
-        return new Promise((resolve, reject) => {
-            const request = indexedDB.open('FreshOfflineDB', 1);
-
-            request.onsuccess = (event) => {
-                const db = event.target.result;
-                const transaction = db.transaction(['posts'], 'readonly');
-                const store = transaction.objectStore('posts');
-                const index = store.index('timestamp');
-
-                const request = index.getAll();
-
-                request.onsuccess = () => resolve(request.result);
-                request.onerror = () => reject(request.error);
-            };
-
-            request.onerror = () => reject(request.error);
-        });
-    },
-
-    // 儲存地圖資料
-    async saveMapData(area, data) {
-        return new Promise((resolve, reject) => {
-            const request = indexedDB.open('FreshOfflineDB', 1);
-
-            request.onsuccess = (event) => {
-                const db = event.target.result;
-                const transaction = db.transaction(['maps'], 'readwrite');
-                const store = transaction.objectStore('maps');
-
-                const mapData = {
-                    id: area,
-                    area: area,
-                    data: data,
-                    timestamp: Date.now()
+                request.onsuccess = () => {
+                    this.db = request.result;
+                    resolve(this.db);
                 };
 
-                const request = store.put(mapData);
+                request.onupgradeneeded = (event) => {
+                    const db = event.target.result;
 
-                request.onsuccess = () => resolve();
-                request.onerror = () => reject(request.error);
-            };
+                    // 創建用戶資料表
+                    if (!db.objectStoreNames.contains('users')) {
+                        const store = db.createObjectStore('users', { keyPath: 'id' });
+                        store.createIndex('username', 'username', { unique: true });
+                    }
 
-            request.onerror = () => reject(request.error);
-        });
-    },
+                    // 創建貼文資料表
+                    if (!db.objectStoreNames.contains('posts')) {
+                        const store = db.createObjectStore('posts', { keyPath: 'id' });
+                        store.createIndex('userId', 'userId', { unique: false });
+                        store.createIndex('timestamp', 'timestamp', { unique: false });
+                    }
 
-    // 獲取地圖資料
-    async getMapData(area) {
-        return new Promise((resolve, reject) => {
-            const request = indexedDB.open('FreshOfflineDB', 1);
+                    // 創建媒體資料表
+                    if (!db.objectStoreNames.contains('media')) {
+                        const store = db.createObjectStore('media', { keyPath: 'id' });
+                        store.createIndex('postId', 'postId', { unique: false });
+                    }
+                };
+            });
+        },
 
-            request.onsuccess = (event) => {
-                const db = event.target.result;
-                const transaction = db.transaction(['maps'], 'readonly');
-                const store = transaction.objectStore('maps');
-
-                const request = store.get(area);
-
-                request.onsuccess = () => resolve(request.result);
-                request.onerror = () => reject(request.error);
-            };
-
-            request.onerror = () => reject(request.error);
-        });
-    },
-
-    // 儲存用戶資料
-    async saveUserData(user) {
-        return new Promise((resolve, reject) => {
-            const request = indexedDB.open('FreshOfflineDB', 1);
-
-            request.onsuccess = (event) => {
-                const db = event.target.result;
-                const transaction = db.transaction(['users'], 'readwrite');
-                const store = transaction.objectStore('users');
-
-                const request = store.put(user);
-
-                request.onsuccess = () => resolve();
-                request.onerror = () => reject(request.error);
-            };
-
-            request.onerror = () => reject(request.error);
-        });
-    },
-
-    // 獲取用戶資料
-    async getUserData(userId) {
-        return new Promise((resolve, reject) => {
-            const request = indexedDB.open('FreshOfflineDB', 1);
-
-            request.onsuccess = (event) => {
-                const db = event.target.result;
-                const transaction = db.transaction(['users'], 'readonly');
-                const store = transaction.objectStore('users');
-
-                const request = store.get(userId);
+        // 添加資料
+        async add(storeName, data) {
+            return new Promise((resolve, reject) => {
+                const transaction = this.db.transaction(storeName, 'readwrite');
+                const store = transaction.objectStore(storeName);
+                const request = store.add(data);
 
                 request.onsuccess = () => resolve(request.result);
                 request.onerror = () => reject(request.error);
-            };
+            });
+        },
 
-            request.onerror = () => reject(request.error);
-        });
-    },
+        // 獲取資料
+        async get(storeName, key) {
+            return new Promise((resolve, reject) => {
+                const transaction = this.db.transaction(storeName, 'readonly');
+                const store = transaction.objectStore(storeName);
+                const request = store.get(key);
 
-    // 檢查離線儲存空間
-    async checkStorageSpace() {
-        if (navigator.storage && navigator.storage.estimate) {
-            const estimate = await navigator.storage.estimate();
-            const used = estimate.usage;
-            const quota = estimate.quota;
-            const percentage = (used / quota) * 100;
-            
-            return {
-                used,
-                quota,
-                percentage,
-                available: quota - used
-            };
+                request.onsuccess = () => resolve(request.result);
+                request.onerror = () => reject(request.error);
+            });
+        },
+
+        // 更新資料
+        async update(storeName, data) {
+            return new Promise((resolve, reject) => {
+                const transaction = this.db.transaction(storeName, 'readwrite');
+                const store = transaction.objectStore(storeName);
+                const request = store.put(data);
+
+                request.onsuccess = () => resolve(request.result);
+                request.onerror = () => reject(request.error);
+            });
+        },
+
+        // 刪除資料
+        async delete(storeName, key) {
+            return new Promise((resolve, reject) => {
+                const transaction = this.db.transaction(storeName, 'readwrite');
+                const store = transaction.objectStore(storeName);
+                const request = store.delete(key);
+
+                request.onsuccess = () => resolve(true);
+                request.onerror = () => reject(request.error);
+            });
+        },
+
+        // 獲取所有資料
+        async getAll(storeName) {
+            return new Promise((resolve, reject) => {
+                const transaction = this.db.transaction(storeName, 'readonly');
+                const store = transaction.objectStore(storeName);
+                const request = store.getAll();
+
+                request.onsuccess = () => resolve(request.result);
+                request.onerror = () => reject(request.error);
+            });
         }
-        return null;
+    },
+
+    // Capacitor Storage 操作
+    capacitor: {
+        // 初始化 Capacitor Storage
+        async init() {
+            try {
+                const { Storage } = await import('@capacitor/storage');
+                this.Storage = Storage;
+                return true;
+            } catch (error) {
+                console.error('Capacitor Storage 初始化失敗:', error);
+                return false;
+            }
+        },
+
+        // 設置資料
+        async set(key, value) {
+            try {
+                await this.Storage.set({
+                    key: key,
+                    value: JSON.stringify(value)
+                });
+                return true;
+            } catch (error) {
+                console.error('Capacitor Storage 設置失敗:', error);
+                return false;
+            }
+        },
+
+        // 獲取資料
+        async get(key) {
+            try {
+                const { value } = await this.Storage.get({ key: key });
+                return value ? JSON.parse(value) : null;
+            } catch (error) {
+                console.error('Capacitor Storage 獲取失敗:', error);
+                return null;
+            }
+        },
+
+        // 移除資料
+        async remove(key) {
+            try {
+                await this.Storage.remove({ key: key });
+                return true;
+            } catch (error) {
+                console.error('Capacitor Storage 移除失敗:', error);
+                return false;
+            }
+        }
+    },
+
+    // SQLite 操作
+    sqlite: {
+        db: null,
+
+        // 初始化 SQLite
+        async init() {
+            try {
+                const { CapacitorSQLite, SQLiteConnection } = await import('@capacitor-community/sqlite');
+                this.SQLite = CapacitorSQLite;
+                this.connection = new SQLiteConnection(CapacitorSQLite);
+                
+                this.db = await this.connection.createConnection(
+                    'fresh_db',
+                    false,
+                    'no-encryption',
+                    1,
+                    false
+                );
+
+                await this.db.open();
+                await this.createTables();
+                return true;
+            } catch (error) {
+                console.error('SQLite 初始化失敗:', error);
+                return false;
+            }
+        },
+
+        // 創建資料表
+        async createTables() {
+            const createUsersTable = `
+                CREATE TABLE IF NOT EXISTS users (
+                    id TEXT PRIMARY KEY,
+                    username TEXT UNIQUE,
+                    email TEXT UNIQUE,
+                    created_at INTEGER
+                )
+            `;
+
+            const createPostsTable = `
+                CREATE TABLE IF NOT EXISTS posts (
+                    id TEXT PRIMARY KEY,
+                    user_id TEXT,
+                    content TEXT,
+                    created_at INTEGER,
+                    FOREIGN KEY (user_id) REFERENCES users (id)
+                )
+            `;
+
+            await this.db.execute(createUsersTable);
+            await this.db.execute(createPostsTable);
+        },
+
+        // 執行 SQL 查詢
+        async query(sql, params = []) {
+            try {
+                const result = await this.db.query(sql, params);
+                return result.values || [];
+            } catch (error) {
+                console.error('SQLite 查詢失敗:', error);
+                throw error;
+            }
+        },
+
+        // 執行 SQL 命令
+        async execute(sql, params = []) {
+            try {
+                await this.db.execute(sql, params);
+                return true;
+            } catch (error) {
+                console.error('SQLite 執行失敗:', error);
+                throw error;
+            }
+        }
+    },
+
+    // 檔案系統操作
+    filesystem: {
+        // 初始化檔案系統
+        async init() {
+            try {
+                const { Filesystem } = await import('@capacitor/filesystem');
+                this.Filesystem = Filesystem;
+                return true;
+            } catch (error) {
+                console.error('檔案系統初始化失敗:', error);
+                return false;
+            }
+        },
+
+        // 寫入檔案
+        async writeFile(path, data, encoding = 'utf8') {
+            try {
+                await this.Filesystem.writeFile({
+                    path: path,
+                    data: data,
+                    encoding: encoding
+                });
+                return true;
+            } catch (error) {
+                console.error('檔案寫入失敗:', error);
+                return false;
+            }
+        },
+
+        // 讀取檔案
+        async readFile(path, encoding = 'utf8') {
+            try {
+                const { data } = await this.Filesystem.readFile({
+                    path: path,
+                    encoding: encoding
+                });
+                return data;
+            } catch (error) {
+                console.error('檔案讀取失敗:', error);
+                return null;
+            }
+        },
+
+        // 刪除檔案
+        async deleteFile(path) {
+            try {
+                await this.Filesystem.deleteFile({
+                    path: path
+                });
+                return true;
+            } catch (error) {
+                console.error('檔案刪除失敗:', error);
+                return false;
+            }
+        }
+    },
+
+    // 初始化所有存儲方式
+    async init() {
+        // 初始化 IndexedDB
+        await this.indexedDB.init();
+
+        // 初始化 Capacitor Storage
+        await this.capacitor.init();
+
+        // 初始化 SQLite
+        await this.sqlite.init();
+
+        // 初始化檔案系統
+        await this.filesystem.init();
+
+        console.log('所有存儲方式初始化完成');
     }
 };
 
-// 初始化離線儲存
-document.addEventListener('DOMContentLoaded', () => {
-    OFFLINE_STORAGE.init();
+// 初始化存儲
+document.addEventListener('DOMContentLoaded', async () => {
+    await STORAGE.init();
 });
 
 // 初始化
