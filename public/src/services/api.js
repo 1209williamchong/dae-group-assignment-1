@@ -41,6 +41,39 @@ export async function apiRequest(endpoint, options = {}) {
     return handleResponse(response);
 }
 
+// 認證相關 API
+export const authApi = {
+    // 註冊
+    async register(username, email, password, avatar, bio) {
+        const formData = new FormData();
+        formData.append('username', username);
+        formData.append('email', email);
+        formData.append('password', password);
+        if (avatar) {
+            formData.append('avatar', avatar);
+        }
+        if (bio) {
+            formData.append('bio', bio);
+        }
+        
+        return apiRequest('/auth/register', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'Content-Type': undefined
+            }
+        });
+    },
+    
+    // 登入
+    async login(email, password) {
+        return apiRequest('/auth/login', {
+            method: 'POST',
+            body: JSON.stringify({ email, password })
+        });
+    }
+};
+
 // 書籤相關 API
 export const bookmarksApi = {
     // 獲取書籤列表
@@ -87,7 +120,6 @@ export const postsApi = {
             method: 'POST',
             body: formData,
             headers: {
-                // 移除 Content-Type，讓瀏覽器自動設置
                 'Content-Type': undefined
             }
         });
@@ -108,6 +140,27 @@ export const usersApi = {
         return apiRequest('/users/profile', {
             method: 'PUT',
             body: JSON.stringify(data)
+        });
+    },
+    
+    // 追蹤用戶
+    async followUser(userId) {
+        return apiRequest(`/users/${userId}/follow`, {
+            method: 'POST'
+        });
+    },
+    
+    // 取消追蹤用戶
+    async unfollowUser(userId) {
+        return apiRequest(`/users/${userId}/unfollow`, {
+            method: 'POST'
+        });
+    },
+    
+    // 檢查是否追蹤用戶
+    async isFollowing(userId) {
+        return apiRequest(`/users/${userId}/is-following`, {
+            method: 'GET'
         });
     }
 }; 

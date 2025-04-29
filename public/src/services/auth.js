@@ -18,10 +18,27 @@ export function isLoggedIn() {
     return !!getToken();
 }
 
+// 獲取當前用戶
+export function getCurrentUser() {
+    const user = localStorage.getItem('user');
+    return user ? JSON.parse(user) : null;
+}
+
+// 設置當前用戶
+export function setCurrentUser(user) {
+    localStorage.setItem('user', JSON.stringify(user));
+}
+
+// 移除當前用戶
+export function removeCurrentUser() {
+    localStorage.removeItem('user');
+}
+
 // 登出
 export function logout() {
     removeToken();
-    window.location.href = '/login.html';
+    removeCurrentUser();
+    window.location.href = '/register.html';
 }
 
 // 處理 API 錯誤

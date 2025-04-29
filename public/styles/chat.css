@@ -9,12 +9,68 @@ body {
     background-color: #121212;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     color: #ffffff;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* 導航欄 */
+.nav {
+    background-color: #1e1e1e;
+    padding: 1rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #333;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.nav-left .logo {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #ff6b00;
+    text-decoration: none;
+    text-shadow: 0 2px 4px rgba(255, 107, 0, 0.2);
+}
+
+.nav-right {
+    display: flex;
+    gap: 2rem;
+    align-items: center;
+}
+
+.nav-link {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #ffffff;
+    text-decoration: none;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.nav-link:hover {
+    background-color: #2d2d2d;
+    color: #ff6b00;
+}
+
+.nav-link.active {
+    background-color: #2d2d2d;
+    color: #ff6b00;
+}
+
+.nav-link ion-icon {
+    font-size: 1.2rem;
 }
 
 /* 聊天容器 */
 .chat-container {
+    flex: 1;
     display: flex;
-    height: 100vh;
+    height: calc(100vh - 72px);
     background-color: #121212;
     padding: 20px;
     gap: 20px;
@@ -34,6 +90,7 @@ body {
 .search-container {
     padding: 20px;
     border-bottom: 1px solid #333;
+    position: relative;
 }
 
 .search-container input {
@@ -51,6 +108,14 @@ body {
     outline: none;
     border-color: #ff6b00;
     box-shadow: 0 0 0 2px rgba(255, 107, 0, 0.1);
+}
+
+.search-icon {
+    position: absolute;
+    left: 35px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #666;
 }
 
 /* 聊天列表 */
@@ -121,7 +186,7 @@ body {
 }
 
 /* 主聊天區域 */
-.chat-main {
+.main-chat {
     flex: 1;
     display: flex;
     flex-direction: column;
@@ -141,34 +206,10 @@ body {
     border-radius: 15px 15px 0 0;
 }
 
-.chat-header-avatar {
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 2px solid #333;
-    transition: all 0.3s ease;
-}
-
-.chat-header-avatar:hover {
-    border-color: #ff6b00;
-    transform: scale(1.05);
-}
-
-.chat-header-info {
-    flex: 1;
-}
-
-.chat-header-name {
+.chat-title {
+    font-size: 1.2rem;
     font-weight: 600;
     color: #ffffff;
-    font-size: 1.2rem;
-}
-
-.chat-header-status {
-    font-size: 0.9rem;
-    color: #666;
-    margin-top: 5px;
 }
 
 /* 聊天消息區域 */
@@ -216,127 +257,76 @@ body {
     color: #666;
 }
 
-/* 文件消息樣式 */
-.file-message {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    padding: 15px;
-    border-radius: 10px;
-    background-color: rgba(45, 45, 45, 0.5);
-    transition: all 0.3s ease;
-}
-
-.file-message:hover {
-    background-color: rgba(45, 45, 45, 0.8);
-    transform: translateY(-2px);
-}
-
-.file-icon {
-    font-size: 1.8rem;
-    color: #ff6b00;
-}
-
-.file-info {
-    flex: 1;
-}
-
-.file-name {
-    font-weight: 500;
-    color: #ffffff;
-    margin-bottom: 5px;
-}
-
-.file-size {
-    font-size: 0.8rem;
-    color: #666;
-}
-
-.download-btn {
-    background: none;
-    border: none;
-    color: #ff6b00;
-    cursor: pointer;
-    padding: 8px;
-    border-radius: 50%;
-    transition: all 0.3s ease;
-}
-
-.download-btn:hover {
-    background-color: rgba(255, 107, 0, 0.1);
-    transform: scale(1.1);
-}
-
-/* 輸入區域 */
+/* 聊天輸入區域 */
 .chat-input {
     padding: 20px;
     border-top: 1px solid #333;
-    background-color: #1e1e1e;
-    display: flex;
-    gap: 15px;
-    border-radius: 0 0 15px 15px;
-}
-
-.input-wrapper {
-    flex: 1;
     display: flex;
     align-items: center;
-    background-color: #2d2d2d;
-    border-radius: 25px;
-    padding: 0 20px;
-    transition: all 0.3s ease;
-}
-
-.input-wrapper:focus-within {
-    box-shadow: 0 0 0 2px rgba(255, 107, 0, 0.1);
+    gap: 15px;
+    background-color: #1e1e1e;
+    border-radius: 0 0 15px 15px;
 }
 
 .chat-input input {
     flex: 1;
-    border: none;
-    background: none;
-    padding: 12px 0;
+    padding: 12px 15px;
+    border: 1px solid #333;
+    border-radius: 25px;
+    background-color: #2d2d2d;
     color: #ffffff;
     font-size: 0.9rem;
+    transition: all 0.3s ease;
 }
 
 .chat-input input:focus {
     outline: none;
+    border-color: #ff6b00;
+    box-shadow: 0 0 0 2px rgba(255, 107, 0, 0.1);
 }
 
-.attach-btn,
-.send-btn {
+.upload-button {
     background: none;
     border: none;
-    color: #ff6b00;
+    color: #666;
+    font-size: 1.2rem;
     cursor: pointer;
-    padding: 12px;
-    border-radius: 50%;
     transition: all 0.3s ease;
 }
 
-.attach-btn:hover,
-.send-btn:hover {
-    background-color: rgba(255, 107, 0, 0.1);
-    transform: scale(1.1);
+.upload-button:hover {
+    color: #ff6b00;
+}
+
+.send-button {
+    padding: 12px 25px;
+    background-color: #ff6b00;
+    color: #000000;
+    border: none;
+    border-radius: 25px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.send-button:hover {
+    background-color: #ff8533;
 }
 
 /* 響應式設計 */
 @media (max-width: 768px) {
     .chat-container {
         flex-direction: column;
-        padding: 10px;
+        height: calc(100vh - 72px);
     }
 
     .chat-sidebar {
         width: 100%;
-        height: auto;
-        border-radius: 10px;
+        height: 40%;
     }
 
-    .chat-main {
-        height: calc(100vh - 200px);
-        border-radius: 10px;
+    .main-chat {
+        height: 60%;
     }
 
     .message {
