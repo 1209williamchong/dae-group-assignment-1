@@ -18,6 +18,24 @@ let hasMorePosts = true;
 let currentSearchQuery = '';
 let showOnlyBookmarks = false;
 
+// 相機和位置相關的變量
+let stream = null;
+let currentCamera = 'user'; // 'user' 或 'environment'
+let currentLocation = null;
+
+// DOM 元素
+const cameraBtn = document.getElementById('camera-btn');
+const galleryBtn = document.getElementById('gallery-btn');
+const cameraModal = document.getElementById('camera-modal');
+const cameraView = document.getElementById('camera-view');
+const photoCanvas = document.getElementById('photo-canvas');
+const captureBtn = document.getElementById('capture-btn');
+const switchCameraBtn = document.getElementById('switch-camera-btn');
+const mediaPreview = document.getElementById('media-preview');
+const locationInfo = document.getElementById('location-info');
+const locationText = document.getElementById('location-text');
+const removeLocationBtn = document.getElementById('remove-location');
+
 // 初始化
 async function init() {
     if (!isLoggedIn()) {
@@ -38,6 +56,9 @@ async function init() {
     
     // 添加滾動事件監聽器
     window.addEventListener('scroll', handleScroll);
+
+    // 初始化相機
+    await initCamera();
 }
 
 // 切換收藏視圖
@@ -220,6 +241,8 @@ async function handlePostSubmit(e) {
     try {
         const postData = {
             content,
+            media: mediaPreview.querySelector('img, video')?.src || null,
+            location: currentLocation,
             youtubeLink: youtubeLink || null
         };
         
@@ -292,6 +315,139 @@ function formatTime(timestamp) {
     const days = Math.floor(hours / 24);
     return `${days} 天前`;
 }
+
+// 初始化相機
+async function initCamera() {
+    try {
+        const constraints = {
+            video: {
+                facingMode: currentCamera,
+                width: { ideal: 1280 },
+                height: { ideal: 720 }
+            }
+        };
+        stream = await navigator.mediaDevices.getUserMedia(constraints);
+        cameraView.srcObject = stream;
+    } catch (error) {
+        console.error('相機初始化失敗:', error);
+        alert('無法訪問相機，請確保已授予相機權限。');
+    }
+}
+
+// 拍照
+function capturePhoto() {
+    const context = photoCanvas.getContext('2d');
+    photoCanvas.width = cameraView.videoWidth;
+    photoCanvas.height = cameraView.videoHeight;
+    context.drawImage(cameraView, 0, 0);
+    
+    // 將照片轉換為 Blob
+    photoCanvas.toBlob((blob) => {
+        const url = URL.createObjectURL(blob);
+        showMediaPreview(url, 'photo');
+    }, 'image/jpeg');
+}
+
+// 切換相機
+async function switchCamera() {
+    if (stream) {
+        stream.getTracks().forEach(track => track.stop());
+    }
+    currentCamera = currentCamera === 'user' ? 'environment' : 'user';
+    await initCamera();
+}
+
+// 從相簿選擇照片
+function selectFromGallery() {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.onchange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            const url = URL.createObjectURL(file);
+            showMediaPreview(url, 'photo');
+        }
+    };
+    input.click();
+}
+
+// 顯示媒體預覽
+function showMediaPreview(url, type) {
+    mediaPreview.innerHTML = '';
+    const mediaElement = document.createElement(type === 'photo' ? 'img' : 'video');
+    mediaElement.src = url;
+    mediaElement.controls = type === 'video';
+    
+    const removeBtn = document.createElement('button');
+    removeBtn.className = 'remove-media-btn';
+    removeBtn.innerHTML = '<ion-icon name="close-outline"></ion-icon>';
+    removeBtn.onclick = () => {
+        mediaPreview.innerHTML = '';
+        if (type === 'photo' && stream) {
+            stream.getTracks().forEach(track => track.stop());
+        }
+    };
+    
+    mediaPreview.appendChild(mediaElement);
+    mediaPreview.appendChild(removeBtn);
+    cameraModal.style.display = 'none';
+}
+
+// 獲取位置
+async function getLocation() {
+    try {
+        const position = await new Promise((resolve, reject) => {
+            navigator.geolocation.getCurrentPosition(resolve, reject, {
+                enableHighAccuracy: true,
+                timeout: 5000,
+                maximumAge: 0
+            });
+        });
+        
+        currentLocation = {
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude
+        };
+        
+        // 使用地理編碼 API 獲取地址
+        const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${currentLocation.latitude}&lon=${currentLocation.longitude}`);
+        const data = await response.json();
+        
+        locationText.textContent = data.display_name || '未知位置';
+        locationInfo.style.display = 'flex';
+    } catch (error) {
+        console.error('獲取位置失敗:', error);
+        alert('無法獲取位置信息，請確保已授予位置權限。');
+    }
+}
+
+// 移除位置
+function removeLocation() {
+    currentLocation = null;
+    locationInfo.style.display = 'none';
+}
+
+// 事件監聽器
+cameraBtn.addEventListener('click', async () => {
+    cameraModal.style.display = 'block';
+    await initCamera();
+});
+
+galleryBtn.addEventListener('click', selectFromGallery);
+
+captureBtn.addEventListener('click', capturePhoto);
+
+switchCameraBtn.addEventListener('click', switchCamera);
+
+document.querySelector('.close-modal').addEventListener('click', () => {
+    cameraModal.style.display = 'none';
+    if (stream) {
+        stream.getTracks().forEach(track => track.stop());
+    }
+});
+
+removeLocationBtn.addEventListener('click', removeLocation);
 
 // 初始化應用
 init(); 
