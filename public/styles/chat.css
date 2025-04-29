@@ -22,8 +22,10 @@ body {
     justify-content: space-between;
     align-items: center;
     border-bottom: 1px solid #333;
-    position: sticky;
+    position: fixed;
     top: 0;
+    left: 0;
+    right: 0;
     z-index: 1000;
 }
 
@@ -64,6 +66,14 @@ body {
 
 .nav-link ion-icon {
     font-size: 1.2rem;
+}
+
+/* 主內容區域 */
+.main-content {
+    margin-top: 72px; /* 導航欄高度 */
+    flex: 1;
+    display: flex;
+    flex-direction: column;
 }
 
 /* 聊天容器 */

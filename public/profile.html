@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>個人檔案 - fresh</title>
-    <link rel="stylesheet" href="styles/main.css">
-    <link rel="stylesheet" href="styles/profile.css">
+    <link rel="stylesheet" href="/styles/main.css">
+    <link rel="stylesheet" href="/styles/profile.css">
     <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
     <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
 </head>
@@ -30,99 +30,101 @@
         </div>
     </nav>
 
-    <div class="profile-container">
-        <!-- 個人資料區 -->
-        <div class="profile-header">
-            <div class="profile-avatar">
-                <img src="https://via.placeholder.com/150" alt="用戶頭像" id="profile-avatar">
-                <button class="edit-avatar-btn">
-                    <ion-icon name="camera"></ion-icon>
-                </button>
-            </div>
-            <div class="profile-info">
-                <div class="profile-name">
-                    <h2 id="profile-username">用戶名稱</h2>
-                    <button class="edit-profile-btn">編輯個人檔案</button>
-                    <button class="settings-btn">
-                        <ion-icon name="settings-outline"></ion-icon>
+    <div class="main-content">
+        <div class="profile-container">
+            <!-- 個人資料區 -->
+            <div class="profile-header">
+                <div class="profile-avatar">
+                    <img src="https://via.placeholder.com/150" alt="用戶頭像" id="profile-avatar">
+                    <button class="edit-avatar-btn">
+                        <ion-icon name="camera"></ion-icon>
                     </button>
                 </div>
-                <div class="profile-stats">
-                    <div class="stat">
-                        <span class="stat-number">123</span>
-                        <span class="stat-label">貼文</span>
+                <div class="profile-info">
+                    <div class="profile-name">
+                        <h2 id="profile-username">用戶名稱</h2>
+                        <button class="edit-profile-btn">編輯個人檔案</button>
+                        <button class="settings-btn">
+                            <ion-icon name="settings-outline"></ion-icon>
+                        </button>
                     </div>
-                    <div class="stat">
-                        <span class="stat-number">456</span>
-                        <span class="stat-label">追蹤者</span>
+                    <div class="profile-stats">
+                        <div class="stat">
+                            <span class="stat-number">123</span>
+                            <span class="stat-label">貼文</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-number">456</span>
+                            <span class="stat-label">追蹤者</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-number">789</span>
+                            <span class="stat-label">追蹤中</span>
+                        </div>
                     </div>
-                    <div class="stat">
-                        <span class="stat-number">789</span>
-                        <span class="stat-label">追蹤中</span>
+                    <div class="profile-bio">
+                        <p>這是個人簡介，可以寫一些關於自己的內容。</p>
                     </div>
-                </div>
-                <div class="profile-bio">
-                    <p>這是個人簡介，可以寫一些關於自己的內容。</p>
                 </div>
             </div>
-        </div>
 
-        <!-- 貼文網格 -->
-        <div class="posts-grid">
-            <div class="grid-row">
-                <div class="grid-item">
-                    <img src="https://picsum.photos/seed/1/600/600" alt="貼文">
-                    <div class="post-overlay">
-                        <div class="post-stats">
-                            <span><ion-icon name="heart-outline"></ion-icon> 123</span>
-                            <span><ion-icon name="chatbubble-outline"></ion-icon> 45</span>
+            <!-- 貼文網格 -->
+            <div class="posts-grid">
+                <div class="grid-row">
+                    <div class="grid-item">
+                        <img src="https://picsum.photos/seed/1/600/600" alt="貼文">
+                        <div class="post-overlay">
+                            <div class="post-stats">
+                                <span><ion-icon name="heart-outline"></ion-icon> 123</span>
+                                <span><ion-icon name="chatbubble-outline"></ion-icon> 45</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="grid-item">
+                        <img src="https://picsum.photos/seed/2/600/600" alt="貼文">
+                        <div class="post-overlay">
+                            <div class="post-stats">
+                                <span><ion-icon name="heart-outline"></ion-icon> 456</span>
+                                <span><ion-icon name="chatbubble-outline"></ion-icon> 78</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="grid-item">
+                        <img src="https://picsum.photos/seed/3/600/600" alt="貼文">
+                        <div class="post-overlay">
+                            <div class="post-stats">
+                                <span><ion-icon name="heart-outline"></ion-icon> 789</span>
+                                <span><ion-icon name="chatbubble-outline"></ion-icon> 90</span>
+                            </div>
                         </div>
                     </div>
                 </div>
-                <div class="grid-item">
-                    <img src="https://picsum.photos/seed/2/600/600" alt="貼文">
-                    <div class="post-overlay">
-                        <div class="post-stats">
-                            <span><ion-icon name="heart-outline"></ion-icon> 456</span>
-                            <span><ion-icon name="chatbubble-outline"></ion-icon> 78</span>
+                <div class="grid-row">
+                    <div class="grid-item">
+                        <img src="https://picsum.photos/seed/4/600/600" alt="貼文">
+                        <div class="post-overlay">
+                            <div class="post-stats">
+                                <span><ion-icon name="heart-outline"></ion-icon> 234</span>
+                                <span><ion-icon name="chatbubble-outline"></ion-icon> 56</span>
+                            </div>
                         </div>
                     </div>
-                </div>
-                <div class="grid-item">
-                    <img src="https://picsum.photos/seed/3/600/600" alt="貼文">
-                    <div class="post-overlay">
-                        <div class="post-stats">
-                            <span><ion-icon name="heart-outline"></ion-icon> 789</span>
-                            <span><ion-icon name="chatbubble-outline"></ion-icon> 90</span>
+                    <div class="grid-item">
+                        <img src="https://picsum.photos/seed/5/600/600" alt="貼文">
+                        <div class="post-overlay">
+                            <div class="post-stats">
+                                <span><ion-icon name="heart-outline"></ion-icon> 567</span>
+                                <span><ion-icon name="chatbubble-outline"></ion-icon> 89</span>
+                            </div>
                         </div>
                     </div>
-                </div>
-            </div>
-            <div class="grid-row">
-                <div class="grid-item">
-                    <img src="https://picsum.photos/seed/4/600/600" alt="貼文">
-                    <div class="post-overlay">
-                        <div class="post-stats">
-                            <span><ion-icon name="heart-outline"></ion-icon> 234</span>
-                            <span><ion-icon name="chatbubble-outline"></ion-icon> 56</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="grid-item">
-                    <img src="https://picsum.photos/seed/5/600/600" alt="貼文">
-                    <div class="post-overlay">
-                        <div class="post-stats">
-                            <span><ion-icon name="heart-outline"></ion-icon> 567</span>
-                            <span><ion-icon name="chatbubble-outline"></ion-icon> 89</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="grid-item">
-                    <img src="https://picsum.photos/seed/6/600/600" alt="貼文">
-                    <div class="post-overlay">
-                        <div class="post-stats">
-                            <span><ion-icon name="heart-outline"></ion-icon> 890</span>
-                            <span><ion-icon name="chatbubble-outline"></ion-icon> 12</span>
+                    <div class="grid-item">
+                        <img src="https://picsum.photos/seed/6/600/600" alt="貼文">
+                        <div class="post-overlay">
+                            <div class="post-stats">
+                                <span><ion-icon name="heart-outline"></ion-icon> 890</span>
+                                <span><ion-icon name="chatbubble-outline"></ion-icon> 12</span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -217,7 +219,7 @@
         </div>
     </div>
 
-    <script src="src/main.js"></script>
-    <script src="src/profile.js"></script>
+    <script src="/src/main.js"></script>
+    <script src="/src/profile.js"></script>
 </body>
 </html> 

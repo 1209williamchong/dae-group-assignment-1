@@ -11,7 +11,8 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "nodemon": "^3.0.2"
+    "@types/vue": "^1.0.31",
+    "nodemon": "^3.1.10"
   },
   "repository": {
     "type": "git",
@@ -23,10 +24,18 @@
   },
   "homepage": "https://github.com/1209williamchong/dae-group-assignment-1#readme",
   "dependencies": {
+    "@capacitor/camera": "^7.0.1",
+    "@capacitor/core": "^7.2.0",
+    "@capacitor/geolocation": "^7.1.2",
+    "@capacitor/local-notifications": "^7.0.1",
+    "@capacitor/storage": "^1.2.5",
+    "@ionic/core": "^8.5.5",
+    "@ionic/vue": "^8.5.5",
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
     "express": "^4.21.2",
+    "ionicons": "^7.4.0",
     "jsonwebtoken": "^9.0.2",
-    "sqlite3": "^5.1.6"
+    "sqlite3": "^5.1.7"
   }
 }

@@ -101,8 +101,8 @@ app.post('/api/posts', authenticateToken, (req, res) => {
 app.post('/api/posts/:postId/like', authenticateToken, (req, res) => {
     const { postId } = req.params;
     
-    db.run
-        'INSERT OR REPLACE INTO likes (user_id, post_id) VALUES (?, ?)'
+    db.run(
+        'INSERT OR REPLACE INTO likes (user_id, post_id) VALUES (?, ?)',
         [req.user.id, postId],
         function(err) {
             if (err) {
