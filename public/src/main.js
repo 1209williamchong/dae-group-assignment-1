@@ -640,4 +640,167 @@ document.querySelector('.close-modal').addEventListener('click', () => {
 removeLocationBtn.addEventListener('click', removeLocation);
 
 // 初始化應用
-init(); 
+init();
+
+// Capacitor Camera API 相關功能
+const CAMERA = {
+    // 初始化相機
+    async init() {
+        try {
+            const { Camera } = await import('@capacitor/camera');
+            this.Camera = Camera;
+            return true;
+        } catch (error) {
+            console.error('無法載入 Capacitor Camera API:', error);
+            return false;
+        }
+    },
+
+    // 拍照
+    async takePicture() {
+        try {
+            const image = await this.Camera.getPhoto({
+                quality: 90,
+                allowEditing: true,
+                resultType: 'uri',
+                source: 'CAMERA',
+                saveToGallery: true
+            });
+
+            return {
+                type: 'photo',
+                uri: image.webPath,
+                format: image.format
+            };
+        } catch (error) {
+            console.error('拍照失敗:', error);
+            throw error;
+        }
+    },
+
+    // 從相簿選擇照片
+    async pickFromGallery() {
+        try {
+            const image = await this.Camera.getPhoto({
+                quality: 90,
+                allowEditing: true,
+                resultType: 'uri',
+                source: 'PHOTOLIBRARY',
+                saveToGallery: false
+            });
+
+            return {
+                type: 'photo',
+                uri: image.webPath,
+                format: image.format
+            };
+        } catch (error) {
+            console.error('選擇照片失敗:', error);
+            throw error;
+        }
+    },
+
+    // 進階圖片處理
+    async processImage(imageUri) {
+        try {
+            // 使用 Canvas 進行圖片處理
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            const img = new Image();
+
+            await new Promise((resolve, reject) => {
+                img.onload = resolve;
+                img.onerror = reject;
+                img.src = imageUri;
+            });
+
+            // 設置畫布大小
+            canvas.width = img.width;
+            canvas.height = img.height;
+
+            // 應用濾鏡效果
+            ctx.filter = 'brightness(1.1) contrast(1.1) saturate(1.2)';
+            ctx.drawImage(img, 0, 0);
+
+            // 添加文字水印
+            ctx.font = '20px Arial';
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+            ctx.fillText('Fresh', 10, 30);
+
+            // 轉換為 Blob
+            return new Promise((resolve) => {
+                canvas.toBlob((blob) => {
+                    resolve(URL.createObjectURL(blob));
+                }, 'image/jpeg', 0.9);
+            });
+        } catch (error) {
+            console.error('圖片處理失敗:', error);
+            throw error;
+        }
+    },
+
+    // 檢查相機權限
+    async checkPermissions() {
+        try {
+            const { Camera } = await import('@capacitor/camera');
+            const permissions = await Camera.checkPermissions();
+            return permissions;
+        } catch (error) {
+            console.error('檢查權限失敗:', error);
+            throw error;
+        }
+    },
+
+    // 請求相機權限
+    async requestPermissions() {
+        try {
+            const { Camera } = await import('@capacitor/camera');
+            const permissions = await Camera.requestPermissions();
+            return permissions;
+        } catch (error) {
+            console.error('請求權限失敗:', error);
+            throw error;
+        }
+    }
+};
+
+// 初始化相機功能
+document.addEventListener('DOMContentLoaded', async () => {
+    const cameraInitialized = await CAMERA.init();
+    if (cameraInitialized) {
+        console.log('相機功能已初始化');
+    }
+});
+
+// 事件監聽器
+cameraBtn.addEventListener('click', async () => {
+    try {
+        const permissions = await CAMERA.checkPermissions();
+        if (permissions.camera !== 'granted') {
+            await CAMERA.requestPermissions();
+        }
+
+        const image = await CAMERA.takePicture();
+        const processedImage = await CAMERA.processImage(image.uri);
+        showMediaPreview(processedImage, 'photo');
+    } catch (error) {
+        console.error('拍照失敗:', error);
+        alert('無法使用相機，請檢查權限設置。');
+    }
+});
+
+galleryBtn.addEventListener('click', async () => {
+    try {
+        const permissions = await CAMERA.checkPermissions();
+        if (permissions.photos !== 'granted') {
+            await CAMERA.requestPermissions();
+        }
+
+        const image = await CAMERA.pickFromGallery();
+        const processedImage = await CAMERA.processImage(image.uri);
+        showMediaPreview(processedImage, 'photo');
+    } catch (error) {
+        console.error('選擇照片失敗:', error);
+        alert('無法訪問相簿，請檢查權限設置。');
+    }
+}); 
