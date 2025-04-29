@@ -402,6 +402,57 @@ body {
     color: #ff4444;
 }
 
+/* 路線規劃 */
+.route-info {
+    margin-top: 15px;
+    padding: 15px;
+    background-color: #f8f9fa;
+    border-radius: 10px;
+}
+
+.route-inputs {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.route-map {
+    height: 200px;
+    width: 100%;
+    border-radius: 10px;
+    margin-bottom: 10px;
+    background-color: #e9ecef;
+}
+
+.route-details {
+    display: flex;
+    justify-content: space-between;
+    color: #666;
+    font-size: 0.9rem;
+    margin-bottom: 10px;
+}
+
+#remove-route {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: rgba(0, 0, 0, 0.5);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+#remove-route:hover {
+    background: rgba(0, 0, 0, 0.7);
+}
+
 /* 響應式設計 */
 @media (max-width: 768px) {
     .container {
@@ -432,5 +483,13 @@ body {
 
     .camera-preview {
         aspect-ratio: 3/4;
+    }
+
+    .route-map {
+        height: 150px;
+    }
+    
+    .route-inputs {
+        flex-direction: column;
     }
 } 

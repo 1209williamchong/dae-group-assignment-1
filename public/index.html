@@ -6,6 +6,7 @@
     <title>fresh</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ionicons@5.5.2/dist/ionicons/ionicons.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
     <link rel="stylesheet" href="/styles/main.css">
 </head>
 <body>
@@ -39,6 +40,9 @@
                             <button type="button" id="gallery-btn" title="選擇照片">
                                 <ion-icon name="images-outline"></ion-icon>
                             </button>
+                            <button type="button" id="route-btn" title="路線規劃">
+                                <ion-icon name="map-outline"></ion-icon>
+                            </button>
                             <div class="input-with-icon">
                                 <ion-icon name="logo-youtube"></ion-icon>
                                 <input type="text" id="youtube-link" placeholder="貼上 YouTube 連結...">
@@ -51,6 +55,26 @@
                             <ion-icon name="location-outline"></ion-icon>
                             <span id="location-text"></span>
                             <button type="button" id="remove-location" title="移除位置">
+                                <ion-icon name="close-outline"></ion-icon>
+                            </button>
+                        </div>
+                        <div id="route-info" class="route-info" style="display: none;">
+                            <div class="route-inputs">
+                                <div class="input-with-icon">
+                                    <ion-icon name="location-outline"></ion-icon>
+                                    <input type="text" id="start-location" placeholder="起點">
+                                </div>
+                                <div class="input-with-icon">
+                                    <ion-icon name="flag-outline"></ion-icon>
+                                    <input type="text" id="end-location" placeholder="終點">
+                                </div>
+                            </div>
+                            <div id="route-map" class="route-map"></div>
+                            <div class="route-details">
+                                <span id="route-distance"></span>
+                                <span id="route-duration"></span>
+                            </div>
+                            <button type="button" id="remove-route" title="移除路線">
                                 <ion-icon name="close-outline"></ion-icon>
                             </button>
                         </div>
@@ -102,6 +126,7 @@
         </div>
     </div>
 
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
     <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
     <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
     <script type="module" src="/src/main.js"></script>
