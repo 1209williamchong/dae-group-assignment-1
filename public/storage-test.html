@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>存儲測試 - fresh</title>
+    <link rel="stylesheet" href="styles/main.css">
+    <link rel="stylesheet" href="styles/storage-test.css">
+    <script type="module" src="src/main.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>存儲測試</h1>
+        
+        <!-- Web Storage 測試 -->
+        <section class="test-section">
+            <h2>Web Storage 測試</h2>
+            <div class="test-controls">
+                <input type="text" id="local-storage-key" placeholder="鍵名">
+                <input type="text" id="local-storage-value" placeholder="值">
+                <button id="local-storage-set">設置 localStorage</button>
+                <button id="local-storage-get">獲取 localStorage</button>
+                <button id="local-storage-remove">移除 localStorage</button>
+            </div>
+            <div class="test-result" id="local-storage-result"></div>
+        </section>
+
+        <!-- IndexedDB 測試 -->
+        <section class="test-section">
+            <h2>IndexedDB 測試</h2>
+            <div class="test-controls">
+                <select id="indexeddb-store">
+                    <option value="users">用戶</option>
+                    <option value="posts">貼文</option>
+                    <option value="media">媒體</option>
+                </select>
+                <input type="text" id="indexeddb-key" placeholder="鍵名">
+                <input type="text" id="indexeddb-value" placeholder="值">
+                <button id="indexeddb-add">添加資料</button>
+                <button id="indexeddb-get">獲取資料</button>
+                <button id="indexeddb-get-all">獲取所有資料</button>
+                <button id="indexeddb-delete">刪除資料</button>
+            </div>
+            <div class="test-result" id="indexeddb-result"></div>
+        </section>
+
+        <!-- Capacitor Storage 測試 -->
+        <section class="test-section">
+            <h2>Capacitor Storage 測試</h2>
+            <div class="test-controls">
+                <input type="text" id="capacitor-key" placeholder="鍵名">
+                <input type="text" id="capacitor-value" placeholder="值">
+                <button id="capacitor-set">設置資料</button>
+                <button id="capacitor-get">獲取資料</button>
+                <button id="capacitor-remove">移除資料</button>
+            </div>
+            <div class="test-result" id="capacitor-result"></div>
+        </section>
+
+        <!-- SQLite 測試 -->
+        <section class="test-section">
+            <h2>SQLite 測試</h2>
+            <div class="test-controls">
+                <select id="sqlite-table">
+                    <option value="users">用戶表</option>
+                    <option value="posts">貼文表</option>
+                </select>
+                <input type="text" id="sqlite-id" placeholder="ID">
+                <input type="text" id="sqlite-username" placeholder="用戶名">
+                <input type="text" id="sqlite-content" placeholder="內容">
+                <button id="sqlite-insert">插入資料</button>
+                <button id="sqlite-select">查詢資料</button>
+                <button id="sqlite-delete">刪除資料</button>
+            </div>
+            <div class="test-result" id="sqlite-result"></div>
+        </section>
+
+        <!-- 檔案系統測試 -->
+        <section class="test-section">
+            <h2>檔案系統測試</h2>
+            <div class="test-controls">
+                <input type="text" id="file-path" placeholder="檔案路徑">
+                <input type="text" id="file-content" placeholder="檔案內容">
+                <button id="file-write">寫入檔案</button>
+                <button id="file-read">讀取檔案</button>
+                <button id="file-delete">刪除檔案</button>
+            </div>
+            <div class="test-result" id="file-result"></div>
+        </section>
+    </div>
+
+    <script type="module">
+        // Web Storage 測試
+        document.getElementById('local-storage-set').addEventListener('click', async () => {
+            const key = document.getElementById('local-storage-key').value;
+            const value = document.getElementById('local-storage-value').value;
+            const result = STORAGE.webStorage.setLocal(key, value);
+            document.getElementById('local-storage-result').textContent = 
+                result ? '設置成功' : '設置失敗';
+        });
+
+        document.getElementById('local-storage-get').addEventListener('click', async () => {
+            const key = document.getElementById('local-storage-key').value;
+            const value = STORAGE.webStorage.getLocal(key);
+            document.getElementById('local-storage-result').textContent = 
+                `獲取結果: ${JSON.stringify(value)}`;
+        });
+
+        document.getElementById('local-storage-remove').addEventListener('click', async () => {
+            const key = document.getElementById('local-storage-key').value;
+            const result = STORAGE.webStorage.removeLocal(key);
+            document.getElementById('local-storage-result').textContent = 
+                result ? '移除成功' : '移除失敗';
+        });
+
+        // IndexedDB 測試
+        document.getElementById('indexeddb-add').addEventListener('click', async () => {
+            const store = document.getElementById('indexeddb-store').value;
+            const key = document.getElementById('indexeddb-key').value;
+            const value = document.getElementById('indexeddb-value').value;
+            try {
+                await STORAGE.indexedDB.add(store, { id: key, data: value });
+                document.getElementById('indexeddb-result').textContent = '添加成功';
+            } catch (error) {
+                document.getElementById('indexeddb-result').textContent = `添加失敗: ${error.message}`;
+            }
+        });
+
+        document.getElementById('indexeddb-get').addEventListener('click', async () => {
+            const store = document.getElementById('indexeddb-store').value;
+            const key = document.getElementById('indexeddb-key').value;
+            try {
+                const result = await STORAGE.indexedDB.get(store, key);
+                document.getElementById('indexeddb-result').textContent = 
+                    `獲取結果: ${JSON.stringify(result)}`;
+            } catch (error) {
+                document.getElementById('indexeddb-result').textContent = `獲取失敗: ${error.message}`;
+            }
+        });
+
+        document.getElementById('indexeddb-get-all').addEventListener('click', async () => {
+            const store = document.getElementById('indexeddb-store').value;
+            try {
+                const result = await STORAGE.indexedDB.getAll(store);
+                document.getElementById('indexeddb-result').textContent = 
+                    `獲取結果: ${JSON.stringify(result)}`;
+            } catch (error) {
+                document.getElementById('indexeddb-result').textContent = `獲取失敗: ${error.message}`;
+            }
+        });
+
+        document.getElementById('indexeddb-delete').addEventListener('click', async () => {
+            const store = document.getElementById('indexeddb-store').value;
+            const key = document.getElementById('indexeddb-key').value;
+            try {
+                await STORAGE.indexedDB.delete(store, key);
+                document.getElementById('indexeddb-result').textContent = '刪除成功';
+            } catch (error) {
+                document.getElementById('indexeddb-result').textContent = `刪除失敗: ${error.message}`;
+            }
+        });
+
+        // Capacitor Storage 測試
+        document.getElementById('capacitor-set').addEventListener('click', async () => {
+            const key = document.getElementById('capacitor-key').value;
+            const value = document.getElementById('capacitor-value').value;
+            const result = await STORAGE.capacitor.set(key, value);
+            document.getElementById('capacitor-result').textContent = 
+                result ? '設置成功' : '設置失敗';
+        });
+
+        document.getElementById('capacitor-get').addEventListener('click', async () => {
+            const key = document.getElementById('capacitor-key').value;
+            const value = await STORAGE.capacitor.get(key);
+            document.getElementById('capacitor-result').textContent = 
+                `獲取結果: ${JSON.stringify(value)}`;
+        });
+
+        document.getElementById('capacitor-remove').addEventListener('click', async () => {
+            const key = document.getElementById('capacitor-key').value;
+            const result = await STORAGE.capacitor.remove(key);
+            document.getElementById('capacitor-result').textContent = 
+                result ? '移除成功' : '移除失敗';
+        });
+
+        // SQLite 測試
+        document.getElementById('sqlite-insert').addEventListener('click', async () => {
+            const table = document.getElementById('sqlite-table').value;
+            const id = document.getElementById('sqlite-id').value;
+            const username = document.getElementById('sqlite-username').value;
+            const content = document.getElementById('sqlite-content').value;
+            
+            let sql, params;
+            if (table === 'users') {
+                sql = 'INSERT INTO users (id, username, created_at) VALUES (?, ?, ?)';
+                params = [id, username, Date.now()];
+            } else {
+                sql = 'INSERT INTO posts (id, user_id, content, created_at) VALUES (?, ?, ?, ?)';
+                params = [id, '1', content, Date.now()];
+            }
+
+            try {
+                await STORAGE.sqlite.execute(sql, params);
+                document.getElementById('sqlite-result').textContent = '插入成功';
+            } catch (error) {
+                document.getElementById('sqlite-result').textContent = `插入失敗: ${error.message}`;
+            }
+        });
+
+        document.getElementById('sqlite-select').addEventListener('click', async () => {
+            const table = document.getElementById('sqlite-table').value;
+            const sql = `SELECT * FROM ${table}`;
+            try {
+                const result = await STORAGE.sqlite.query(sql);
+                document.getElementById('sqlite-result').textContent = 
+                    `查詢結果: ${JSON.stringify(result)}`;
+            } catch (error) {
+                document.getElementById('sqlite-result').textContent = `查詢失敗: ${error.message}`;
+            }
+        });
+
+        document.getElementById('sqlite-delete').addEventListener('click', async () => {
+            const table = document.getElementById('sqlite-table').value;
+            const id = document.getElementById('sqlite-id').value;
+            const sql = `DELETE FROM ${table} WHERE id = ?`;
+            try {
+                await STORAGE.sqlite.execute(sql, [id]);
+                document.getElementById('sqlite-result').textContent = '刪除成功';
+            } catch (error) {
+                document.getElementById('sqlite-result').textContent = `刪除失敗: ${error.message}`;
+            }
+        });
+
+        // 檔案系統測試
+        document.getElementById('file-write').addEventListener('click', async () => {
+            const path = document.getElementById('file-path').value;
+            const content = document.getElementById('file-content').value;
+            const result = await STORAGE.filesystem.writeFile(path, content);
+            document.getElementById('file-result').textContent = 
+                result ? '寫入成功' : '寫入失敗';
+        });
+
+        document.getElementById('file-read').addEventListener('click', async () => {
+            const path = document.getElementById('file-path').value;
+            const content = await STORAGE.filesystem.readFile(path);
+            document.getElementById('file-result').textContent = 
+                `讀取結果: ${content}`;
+        });
+
+        document.getElementById('file-delete').addEventListener('click', async () => {
+            const path = document.getElementById('file-path').value;
+            const result = await STORAGE.filesystem.deleteFile(path);
+            document.getElementById('file-result').textContent = 
+                result ? '刪除成功' : '刪除失敗';
+        });
+    </script>
+</body>
+</html> 

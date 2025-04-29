@@ -164,6 +164,16 @@ app.post('/api/follows', authenticateToken, (req, res) => {
     );
 });
 
+// 主頁路由
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+// 存儲測試頁面路由
+app.get('/storage-test', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'storage-test.html'));
+});
+
 // 錯誤處理中間件
 app.use((err, req, res, next) => {
     console.error(err.stack);
@@ -178,4 +188,5 @@ app.use((req, res) => {
 // 啟動伺服器
 app.listen(port, () => {
     console.log(`伺服器運行在 http://localhost:${port}`);
+    console.log(`存儲測試頁面: http://localhost:${port}/storage-test`);
 }); 
