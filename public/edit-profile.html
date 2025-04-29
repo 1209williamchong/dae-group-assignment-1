@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>編輯個人檔案 - fresh</title>
+    <link rel="stylesheet" href="styles/main.css">
+    <link rel="stylesheet" href="styles/edit-profile.css">
+    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+</head>
+<body>
+    <nav class="nav">
+        <div class="nav-left">
+            <a href="/" class="logo">fresh</a>
+        </div>
+        <div class="nav-right">
+            <a href="/chat.html" class="nav-link">
+                <ion-icon name="chatbubbles-outline"></ion-icon>
+                <span>聊天室</span>
+            </a>
+            <a href="/profile.html" class="nav-link">
+                <ion-icon name="person-outline"></ion-icon>
+                <span>個人檔案</span>
+            </a>
+            <button id="logout-btn" class="nav-link">
+                <ion-icon name="log-out-outline"></ion-icon>
+                <span>登出</span>
+            </button>
+        </div>
+    </nav>
+
+    <div class="edit-profile-container">
+        <div class="edit-profile-header">
+            <h1>編輯個人檔案</h1>
+            <a href="/profile.html" class="back-btn">
+                <ion-icon name="arrow-back-outline"></ion-icon>
+                <span>返回</span>
+            </a>
+        </div>
+
+        <form id="editProfileForm" class="edit-profile-form">
+            <div class="form-section">
+                <h2>基本資料</h2>
+                <div class="form-group">
+                    <label for="username">用戶名稱</label>
+                    <input type="text" id="username" name="username" required>
+                </div>
+                <div class="form-group">
+                    <label for="email">電子郵件</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="bio">個人簡介</label>
+                    <textarea id="bio" name="bio" rows="4"></textarea>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h2>頭像</h2>
+                <div class="avatar-upload">
+                    <div class="avatar-preview">
+                        <img src="https://via.placeholder.com/200" alt="頭像預覽" id="avatar-preview">
+                    </div>
+                    <div class="upload-actions">
+                        <input type="file" id="avatar" name="avatar" accept="image/*" hidden>
+                        <button type="button" class="upload-btn" id="upload-btn">選擇圖片</button>
+                        <button type="button" class="remove-btn" id="remove-btn">移除</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h2>隱私設置</h2>
+                <div class="form-group">
+                    <label for="post-visibility">貼文可見性</label>
+                    <select id="post-visibility" name="post-visibility">
+                        <option value="public">公開</option>
+                        <option value="private">私人</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="profile-visibility">個人檔案可見性</label>
+                    <select id="profile-visibility" name="profile-visibility">
+                        <option value="public">公開</option>
+                        <option value="private">私人</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h2>通知設置</h2>
+                <div class="toggle-group">
+                    <label>新追蹤者通知</label>
+                    <div class="toggle-switch">
+                        <input type="checkbox" id="follower-notification" checked>
+                        <label for="follower-notification"></label>
+                    </div>
+                </div>
+                <div class="toggle-group">
+                    <label>留言通知</label>
+                    <div class="toggle-switch">
+                        <input type="checkbox" id="comment-notification" checked>
+                        <label for="comment-notification"></label>
+                    </div>
+                </div>
+                <div class="toggle-group">
+                    <label>按讚通知</label>
+                    <div class="toggle-switch">
+                        <input type="checkbox" id="like-notification" checked>
+                        <label for="like-notification"></label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button type="button" class="cancel-btn">取消</button>
+                <button type="submit" class="save-btn">儲存變更</button>
+            </div>
+        </form>
+    </div>
+
+    <script src="src/main.js"></script>
+    <script src="src/edit-profile.js"></script>
+</body>
+</html> 

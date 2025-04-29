@@ -327,7 +327,7 @@
 }
 
 .close-modal:hover {
-    color: #ffffff;
+    color: #ff6b00;
 }
 
 .close-modal ion-icon {
@@ -361,7 +361,7 @@
 .form-group input:focus,
 .form-group textarea:focus {
     outline: none;
-    border-color: #bb86fc;
+    border-color: #ff6b00;
 }
 
 .avatar-upload {
@@ -397,6 +397,7 @@
 
 .upload-btn:hover {
     background-color: #3d3d3d;
+    color: #ff6b00;
 }
 
 .form-actions {
@@ -426,13 +427,13 @@
 }
 
 .save-btn {
-    background-color: #bb86fc;
+    background-color: #ff6b00;
     border: none;
-    color: #ffffff;
+    color: #000000;
 }
 
 .save-btn:hover {
-    background-color: #9c64d4;
+    background-color: #ff8533;
 }
 
 /* 響應式設計 */

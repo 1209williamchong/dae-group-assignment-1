@@ -120,6 +120,100 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 載入用戶資料
     loadUserProfile();
+
+    // 打開設置面板
+    if (settingsBtn) {
+        settingsBtn.addEventListener('click', () => {
+            console.log('Settings button clicked');
+            settingsPanel.classList.add('active');
+        });
+    }
+
+    // 關閉設置面板
+    if (closeSettings) {
+        closeSettings.addEventListener('click', () => {
+            settingsPanel.classList.remove('active');
+        });
+    }
+
+    // 點擊設置面板外部關閉
+    document.addEventListener('click', (e) => {
+        if (settingsPanel.classList.contains('active') && 
+            !settingsPanel.contains(e.target) && 
+            e.target !== settingsBtn) {
+            settingsPanel.classList.remove('active');
+        }
+    });
+
+    // 主題切換
+    if (themeOptions) {
+        themeOptions.forEach(option => {
+            option.addEventListener('click', () => {
+                themeOptions.forEach(opt => opt.classList.remove('active'));
+                option.classList.add('active');
+                const theme = option.dataset.theme;
+                document.body.className = theme;
+                localStorage.setItem('theme', theme);
+            });
+        });
+    }
+
+    // 載入保存的主題
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme) {
+        document.body.className = savedTheme;
+        themeOptions.forEach(option => {
+            if (option.dataset.theme === savedTheme) {
+                option.classList.add('active');
+            }
+        });
+    }
+
+    // 刪除帳號確認
+    if (deleteAccountBtn) {
+        deleteAccountBtn.addEventListener('click', () => {
+            if (confirm('確定要刪除帳號嗎？此操作無法復原。')) {
+                // 這裡添加刪除帳號的 API 調用
+                console.log('刪除帳號');
+            }
+        });
+    }
+
+    // 切換通知設置
+    const notificationToggle = document.getElementById('notifications');
+    if (notificationToggle) {
+        notificationToggle.addEventListener('change', (e) => {
+            // 這裡添加通知設置的 API 調用
+            console.log('通知設置已更改:', e.target.checked);
+        });
+    }
+
+    // 貼文可見性設置
+    const postVisibility = document.querySelector('.settings-select');
+    if (postVisibility) {
+        postVisibility.addEventListener('change', (e) => {
+            // 這裡添加貼文可見性設置的 API 調用
+            console.log('貼文可見性已更改:', e.target.value);
+        });
+    }
+
+    // 修改密碼
+    const changePasswordBtn = document.querySelector('.settings-action-btn');
+    if (changePasswordBtn) {
+        changePasswordBtn.addEventListener('click', () => {
+            // 這裡添加修改密碼的邏輯
+            console.log('修改密碼');
+        });
+    }
+
+    // 修改電子郵件
+    const changeEmailBtn = document.querySelectorAll('.settings-action-btn')[1];
+    if (changeEmailBtn) {
+        changeEmailBtn.addEventListener('click', () => {
+            // 這裡添加修改電子郵件的邏輯
+            console.log('修改電子郵件');
+        });
+    }
 });
 
 // API 函數
@@ -205,72 +299,4 @@ async function loadUserProfile() {
         console.error('載入個人資料失敗:', error);
         alert('載入個人資料失敗，請稍後再試');
     }
-}
-
-// 打開設置面板
-settingsBtn.addEventListener('click', () => {
-    settingsPanel.classList.add('active');
-});
-
-// 關閉設置面板
-closeSettings.addEventListener('click', () => {
-    settingsPanel.classList.remove('active');
-});
-
-// 主題切換
-themeOptions.forEach(option => {
-    option.addEventListener('click', () => {
-        themeOptions.forEach(opt => opt.classList.remove('active'));
-        option.classList.add('active');
-        const theme = option.dataset.theme;
-        document.body.className = theme;
-        localStorage.setItem('theme', theme);
-    });
-});
-
-// 載入保存的主題
-const savedTheme = localStorage.getItem('theme');
-if (savedTheme) {
-    document.body.className = savedTheme;
-    themeOptions.forEach(option => {
-        if (option.dataset.theme === savedTheme) {
-            option.classList.add('active');
-        }
-    });
-}
-
-// 刪除帳號確認
-deleteAccountBtn.addEventListener('click', () => {
-    if (confirm('確定要刪除帳號嗎？此操作無法復原。')) {
-        // 這裡添加刪除帳號的 API 調用
-        console.log('刪除帳號');
-    }
-});
-
-// 切換通知設置
-const notificationToggle = document.getElementById('notifications');
-notificationToggle.addEventListener('change', (e) => {
-    // 這裡添加通知設置的 API 調用
-    console.log('通知設置已更改:', e.target.checked);
-});
-
-// 貼文可見性設置
-const postVisibility = document.querySelector('.settings-select');
-postVisibility.addEventListener('change', (e) => {
-    // 這裡添加貼文可見性設置的 API 調用
-    console.log('貼文可見性已更改:', e.target.value);
-});
-
-// 修改密碼
-const changePasswordBtn = document.querySelector('.settings-action-btn');
-changePasswordBtn.addEventListener('click', () => {
-    // 這裡添加修改密碼的邏輯
-    console.log('修改密碼');
-});
-
-// 修改電子郵件
-const changeEmailBtn = document.querySelectorAll('.settings-action-btn')[1];
-changeEmailBtn.addEventListener('click', () => {
-    // 這裡添加修改電子郵件的邏輯
-    console.log('修改電子郵件');
-}); 
+} 
