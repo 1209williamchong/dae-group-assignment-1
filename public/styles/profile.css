@@ -86,9 +86,100 @@
     font-size: 0.9rem;
 }
 
+/* 個人簡介區域 */
+.profile-bio {
+    margin-top: 20px;
+    padding: 20px;
+    background-color: #1e1e1e;
+    border-radius: 15px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    min-height: 150px;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
 .profile-bio p {
     color: #ffffff;
-    line-height: 1.5;
+    line-height: 1.6;
+    font-size: 1rem;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
+/* 編輯按鈕 */
+.edit-button {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: none;
+    border: none;
+    color: #666;
+    cursor: pointer;
+    font-size: 1.2rem;
+    transition: all 0.3s ease;
+}
+
+.edit-button:hover {
+    color: #ff6b00;
+    transform: scale(1.1);
+}
+
+/* 編輯模式 */
+.bio-edit {
+    display: none;
+    margin-top: 10px;
+}
+
+.bio-edit textarea {
+    width: 100%;
+    min-height: 150px;
+    padding: 15px;
+    border: 1px solid #333;
+    border-radius: 10px;
+    background-color: #2d2d2d;
+    color: #ffffff;
+    font-size: 1rem;
+    resize: vertical;
+    margin-bottom: 10px;
+}
+
+.bio-edit textarea:focus {
+    outline: none;
+    border-color: #ff6b00;
+    box-shadow: 0 0 0 2px rgba(255, 107, 0, 0.1);
+}
+
+.bio-edit-buttons {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+}
+
+.bio-edit-buttons button {
+    padding: 8px 20px;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.save-button {
+    background-color: #ff6b00;
+    color: #000000;
+}
+
+.save-button:hover {
+    background-color: #ff8533;
+}
+
+.cancel-button {
+    background-color: #2d2d2d;
+    color: #ffffff;
+}
+
+.cancel-button:hover {
+    background-color: #3d3d3d;
 }
 
 /* 貼文網格 */
@@ -371,5 +462,14 @@
     .modal-content {
         margin: 1rem;
         padding: 1.5rem;
+    }
+
+    .profile-bio {
+        min-height: 120px;
+        max-height: 250px;
+    }
+    
+    .bio-edit textarea {
+        min-height: 120px;
     }
 } 
