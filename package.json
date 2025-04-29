@@ -1,7 +1,7 @@
 {
   "name": "dae-group-assignment-1",
   "version": "1.0.0",
-  "description": "",
+  "description": "團體項目目標是開發一個以圖片為主的社交平台，類似Threads但更專注於圖片分享，適用於特定社群（如美甲設計、時尚穿搭、畫作展示）。功能包括發佈貼文（含圖片）、留言、按讚，使用SQLite儲存貼文、留言和按讚數據，並實現關注/好友系統。",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -11,5 +11,14 @@
   "license": "ISC",
   "devDependencies": {
     "typescript": "^5.8.3"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/1209williamchong/dae-group-assignment-1.git"
+  },
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/1209williamchong/dae-group-assignment-1/issues"
+  },
+  "homepage": "https://github.com/1209williamchong/dae-group-assignment-1#readme"
 }

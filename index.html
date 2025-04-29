@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>圖片社交平台</title>
+    <link rel="stylesheet" href="styles/main.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="logo">圖片社交平台</div>
+            <div class="nav-links">
+                <a href="#" class="active">首頁</a>
+                <a href="#">探索</a>
+                <a href="#">通知</a>
+                <a href="#">個人檔案</a>
+            </div>
+            <div class="user-actions">
+                <button class="post-btn">發布新貼文</button>
+                <div class="user-profile">
+                    <img src="images/default-avatar.png" alt="用戶頭像">
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <div class="feed-container">
+            <!-- 貼文範例 -->
+            <article class="post">
+                <div class="post-header">
+                    <img src="images/default-avatar.png" alt="用戶頭像" class="post-avatar">
+                    <div class="post-info">
+                        <h3>用戶名稱</h3>
+                        <span class="post-time">2小時前</span>
+                    </div>
+                </div>
+                <div class="post-content">
+                    <p>這是貼文內容...</p>
+                    <img src="images/post-image.jpg" alt="貼文圖片" class="post-image">
+                </div>
+                <div class="post-actions">
+                    <button class="like-btn">❤️ 讚</button>
+                    <button class="comment-btn">💬 留言</button>
+                    <button class="share-btn">↪️ 分享</button>
+                </div>
+            </article>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 圖片社交平台. 版權所有.</p>
+    </footer>
+
+    <script src="scripts/main.js"></script>
+</body>
+</html> 
