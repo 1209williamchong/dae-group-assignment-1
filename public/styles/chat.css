@@ -1,0 +1,256 @@
+/* 全局樣式 */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f0f2f5;
+    height: 100vh;
+}
+
+/* 聊天容器 */
+.chat-container {
+    display: flex;
+    height: 100vh;
+    max-width: 1400px;
+    margin: 0 auto;
+    background-color: #fff;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+/* 側邊欄 */
+.sidebar {
+    width: 350px;
+    border-right: 1px solid #e9ecef;
+    display: flex;
+    flex-direction: column;
+}
+
+.sidebar-header {
+    padding: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.sidebar-header h2 {
+    font-size: 1.5rem;
+    color: #1a1a1a;
+}
+
+.new-chat-btn {
+    background-color: #1877f2;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 20px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.new-chat-btn:hover {
+    background-color: #166fe5;
+}
+
+.search-box {
+    padding: 10px;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.search-box input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #e9ecef;
+    border-radius: 20px;
+    outline: none;
+}
+
+.chat-list {
+    flex: 1;
+    overflow-y: auto;
+}
+
+/* 聊天項目 */
+.chat-item {
+    display: flex;
+    align-items: center;
+    padding: 15px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.chat-item:hover {
+    background-color: #f5f5f5;
+}
+
+.chat-item.active {
+    background-color: #e9ecef;
+}
+
+.chat-item img {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    margin-right: 15px;
+}
+
+.chat-item-info {
+    flex: 1;
+}
+
+.chat-item-info h3 {
+    font-size: 1rem;
+    margin-bottom: 5px;
+}
+
+.chat-item-info p {
+    color: #666;
+    font-size: 0.9rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* 主聊天區域 */
+.main-chat {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.chat-header {
+    padding: 15px 20px;
+    border-bottom: 1px solid #e9ecef;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.chat-info {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.chat-info img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+}
+
+.chat-info h3 {
+    font-size: 1.1rem;
+}
+
+.chat-info span {
+    color: #666;
+    font-size: 0.9rem;
+}
+
+.chat-actions {
+    display: flex;
+    gap: 15px;
+}
+
+.chat-actions button {
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    color: #666;
+    cursor: pointer;
+}
+
+.chat-actions button:hover {
+    color: #1877f2;
+}
+
+/* 訊息容器 */
+.messages-container {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.message {
+    max-width: 70%;
+    padding: 10px 15px;
+    border-radius: 20px;
+    margin-bottom: 10px;
+}
+
+.message.sent {
+    align-self: flex-end;
+    background-color: #1877f2;
+    color: white;
+}
+
+.message.received {
+    align-self: flex-start;
+    background-color: #e9ecef;
+    color: #1a1a1a;
+}
+
+.message-time {
+    font-size: 0.8rem;
+    color: #666;
+    margin-top: 5px;
+    text-align: right;
+}
+
+/* 訊息輸入區域 */
+.message-input {
+    padding: 15px;
+    border-top: 1px solid #e9ecef;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.message-input input {
+    flex: 1;
+    padding: 10px 15px;
+    border: 1px solid #e9ecef;
+    border-radius: 20px;
+    outline: none;
+}
+
+.message-input button {
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    color: #666;
+    cursor: pointer;
+}
+
+.message-input button:hover {
+    color: #1877f2;
+}
+
+/* 響應式設計 */
+@media (max-width: 768px) {
+    .sidebar {
+        width: 100%;
+        display: none;
+    }
+
+    .sidebar.active {
+        display: block;
+    }
+
+    .main-chat {
+        display: none;
+    }
+
+    .main-chat.active {
+        display: flex;
+    }
+} 

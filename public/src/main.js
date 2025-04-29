@@ -6,6 +6,16 @@ const postForm = document.getElementById('post-form');
 const postContent = document.getElementById('post-content');
 const postsContainer = document.getElementById('posts-container');
 const logoutBtn = document.getElementById('logout-btn');
+const searchInput = document.getElementById('search-input');
+const searchForm = document.getElementById('search-form');
+const showBookmarksBtn = document.getElementById('show-bookmarks-btn');
+
+// 狀態變量
+let currentPage = 1;
+let isLoading = false;
+let hasMorePosts = true;
+let currentSearchQuery = '';
+let showOnlyBookmarks = false;
 
 // 初始化
 async function init() {
@@ -20,12 +30,109 @@ async function init() {
     // 事件監聽器
     postForm.addEventListener('submit', handlePostSubmit);
     logoutBtn.addEventListener('click', logout);
+    searchForm.addEventListener('submit', handleSearch);
+    searchInput.addEventListener('input', handleSearchInput);
+    showBookmarksBtn.addEventListener('click', toggleBookmarksView);
+    
+    // 添加滾動事件監聽器
+    window.addEventListener('scroll', handleScroll);
+}
+
+// 切換收藏視圖
+async function toggleBookmarksView() {
+    showOnlyBookmarks = !showOnlyBookmarks;
+    showBookmarksBtn.classList.toggle('active');
+    currentPage = 1;
+    hasMorePosts = true;
+    loadPosts();
+}
+
+// 處理搜尋輸入
+function handleSearchInput(e) {
+    const query = e.target.value.trim();
+    if (query === '') {
+        // 如果搜尋框為空，重置為顯示所有貼文
+        currentSearchQuery = '';
+        currentPage = 1;
+        loadPosts();
+    }
+}
+
+// 處理搜尋提交
+async function handleSearch(e) {
+    e.preventDefault();
+    const query = searchInput.value.trim();
+    if (query === currentSearchQuery) return;
+    
+    currentSearchQuery = query;
+    currentPage = 1;
+    hasMorePosts = true;
+    
+    try {
+        const posts = await ajax.posts.search(query, currentPage);
+        hasMorePosts = posts.length > 0;
+        renderPosts(posts);
+    } catch (error) {
+        console.error('搜尋貼文失敗:', error);
+    }
+}
+
+// 處理滾動事件
+function handleScroll() {
+    if (isLoading || !hasMorePosts) return;
+    
+    const scrollHeight = document.documentElement.scrollHeight;
+    const scrollTop = document.documentElement.scrollTop;
+    const clientHeight = document.documentElement.clientHeight;
+    
+    // 當滾動到距離底部 200px 時載入更多貼文
+    if (scrollHeight - scrollTop - clientHeight < 200) {
+        loadMorePosts();
+    }
+}
+
+// 載入更多貼文
+async function loadMorePosts() {
+    if (isLoading || !hasMorePosts) return;
+    
+    isLoading = true;
+    currentPage++;
+    
+    try {
+        let posts;
+        if (showOnlyBookmarks) {
+            posts = await ajax.bookmarks.getAll(currentPage);
+        } else if (currentSearchQuery) {
+            posts = await ajax.posts.search(currentSearchQuery, currentPage);
+        } else {
+            posts = await ajax.posts.getAll(currentPage);
+        }
+        
+        if (posts.length === 0) {
+            hasMorePosts = false;
+            return;
+        }
+        renderPosts(posts, true);
+    } catch (error) {
+        console.error('載入更多貼文失敗:', error);
+        currentPage--;
+    } finally {
+        isLoading = false;
+    }
 }
 
 // 載入貼文
 async function loadPosts() {
     try {
-        const posts = await ajax.posts.getAll();
+        let posts;
+        if (showOnlyBookmarks) {
+            posts = await ajax.bookmarks.getAll(currentPage);
+        } else if (currentSearchQuery) {
+            posts = await ajax.posts.search(currentSearchQuery, currentPage);
+        } else {
+            posts = await ajax.posts.getAll(currentPage);
+        }
+        hasMorePosts = posts.length > 0;
         renderPosts(posts);
     } catch (error) {
         console.error('載入貼文失敗:', error);
@@ -33,8 +140,11 @@ async function loadPosts() {
 }
 
 // 渲染貼文
-function renderPosts(posts) {
-    postsContainer.innerHTML = '';
+function renderPosts(posts, append = false) {
+    if (!append) {
+        postsContainer.innerHTML = '';
+    }
+    
     posts.forEach(post => {
         const postElement = createPostElement(post);
         postsContainer.appendChild(postElement);

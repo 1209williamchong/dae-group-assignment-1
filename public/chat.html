@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>聊天室 - fresh</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="/styles/chat.css">
+</head>
+<body>
+    <div class="chat-container">
+        <!-- 側邊欄 -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h2>聊天室</h2>
+                <button id="new-chat-btn" class="new-chat-btn">
+                    <i class="fas fa-plus"></i> 新對話
+                </button>
+            </div>
+            <div class="search-box">
+                <input type="text" id="chat-search" placeholder="搜尋對話...">
+            </div>
+            <div class="chat-list" id="chat-list">
+                <!-- 聊天列表將由 JavaScript 動態生成 -->
+            </div>
+        </div>
+
+        <!-- 主聊天區域 -->
+        <div class="main-chat">
+            <div class="chat-header">
+                <div class="chat-info">
+                    <img id="chat-avatar" src="" alt="用戶頭像">
+                    <div>
+                        <h3 id="chat-name">選擇對話</h3>
+                        <span id="chat-status">離線</span>
+                    </div>
+                </div>
+                <div class="chat-actions">
+                    <button id="video-call-btn"><i class="fas fa-video"></i></button>
+                    <button id="voice-call-btn"><i class="fas fa-phone"></i></button>
+                    <button id="more-options-btn"><i class="fas fa-ellipsis-v"></i></button>
+                </div>
+            </div>
+
+            <div class="messages-container" id="messages-container">
+                <!-- 訊息將由 JavaScript 動態生成 -->
+            </div>
+
+            <div class="message-input">
+                <button id="attach-file-btn"><i class="fas fa-paperclip"></i></button>
+                <input type="text" id="message-input" placeholder="輸入訊息...">
+                <button id="send-message-btn"><i class="fas fa-paper-plane"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="/src/chat.js"></script>
+</body>
+</html> 
