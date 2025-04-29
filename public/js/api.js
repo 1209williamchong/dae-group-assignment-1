@@ -29,33 +29,54 @@ class ApiService {
         }
     }
 
-    // 用戶相關 API
-    async login(username, password) {
-        return this.request('/auth/login', {
+    // 認證相關 API
+    async signup(username, password) {
+        const response = await this.request('/auth/signup', {
             method: 'POST',
             body: JSON.stringify({ username, password })
         });
+        this.token = response.token;
+        localStorage.setItem('token', response.token);
+        return response;
     }
 
-    async register(userData) {
-        return this.request('/auth/register', {
+    async login(username, password) {
+        const response = await this.request('/auth/login', {
             method: 'POST',
-            body: JSON.stringify(userData)
+            body: JSON.stringify({ username, password })
         });
+        this.token = response.token;
+        localStorage.setItem('token', response.token);
+        return response;
     }
 
-    async getProfile() {
-        return this.request('/users/profile');
+    async checkAuth() {
+        return this.request('/auth/check');
     }
 
-    async updateProfile(profileData) {
-        return this.request('/users/profile', {
-            method: 'PUT',
-            body: JSON.stringify(profileData)
-        });
+    // 通用列表 API
+    async getList(resource, params = {}) {
+        const queryParams = new URLSearchParams();
+        
+        // 添加可選參數
+        if (params.page) queryParams.append('page', params.page);
+        if (params.limit) queryParams.append('limit', params.limit);
+        if (params.search) queryParams.append('search', params.search);
+        if (params.category) queryParams.append('category', params.category);
+        if (params.sort) queryParams.append('sort', params.sort);
+        if (params.order) queryParams.append('order', params.order);
+
+        const queryString = queryParams.toString();
+        const url = `/${resource}${queryString ? `?${queryString}` : ''}`;
+        
+        return this.request(url);
     }
 
     // 貼文相關 API
+    async getPosts(params = {}) {
+        return this.getList('posts', params);
+    }
+
     async createPost(content, image = null) {
         const formData = new FormData();
         formData.append('content', content);
@@ -70,10 +91,6 @@ class ApiService {
                 'Authorization': `Bearer ${this.token}`
             }
         });
-    }
-
-    async getPosts() {
-        return this.request('/posts');
     }
 
     async getPostById(id) {
@@ -93,6 +110,10 @@ class ApiService {
     }
 
     // 評論相關 API
+    async getComments(postId, params = {}) {
+        return this.getList(`posts/${postId}/comments`, params);
+    }
+
     async addComment(postId, content) {
         return this.request(`/posts/${postId}/comments`, {
             method: 'POST',
@@ -100,11 +121,27 @@ class ApiService {
         });
     }
 
-    async getComments(postId) {
-        return this.request(`/posts/${postId}/comments`);
+    // 用戶相關 API
+    async getProfile() {
+        return this.request('/users/profile');
+    }
+
+    async updateProfile(profileData) {
+        return this.request('/users/profile', {
+            method: 'PUT',
+            body: JSON.stringify(profileData)
+        });
     }
 
     // 追蹤相關 API
+    async getFollowers(params = {}) {
+        return this.getList('users/followers', params);
+    }
+
+    async getFollowing(params = {}) {
+        return this.getList('users/following', params);
+    }
+
     async followUser(userId) {
         return this.request(`/users/${userId}/follow`, {
             method: 'POST'
@@ -115,14 +152,6 @@ class ApiService {
         return this.request(`/users/${userId}/unfollow`, {
             method: 'POST'
         });
-    }
-
-    async getFollowers() {
-        return this.request('/users/followers');
-    }
-
-    async getFollowing() {
-        return this.request('/users/following');
     }
 }
 
