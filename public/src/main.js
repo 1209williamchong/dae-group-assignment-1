@@ -1,4 +1,4 @@
-import { ajax } from './services/ajax.js';
+import { ajax, postsApi } from './services/ajax.js';
 import { isLoggedIn, logout } from './services/auth.js';
 
 // DOM 元素

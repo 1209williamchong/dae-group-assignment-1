@@ -299,4 +299,72 @@ async function loadUserProfile() {
         console.error('載入個人資料失敗:', error);
         alert('載入個人資料失敗，請稍後再試');
     }
-} 
+}
+
+// 處理編輯個人檔案按鈕
+function openEditProfileModal() {
+    const modal = document.getElementById('editProfileModal');
+    modal.style.display = 'flex';
+}
+
+// 處理設置按鈕
+function openSettingsPanel() {
+    const settingsPanel = document.querySelector('.settings-panel');
+    settingsPanel.classList.add('active');
+}
+
+// 處理貼文點擊
+function openPost(postId) {
+    window.location.href = `/post.html?id=${postId}`;
+}
+
+// 處理更改密碼
+function changePassword() {
+    window.location.href = '/change-password.html';
+}
+
+// 處理更改電子郵件
+function changeEmail() {
+    window.location.href = '/change-email.html';
+}
+
+// 處理主題切換
+function changeTheme(theme) {
+    document.body.setAttribute('data-theme', theme);
+    localStorage.setItem('theme', theme);
+}
+
+// 處理刪除帳號
+function deleteAccount() {
+    if (confirm('確定要刪除帳號嗎？此操作無法復原。')) {
+        // TODO: 實作刪除帳號的 API 呼叫
+        console.log('刪除帳號');
+    }
+}
+
+// 關閉按鈕的事件監聽器
+document.addEventListener('DOMContentLoaded', () => {
+    // 關閉編輯個人檔案彈出視窗
+    const closeModalBtn = document.querySelector('.close-modal');
+    if (closeModalBtn) {
+        closeModalBtn.addEventListener('click', () => {
+            const modal = document.getElementById('editProfileModal');
+            modal.style.display = 'none';
+        });
+    }
+
+    // 關閉設置面板
+    const closeSettingsBtn = document.querySelector('.close-settings');
+    if (closeSettingsBtn) {
+        closeSettingsBtn.addEventListener('click', () => {
+            const settingsPanel = document.querySelector('.settings-panel');
+            settingsPanel.classList.remove('active');
+        });
+    }
+
+    // 載入儲存的主題
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme) {
+        document.body.setAttribute('data-theme', savedTheme);
+    }
+}); 

@@ -116,3 +116,18 @@
     height: 24px;
     fill: white;
 } 
+
+.edit-profile-btn {
+    display: inline-block; /* Or block, depending on your layout */
+    padding: 10px 20px; /* Adjust padding as needed */
+    background-color: #4CAF50; /* Example button color */
+    color: white;
+    text-decoration: none; /* Remove underline from link */
+    border: none;
+    border-radius: 5px; /* Add rounded corners */
+    cursor: pointer;
+  }
+  
+  .edit-profile-btn:hover {
+    background-color: #3e8e41; /* Darker color on hover */
+  }

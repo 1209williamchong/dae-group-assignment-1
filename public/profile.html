@@ -43,10 +43,20 @@
                 <div class="profile-info">
                     <div class="profile-name">
                         <h2 id="profile-username">用戶名稱</h2>
-                        <button class="edit-profile-btn">編輯個人檔案</button>
-                        <button class="settings-btn">
+                        <!--加入settings.html連結--> 
+                        <button class="edit-profile-btn" onclick="openEditProfileModal()">編輯個人檔案 </button>
+                        <script>
+                            function openEditProfileModal() {
+                              window.location.href = "/settings.html";
+                            }
+                            function goToSettings() {
+                              window.location.href = "/settings.html";
+                            }
+                            </script>
+                       <!--加入settings.html連結--> 
+                        <button class="settings-btn" onclick="goToSettings();">
                             <ion-icon name="settings-outline"></ion-icon>
-                        </button>
+                          </button>
                     </div>
                     <div class="profile-stats">
                         <div class="stat">
@@ -71,7 +81,7 @@
             <!-- 貼文網格 -->
             <div class="posts-grid">
                 <div class="grid-row">
-                    <div class="grid-item">
+                    <div class="grid-item" onclick="openPost(1)">
                         <img src="https://picsum.photos/seed/1/600/600" alt="貼文">
                         <div class="post-overlay">
                             <div class="post-stats">
@@ -80,7 +90,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="grid-item">
+                    <div class="grid-item" onclick="openPost(2)">
                         <img src="https://picsum.photos/seed/2/600/600" alt="貼文">
                         <div class="post-overlay">
                             <div class="post-stats">
@@ -89,7 +99,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="grid-item">
+                    <div class="grid-item" onclick="openPost(3)">
                         <img src="https://picsum.photos/seed/3/600/600" alt="貼文">
                         <div class="post-overlay">
                             <div class="post-stats">
@@ -100,7 +110,7 @@
                     </div>
                 </div>
                 <div class="grid-row">
-                    <div class="grid-item">
+                    <div class="grid-item" onclick="openPost(4)">
                         <img src="https://picsum.photos/seed/4/600/600" alt="貼文">
                         <div class="post-overlay">
                             <div class="post-stats">
@@ -109,7 +119,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="grid-item">
+                    <div class="grid-item" onclick="openPost(5)">
                         <img src="https://picsum.photos/seed/5/600/600" alt="貼文">
                         <div class="post-overlay">
                             <div class="post-stats">
@@ -118,7 +128,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="grid-item">
+                    <div class="grid-item" onclick="openPost(6)">
                         <img src="https://picsum.photos/seed/6/600/600" alt="貼文">
                         <div class="post-overlay">
                             <div class="post-stats">
@@ -181,11 +191,11 @@
                 <h4>帳號設置</h4>
                 <div class="settings-item">
                     <label>更改密碼</label>
-                    <button class="settings-action-btn">修改</button>
+                    <button class="settings-action-btn" onclick="changePassword()">修改</button>
                 </div>
                 <div class="settings-item">
                     <label>電子郵件</label>
-                    <button class="settings-action-btn">修改</button>
+                    <button class="settings-action-btn" onclick="changeEmail()">修改</button>
                 </div>
             </div>
             <div class="settings-section">
@@ -208,18 +218,18 @@
             <div class="settings-section">
                 <h4>主題設置</h4>
                 <div class="theme-options">
-                    <button class="theme-option" data-theme="dark">深色主題</button>
-                    <button class="theme-option" data-theme="light">淺色主題</button>
+                    <button class="theme-option" data-theme="dark" onclick="changeTheme('dark')">深色主題</button>
+                    <button class="theme-option" data-theme="light" onclick="changeTheme('light')">淺色主題</button>
                 </div>
             </div>
             <div class="settings-section">
                 <h4>帳號管理</h4>
-                <button class="delete-account-btn">刪除帳號</button>
+                <button class="delete-account-btn" onclick="deleteAccount()">刪除帳號</button>
             </div>
         </div>
     </div>
 
-    <script src="/src/main.js"></script>
-    <script src="/src/profile.js"></script>
+    <script type="module" src="/src/main.js"></script>
+    <script type="module" src="/src/profile.js"></script>
 </body>
 </html> 

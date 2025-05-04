@@ -118,6 +118,8 @@ export const postsApi = {
             method: 'GET'
         });
     },
+
+    searchPosts(){},
     
     // 創建新貼文
     createPost(content, image) {
