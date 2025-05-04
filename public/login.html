@@ -4,38 +4,47 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>登入 - fresh</title>
-    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="styles/main.css">
+    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
 </head>
 <body>
-    <div id="app">
-        <header>
-            <h1>fresh</h1>
-        </header>
-        
-        <main>
-            <section class="auth-section">
-                <h2>登入</h2>
-                <form id="loginForm" class="auth-form">
-                    <div class="form-group">
-                        <label for="username">用戶名稱</label>
-                        <input type="text" id="username" name="username" required>
+    <div class="login-container">
+        <div class="login-box">
+            <div class="login-header">
+                <h1>fresh</h1>
+                <p>歡迎回來</p>
+            </div>
+            
+            <form id="loginForm" class="login-form">
+                <div class="form-group">
+                    <label for="email">電子郵件</label>
+                    <div class="input-group">
+                        <ion-icon name="mail-outline"></ion-icon>
+                        <input type="email" id="email" name="email" placeholder="輸入電子郵件" required>
                     </div>
-                    <div class="form-group">
-                        <label for="password">密碼</label>
-                        <input type="password" id="password" name="password" required>
-                    </div>
-                    <button type="submit" class="auth-button">登入</button>
-                </form>
-                <p class="auth-link">
-                    還沒有帳號？<a href="/signup.html">註冊</a>
-                </p>
-            </section>
-        </main>
+                </div>
 
-        <footer>
-            <p>&copy; 2025 fresh</p>
-        </footer>
+                <div class="form-group">
+                    <label for="password">密碼</label>
+                    <div class="input-group">
+                        <ion-icon name="lock-closed-outline"></ion-icon>
+                        <input type="password" id="password" name="password" placeholder="輸入密碼" required>
+                    </div>
+                </div>
+
+                <button type="submit" class="login-btn">
+                    <span>登入</span>
+                    <ion-icon name="arrow-forward-outline"></ion-icon>
+                </button>
+            </form>
+
+            <div class="register-link">
+                還沒有帳號？ <a href="register.html">註冊</a>
+            </div>
+        </div>
     </div>
-    <script src="/js/login.js"></script>
+
+    <script src="src/login.js"></script>
 </body>
 </html> 
