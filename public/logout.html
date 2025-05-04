@@ -4,28 +4,76 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>登出 - fresh</title>
-    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/styles/main.css">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background-color: #121212;
+            color: #ffffff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .logout-container {
+            background-color: #1a1a1a;
+            padding: 40px;
+            border-radius: 8px;
+            text-align: center;
+            max-width: 400px;
+            width: 100%;
+        }
+        .logo {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #ff6b00;
+            text-decoration: none;
+            margin-bottom: 20px;
+            display: block;
+        }
+        h2 {
+            color: #ff6b00;
+            margin-bottom: 20px;
+        }
+        p {
+            color: #cccccc;
+            margin-bottom: 30px;
+        }
+        .auth-button {
+            width: 100%;
+            padding: 12px;
+            background-color: #ff6b00;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .auth-button:hover {
+            background-color: #ff8533;
+        }
+    </style>
 </head>
 <body>
-    <div id="app">
-        <header>
-            <h1>fresh</h1>
-        </header>
-
-        <main>
-            
-                <h2>登出</h2>
-                <p>確定要登出嗎？</p>
-                <form id="logoutForm" class="auth-form">
-                    <button type="submit" class="auth-button">登出</button>
-                </form>
-            </section>
-        </main>
-
-        <footer>
-            <p>&copy; 2025 fresh</p>
-        </footer>
+    <div class="logout-container">
+        <a href="/" class="logo">fresh</a>
+        <h2>登出</h2>
+        <p>確定要登出嗎？</p>
+        <button id="logoutBtn" class="auth-button">登出</button>
     </div>
-    <script src="/js/logout.js"></script>
+
+    <script>
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+            // 清除本地存儲的用戶信息
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            
+            // 跳轉到首頁
+            window.location.href = 'http://localhost:3000/index.html';
+        });
+    </script>
 </body>
 </html>

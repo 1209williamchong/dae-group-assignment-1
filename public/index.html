@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>fresh - 歡迎</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ionicons@5.5.2/dist/ionicons/ionicons.min.css">
+    <link rel="stylesheet" href="/styles/main.css">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background-color: #121212;
+            color: #ffffff;
+        }
+        .container {
+            display: flex;
+            height: 100vh;
+        }
+        .left-section {
+            flex: 1;
+            background: linear-gradient(135deg, #121212, #1a1a1a);
+            color: white;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            border-right: 1px solid #333;
+        }
+        .right-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 40px;
+            background-color: #1a1a1a;
+        }
+        .logo {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #ff6b00;
+            text-decoration: none;
+            margin-bottom: 20px;
+        }
+        .welcome-text {
+            font-size: 2em;
+            margin-bottom: 20px;
+            color: #ff6b00;
+        }
+        .description {
+            font-size: 1.2em;
+            margin-bottom: 40px;
+            max-width: 400px;
+            color: #cccccc;
+        }
+        .auth-form {
+            max-width: 400px;
+            margin: 0 auto;
+        }
+        .form-title {
+            font-size: 1.8em;
+            margin-bottom: 30px;
+            color: #ff6b00;
+        }
+        .input-group {
+            margin-bottom: 20px;
+        }
+        .input-group input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #333;
+            border-radius: 4px;
+            font-size: 1em;
+            box-sizing: border-box;
+            background-color: #2a2a2a;
+            color: #ffffff;
+        }
+        .input-group input:focus {
+            outline: none;
+            border-color: #ff6b00;
+        }
+        .input-group input::placeholder {
+            color: #666;
+        }
+        .auth-button {
+            width: 100%;
+            padding: 12px;
+            background-color: #ff6b00;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 1em;
+            cursor: pointer;
+            margin-bottom: 10px;
+            transition: background-color 0.3s;
+        }
+        .auth-button:hover {
+            background-color: #ff8533;
+        }
+        .auth-button.secondary {
+            background-color: transparent;
+            color: #ff6b00;
+            border: 1px solid #ff6b00;
+        }
+        .auth-button.secondary:hover {
+            background-color: rgba(255, 107, 0, 0.1);
+        }
+        .auth-links {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .auth-links a {
+            color: #ff6b00;
+            text-decoration: none;
+            margin: 0 10px;
+            transition: color 0.3s;
+        }
+        .auth-links a:hover {
+            color: #ff8533;
+        }
+        .feature-list {
+            margin-top: 40px;
+            text-align: left;
+        }
+        .feature-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            color: #cccccc;
+        }
+        .feature-item ion-icon {
+            margin-right: 10px;
+            font-size: 1.5em;
+            color: #ff6b00;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 左側區域 -->
+        <div class="left-section">
+            <a href="/" class="logo">fresh</a>
+            <div class="welcome-text">歡迎來到 fresh</div>
+            <div class="description">
+                一個專注於圖片分享的社交平台，讓您輕鬆分享生活點滴
+            </div>
+            <div class="feature-list">
+                <div class="feature-item">
+                    <ion-icon name="image-outline"></ion-icon>
+                    <span>分享精彩圖片</span>
+                </div>
+                <div class="feature-item">
+                    <ion-icon name="people-outline"></ion-icon>
+                    <span>與朋友互動交流</span>
+                </div>
+                <div class="feature-item">
+                    <ion-icon name="heart-outline"></ion-icon>
+                    <span>按讚評論功能</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 右側區域 -->
+        <div class="right-section">
+            <div class="auth-form">
+                <h1 class="form-title">登入</h1>
+                <div class="input-group">
+                    <input type="text" placeholder="電子郵件或手機號碼">
+                </div>
+                <div class="input-group">
+                    <input type="password" placeholder="密碼">
+                </div>
+                <button class="auth-button">登入</button>
+                <button class="auth-button secondary">使用 Microsoft 帳戶登入</button>
+                <div class="auth-links">
+                    <a href="register.html">註冊新帳戶</a>
+                    <a href="#">忘記密碼？</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
+</body>
+</html> 
