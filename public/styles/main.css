@@ -59,91 +59,46 @@ body {
     gap: 1rem;
 }
 
+.auth-buttons,
+.user-buttons {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
 .nav-link {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    padding: 0.8rem 1.2rem;
     color: #ffffff;
     text-decoration: none;
-    border-radius: 8px;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
     transition: all 0.3s ease;
-    font-weight: 500;
-    position: relative;
-    background-color: #2d2d2d;
 }
 
 .nav-link:hover {
-    background-color: #3d3d3d;
-    color: #bb86fc;
-    transform: translateY(-1px);
-}
-
-.nav-link.active {
-    background-color: #3d3d3d;
-    color: #bb86fc;
-}
-
-.nav-link.active::after {
-    content: '';
-    position: absolute;
-    bottom: -2px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 20px;
-    height: 3px;
-    background-color: #bb86fc;
-    border-radius: 3px;
+    background-color: rgba(255, 255, 255, 0.1);
 }
 
 .nav-link ion-icon {
-    font-size: 1.4rem;
-    transition: transform 0.3s ease;
-}
-
-.nav-link:hover ion-icon {
-    transform: scale(1.1);
-}
-
-.nav-link span {
-    font-size: 1rem;
-    font-weight: 500;
+    font-size: 1.2rem;
 }
 
 #logout-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font: inherit;
+    color: inherit;
+    padding: 0.5rem 1rem;
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    padding: 0.8rem 1.2rem;
-    color: #ffffff;
-    text-decoration: none;
-    border-radius: 8px;
-    transition: all 0.3s ease;
-    font-weight: 500;
-    position: relative;
-    background-color: #2d2d2d;
-    border: none;
-    cursor: pointer;
 }
 
 #logout-btn:hover {
-    background-color: #3d3d3d;
-    color: #ff4444;
-    transform: translateY(-1px);
-}
-
-#logout-btn ion-icon {
-    font-size: 1.4rem;
-    transition: transform 0.3s ease;
-}
-
-#logout-btn:hover ion-icon {
-    transform: scale(1.1);
-}
-
-#logout-btn span {
-    font-size: 1rem;
-    font-weight: 500;
+    background-color: rgba(255, 255, 255, 0.1);
 }
 
 /* 主內容區域調整 */

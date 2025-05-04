@@ -419,11 +419,39 @@ document.addEventListener('DOMContentLoaded', async () => {
     await STORAGE.init();
 });
 
+// 檢查登入狀態
+function checkAuthStatus() {
+    const token = localStorage.getItem('token');
+    const authButtons = document.getElementById('auth-buttons');
+    const userButtons = document.getElementById('user-buttons');
+
+    if (token) {
+        // 已登入
+        authButtons.style.display = 'none';
+        userButtons.style.display = 'flex';
+    } else {
+        // 未登入
+        authButtons.style.display = 'flex';
+        userButtons.style.display = 'none';
+    }
+}
+
+// 處理登出
+function handleLogout() {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    window.location.href = '/';
+}
+
 // 初始化
 async function init() {
-    if (!isLoggedIn()) {
-        window.location.href = '/login.html';
-        return;
+    // 檢查登入狀態
+    checkAuthStatus();
+
+    // 設置登出按鈕事件
+    const logoutBtn = document.getElementById('logout-btn');
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', handleLogout);
     }
 
     // 載入貼文
@@ -431,7 +459,6 @@ async function init() {
 
     // 事件監聽器
     postForm.addEventListener('submit', handlePostSubmit);
-    logoutBtn.addEventListener('click', logout);
     searchForm.addEventListener('submit', handleSearch);
     searchInput.addEventListener('input', handleSearchInput);
     showBookmarksBtn.addEventListener('click', toggleBookmarksView);

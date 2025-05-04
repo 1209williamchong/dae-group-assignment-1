@@ -17,19 +17,30 @@
                 <a href="/" class="logo">fresh</a>
             </div>
             <div class="nav-right">
-                <a href="chat.html" class="nav-link">
-                    <ion-icon name="chatbubbles-outline"></ion-icon>
-                    <span>聊天室</span>
-                </a>
-                <a href="profile.html" class="nav-link">
-                    <ion-icon name="person-outline"></ion-icon>
-                    <span>個人檔案</span>
-                </a>
-                <button id="logout-btn" class="nav-link">
-                    <ion-icon name="log-out-outline"></ion-icon>
-                    <span>登出</span>
-                    <a href="logout.html" class="nav-link"></a>
-                </button>
+                <div class="auth-buttons" id="auth-buttons">
+                    <a href="register.html" class="nav-link">
+                        <ion-icon name="person-add-outline"></ion-icon>
+                        <span>註冊</span>
+                    </a>
+                    <a href="login.html" class="nav-link">
+                        <ion-icon name="log-in-outline"></ion-icon>
+                        <span>登入</span>
+                    </a>
+                </div>
+                <div class="user-buttons" id="user-buttons" style="display: none;">
+                    <a href="chat.html" class="nav-link">
+                        <ion-icon name="chatbubbles-outline"></ion-icon>
+                        <span>聊天室</span>
+                    </a>
+                    <a href="profile.html" class="nav-link">
+                        <ion-icon name="person-outline"></ion-icon>
+                        <span>個人檔案</span>
+                    </a>
+                    <button id="logout-btn" class="nav-link">
+                        <ion-icon name="log-out-outline"></ion-icon>
+                        <span>登出</span>
+                    </button>
+                </div>
             </div>
         </nav>
 

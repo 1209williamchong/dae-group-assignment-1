@@ -2,6 +2,7 @@ const express = require('express');
 const path = require('path');
 const cors = require('cors');
 const jwt = require('jsonwebtoken');
+const bcrypt = require('bcryptjs');
 const db = require('./src/db/init');
 
 const app = express();
@@ -173,6 +174,66 @@ app.delete('/api/follow/:userId', authenticateToken, (req, res) => {
             res.json({ success: true });
         }
     );
+});
+
+// 註冊新用戶
+app.post('/api/auth/register', async (req, res) => {
+    const { username, email, password } = req.body;
+
+    // 驗證輸入
+    if (!username || !email || !password) {
+        return res.status(400).json({ error: '請填寫所有必填欄位' });
+    }
+
+    // 檢查用戶名是否已存在
+    db.get('SELECT * FROM users WHERE username = ?', [username], async (err, user) => {
+        if (err) {
+            return res.status(500).json({ error: '資料庫錯誤' });
+        }
+        if (user) {
+            return res.status(400).json({ error: '用戶名已被使用' });
+        }
+
+        // 檢查電子郵件是否已存在
+        db.get('SELECT * FROM users WHERE email = ?', [email], async (err, user) => {
+            if (err) {
+                return res.status(500).json({ error: '資料庫錯誤' });
+            }
+            if (user) {
+                return res.status(400).json({ error: '電子郵件已被使用' });
+            }
+
+            // 加密密碼
+            const hashedPassword = await bcrypt.hash(password, 10);
+
+            // 創建新用戶
+            db.run(
+                'INSERT INTO users (username, email, password) VALUES (?, ?, ?)',
+                [username, email, hashedPassword],
+                function(err) {
+                    if (err) {
+                        return res.status(500).json({ error: '註冊失敗' });
+                    }
+
+                    // 生成 JWT token
+                    const token = jwt.sign(
+                        { id: this.lastID, username },
+                        JWT_SECRET,
+                        { expiresIn: '24h' }
+                    );
+
+                    res.json({
+                        token,
+                        user: {
+                            id: this.lastID,
+                            username,
+                            email
+                        }
+                    });
+                }
+            );
+        });
+    });
 });
 
 // 主頁路由
