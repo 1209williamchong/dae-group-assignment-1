@@ -236,6 +236,115 @@ app.post('/api/auth/register', async (req, res) => {
     });
 });
 
+// 獲取個人資料
+app.get('/api/users/profile', authenticateToken, (req, res) => {
+    db.get(`
+        SELECT id, username, email, bio, avatar
+        FROM users
+        WHERE id = ?
+    `, [req.user.id], (err, user) => {
+        if (err) {
+            return res.status(500).json({ error: '獲取個人資料失敗' });
+        }
+        if (!user) {
+            return res.status(404).json({ error: '用戶不存在' });
+        }
+        res.json(user);
+    });
+});
+
+// 更新個人資料
+app.put('/api/users/profile', authenticateToken, (req, res) => {
+    const { username, email, bio } = req.body;
+
+    // 驗證輸入
+    if (!username || !email) {
+        return res.status(400).json({ error: '用戶名和電子郵件為必填項' });
+    }
+
+    // 檢查用戶名是否已被其他用戶使用
+    db.get('SELECT * FROM users WHERE username = ? AND id != ?', [username, req.user.id], (err, existingUser) => {
+        if (err) {
+            return res.status(500).json({ error: '資料庫錯誤' });
+        }
+        if (existingUser) {
+            return res.status(400).json({ error: '用戶名已被使用' });
+        }
+
+        // 檢查電子郵件是否已被其他用戶使用
+        db.get('SELECT * FROM users WHERE email = ? AND id != ?', [email, req.user.id], (err, existingUser) => {
+            if (err) {
+                return res.status(500).json({ error: '資料庫錯誤' });
+            }
+            if (existingUser) {
+                return res.status(400).json({ error: '電子郵件已被使用' });
+            }
+
+            // 更新用戶資料
+            db.run(
+                'UPDATE users SET username = ?, email = ?, bio = ? WHERE id = ?',
+                [username, email, bio, req.user.id],
+                function(err) {
+                    if (err) {
+                        return res.status(500).json({ error: '更新個人資料失敗' });
+                    }
+                    res.json({ success: true });
+                }
+            );
+        });
+    });
+});
+
+// 用戶登入
+app.post('/api/auth/login', async (req, res) => {
+    const { email, password } = req.body;
+
+    // 驗證輸入
+    if (!email || !password) {
+        return res.status(400).json({ error: '請填寫所有必填欄位' });
+    }
+
+    // 查找用戶
+    db.get('SELECT * FROM users WHERE email = ?', [email], async (err, user) => {
+        if (err) {
+            return res.status(500).json({ error: '資料庫錯誤' });
+        }
+        if (!user) {
+            return res.status(401).json({ error: '電子郵件或密碼錯誤' });
+        }
+
+        // 驗證密碼
+        const validPassword = await bcrypt.compare(password, user.password);
+        if (!validPassword) {
+            return res.status(401).json({ error: '電子郵件或密碼錯誤' });
+        }
+
+        // 生成 JWT token
+        const token = jwt.sign(
+            { id: user.id, username: user.username },
+            JWT_SECRET,
+            { expiresIn: '24h' }
+        );
+
+        // 返回用戶資訊（不包含密碼）
+        const { password: _, ...userWithoutPassword } = user;
+        res.json({
+            token,
+            user: userWithoutPassword
+        });
+    });
+});
+
+// 用戶登出
+app.post('/api/auth/logout', authenticateToken, (req, res) => {
+    // 在實際應用中，你可能會想要：
+    // 1. 將 token 加入黑名單
+    // 2. 清除用戶的會話
+    // 3. 記錄登出時間
+    // 但在這個簡單的實現中，我們只需要返回成功訊息
+    res.json({ success: true });
+});
+
 // 主頁路由
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
