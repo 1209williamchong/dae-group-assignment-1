@@ -241,6 +241,16 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
+// 登入後的首頁路由
+app.get('/home.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'home.html'));
+});
+
+// 註冊頁面路由
+app.get('/signup.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'register.html'));
+});
+
 // 存儲測試頁面路由
 app.get('/storage-test', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'storage-test.html'));
