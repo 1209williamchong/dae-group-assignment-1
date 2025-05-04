@@ -3,17 +3,31 @@ const path = require('path');
 const cors = require('cors');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
+const multer = require('multer');
 const db = require('./src/db/init');
 
 const app = express();
 const port = 3000;
 const JWT_SECRET = 'your-secret-key'; // 在生產環境中應該使用環境變數
 
+// 配置 multer
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, 'public/uploads/');
+    },
+    filename: function (req, file, cb) {
+        cb(null, Date.now() + '-' + file.originalname);
+    }
+});
+
+const upload = multer({ storage: storage });
+
 // 啟用 CORS
 app.use(cors());
 
-// 解析 JSON 請求體
+// 解析 JSON 和 URL-encoded 請求體
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 // 設置靜態文件目錄
 app.use(express.static(path.join(__dirname, 'public')));
@@ -177,11 +191,14 @@ app.delete('/api/follow/:userId', authenticateToken, (req, res) => {
 });
 
 // 註冊新用戶
-app.post('/api/auth/register', async (req, res) => {
-    const { username, email, password } = req.body;
+app.post('/api/auth/register', upload.single('avatar'), async (req, res) => {
+    console.log('收到註冊請求:', req.body); // 添加日誌
+    const { username, email, password, bio } = req.body;
+    const avatar = req.file ? `/uploads/${req.file.filename}` : null;
 
     // 驗證輸入
     if (!username || !email || !password) {
+        console.log('缺少必填欄位:', { username, email, password }); // 添加日誌
         return res.status(400).json({ error: '請填寫所有必填欄位' });
     }
 
@@ -208,8 +225,8 @@ app.post('/api/auth/register', async (req, res) => {
 
             // 創建新用戶
             db.run(
-                'INSERT INTO users (username, email, password) VALUES (?, ?, ?)',
-                [username, email, hashedPassword],
+                'INSERT INTO users (username, email, password, avatar, bio) VALUES (?, ?, ?, ?, ?)',
+                [username, email, hashedPassword, avatar, bio],
                 function(err) {
                     if (err) {
                         return res.status(500).json({ error: '註冊失敗' });
@@ -227,7 +244,9 @@ app.post('/api/auth/register', async (req, res) => {
                         user: {
                             id: this.lastID,
                             username,
-                            email
+                            email,
+                            avatar,
+                            bio
                         }
                     });
                 }
