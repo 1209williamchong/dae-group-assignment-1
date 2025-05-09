@@ -66,31 +66,11 @@
     </div>
 
     <script>
-        document.getElementById('logoutBtn').addEventListener('click', async () => {
-            try {
-                // 呼叫登出 API
-                const response = await fetch('http://localhost:3000/api/auth/logout', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${localStorage.getItem('token')}`
-                    }
-                });
-
-                if (!response.ok) {
-                    throw new Error('登出失敗');
-                }
-
-                // 清除本地存儲的用戶信息
-                localStorage.removeItem('token');
-                localStorage.removeItem('user');
-                
-                // 跳轉到首頁
-                window.location.href = 'index.html';
-            } catch (error) {
-                console.error('登出錯誤:', error);
-                alert('登出時發生錯誤，請重試');
-            }
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+            // 清除本地存儲的用戶信息
+            localStorage.clear();
+            // 跳轉到首頁
+            window.location.href = 'index.html';
         });
     </script>
 </body>
