@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>分享 - fresh</title>
+    <link rel="stylesheet" href="/styles/main.css">
+    <style>
+        .share-container {
+            max-width: 500px;
+            margin: 40px auto;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            padding: 32px 24px;
+        }
+        .share-title {
+            font-size: 2em;
+            margin-bottom: 20px;
+            color: #ff6b00;
+            text-align: center;
+        }
+        .share-form label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+        .share-form input[type="file"] {
+            margin-bottom: 16px;
+        }
+        .share-form textarea {
+            width: 100%;
+            min-height: 80px;
+            margin-bottom: 16px;
+            padding: 8px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+            resize: vertical;
+        }
+        .share-form button {
+            background: #ff6b00;
+            color: #fff;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 4px;
+            font-size: 1em;
+            cursor: pointer;
+            width: 100%;
+        }
+        .share-form button:hover {
+            background: #ff8533;
+        }
+        .preview {
+            margin-bottom: 16px;
+            text-align: center;
+        }
+        .preview img, .preview video {
+            max-width: 100%;
+            max-height: 200px;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+    <nav class="nav">
+        <div class="nav-left">
+            <a href="/" class="logo">fresh</a>
+        </div>
+        <div class="nav-right">
+            <a href="home.html" class="nav-link">首頁</a>
+            <a href="profile.html" class="nav-link">個人檔案</a>
+            <a href="settings.html" class="nav-link">設定</a>
+            <a href="logout.html" class="nav-link">登出</a>
+        </div>
+    </nav>
+    <div class="share-container">
+        <div class="share-title">分享你的精彩瞬間</div>
+        <form class="share-form" id="shareForm">
+            <label for="media">上傳相片或影片</label>
+            <input type="file" id="media" name="media" accept="image/*,video/*">
+            <div class="preview" id="mediaPreview"></div>
+            <label for="text">分享內容</label>
+            <textarea id="text" name="text" placeholder="寫下你的想法..."></textarea>
+            <button type="submit">發佈</button>
+        </form>
+    </div>
+    <script>
+    // 預覽相片或影片
+    document.getElementById('media').addEventListener('change', function(e) {
+        const preview = document.getElementById('mediaPreview');
+        preview.innerHTML = '';
+        const file = e.target.files[0];
+        if (!file) return;
+        const url = URL.createObjectURL(file);
+        if (file.type.startsWith('image/')) {
+            preview.innerHTML = `<img src="${url}" alt="預覽">`;
+        } else if (file.type.startsWith('video/')) {
+            preview.innerHTML = `<video src="${url}" controls></video>`;
+        }
+    });
+    // 處理表單提交
+    document.getElementById('shareForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        alert('已發佈（前端示範，請接後端API）');
+        this.reset();
+        document.getElementById('mediaPreview').innerHTML = '';
+    });
+    </script>
+</body>
+</html>

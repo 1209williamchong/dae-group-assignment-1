@@ -34,10 +34,10 @@
         <div class="chat-container">
             <div class="chat-sidebar">
                 <div class="search-container">
-                    <input type="text" placeholder="搜尋聊天室...">
+                    <input type="text" id="chat-search" placeholder="搜尋聊天室...">
                     <span class="search-icon">🔍</span>
                 </div>
-                <div class="chat-list">
+                <div class="chat-list" id="chat-list">
                     <!-- 聊天室列表將由 JavaScript 動態生成 -->
                 </div>
             </div>
@@ -45,13 +45,13 @@
                 <div class="chat-header">
                     <div class="chat-title">選擇一個聊天室開始對話</div>
                 </div>
-                <div class="chat-messages">
+                <div class="chat-messages" id="chat-messages">
                     <!-- 訊息將由 JavaScript 動態生成 -->
                 </div>
                 <div class="chat-input">
-                    <input type="text" placeholder="輸入訊息...">
-                    <button class="upload-button">📎</button>
-                    <button class="send-button">發送</button>
+                    <input type="text" id="message-input" placeholder="輸入訊息...">
+                    <button class="upload-button" id="upload-file">📎</button>
+                    <button class="send-button" id="send-message-btn">發送</button>
                 </div>
             </div>
         </div>
