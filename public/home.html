@@ -16,7 +16,10 @@
                 <a href="/" class="logo">fresh</a>
             </div>
             <div class="nav-right">
-                <div class="auth-buttons">
+                <div class="home-avatar-wrap" style="display:inline-block;vertical-align:middle;margin-right:16px;">
+                    <img id="home-avatar" src="https://via.placeholder.com/100" alt="個人頭像" style="width:50px;height:50px;border-radius:50%;object-fit:cover;border:2px solid #ff6b00;">
+                </div>
+                <div class="auth-buttons" style="display:flex;align-items:center;gap:8px;vertical-align:middle;">
                     <a href="settings.html" class="nav-link">
                         <ion-icon name="settings-outline"></ion-icon>
                         <span>設定</span>
@@ -51,5 +54,15 @@
 
     <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
     <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
+    <script>
+    // 載入 localStorage 頭像
+    window.addEventListener('DOMContentLoaded', function() {
+        const avatar = localStorage.getItem('profileAvatar');
+        if (avatar) {
+            var img = document.getElementById('home-avatar');
+            if (img) img.src = avatar;
+        }
+    });
+    </script>
 </body>
 </html> 
