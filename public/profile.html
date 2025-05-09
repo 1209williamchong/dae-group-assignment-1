@@ -222,5 +222,14 @@
 
     <script type="module" src="/src/main.js"></script>
     <script type="module" src="/src/profile.js"></script>
+    <script>
+    window.addEventListener('DOMContentLoaded', function() {
+        const avatar = localStorage.getItem('profileAvatar');
+        if (avatar) {
+            var img = document.getElementById('profile-avatar');
+            if (img) img.src = avatar;
+        }
+    });
+    </script>
 </body>
 </html> 

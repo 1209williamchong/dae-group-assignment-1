@@ -50,8 +50,14 @@
         preview.innerHTML = '';
         const file = e.target.files[0];
         if (!file) return;
-        const url = URL.createObjectURL(file);
-        preview.innerHTML = `<img src="${url}" alt="頭像預覽" style="max-width:120px;max-height:120px;border-radius:50%;">`;
+        const reader = new FileReader();
+        reader.onload = function(evt) {
+            const base64 = evt.target.result;
+            preview.innerHTML = `<img src="${base64}" alt="頭像預覽" style="max-width:120px;max-height:120px;border-radius:50%;">`;
+            // 儲存到 localStorage
+            localStorage.setItem('profileAvatar', base64);
+        };
+        reader.readAsDataURL(file);
     });
     </script>
 </body>
