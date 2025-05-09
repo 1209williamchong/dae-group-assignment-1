@@ -13,7 +13,6 @@
     <header class="header">
         <a href="home.html" class="logo">fresh</a>
         <div class="nav-buttons">
-            <a href="chat.html" class="nav-button">聊天室</a>
             <a href="logout.html" class="nav-button">登出</a>
         </div>
     </header>
@@ -22,6 +21,11 @@
         <div class="profile-form">
             <h2>編輯個人資料</h2>
             <form id="profileForm">
+                <div class="form-group">
+                    <label for="avatar">上傳頭像</label>
+                    <input type="file" id="avatar" name="avatar" accept="image/*">
+                    <div id="avatarPreview" style="margin-top:10px;"></div>
+                </div>
                 <div class="form-group">
                     <label for="username">用戶名</label>
                     <input type="text" id="username" name="username" required>
@@ -40,5 +44,15 @@
     </div>
 
     <script src="src/edit-profile.js"></script>
+    <script>
+    document.getElementById('avatar').addEventListener('change', function(e) {
+        const preview = document.getElementById('avatarPreview');
+        preview.innerHTML = '';
+        const file = e.target.files[0];
+        if (!file) return;
+        const url = URL.createObjectURL(file);
+        preview.innerHTML = `<img src="${url}" alt="頭像預覽" style="max-width:120px;max-height:120px;border-radius:50%;">`;
+    });
+    </script>
 </body>
 </html> 
