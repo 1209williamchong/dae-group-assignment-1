@@ -229,6 +229,12 @@
             var img = document.getElementById('profile-avatar');
             if (img) img.src = avatar;
         }
+        // 套用個人簡介
+        const bio = localStorage.getItem('profileBio');
+        if (bio) {
+            var bioP = document.querySelector('.profile-bio p');
+            if (bioP) bioP.textContent = bio;
+        }
     });
     </script>
 </body>

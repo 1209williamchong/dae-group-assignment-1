@@ -66,6 +66,11 @@
         };
         reader.readAsDataURL(file);
     });
+    // 儲存個人簡介到 localStorage
+    document.getElementById('profileForm').addEventListener('submit', function(e) {
+        var bio = document.getElementById('bio').value;
+        localStorage.setItem('profileBio', bio);
+    });
     </script>
 </body>
 </html> 
