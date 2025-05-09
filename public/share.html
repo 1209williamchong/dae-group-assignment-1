@@ -87,6 +87,9 @@
             <a href="/" class="logo">fresh</a>
         </div>
         <div class="nav-right">
+            <div class="home-avatar-wrap" style="display:inline-block;vertical-align:middle;margin-right:16px;">
+                <img id="home-avatar" src="https://via.placeholder.com/100" alt="個人頭像" style="width:50px;height:50px;border-radius:50%;object-fit:cover;border:2px solid #ff6b00;">
+            </div>
             <a href="home.html" class="nav-link">首頁</a>
             <a href="profile.html" class="nav-link">個人檔案</a>
             <a href="settings.html" class="nav-link">設定</a>
@@ -160,20 +163,17 @@
     }
     renderFeed(demoPosts);
     // 發佈區預覽
-    document.querySelector('.custom-upload-btn').addEventListener('click', function() {
-        document.getElementById('media').click();
-    });
     document.getElementById('media').addEventListener('change', function(e) {
-      const preview = document.getElementById('mediaPreview');
-      preview.innerHTML = '';
-      const file = e.target.files[0];
-      if (!file) return;
-      const url = URL.createObjectURL(file);
-      if (file.type.startsWith('image/')) {
-        preview.innerHTML = `<img src="${url}" alt="預覽">`;
-      } else if (file.type.startsWith('video/')) {
-        preview.innerHTML = `<video src="${url}" controls></video>`;
-      }
+        const preview = document.getElementById('mediaPreview');
+        preview.innerHTML = '';
+        const file = e.target.files[0];
+        if (!file) return;
+        const url = URL.createObjectURL(file);
+        if (file.type.startsWith('image/')) {
+            preview.innerHTML = `<img src="${url}" alt="預覽">`;
+        } else if (file.type.startsWith('video/')) {
+            preview.innerHTML = `<video src="${url}" controls></video>`;
+        }
     });
     // 處理發佈（前端示範）
     document.getElementById('shareForm').addEventListener('submit', function(e) {
@@ -187,9 +187,11 @@
         if (file.type.startsWith('image/')) mediaType = 'image';
         else if (file.type.startsWith('video/')) mediaType = 'video';
       }
+      // 取得用戶頭像
+      let avatar = localStorage.getItem('profileAvatar') || 'https://via.placeholder.com/100';
       demoPosts.unshift({
         user: '你',
-        avatar: 'https://randomuser.me/api/portraits/men/99.jpg',
+        avatar: avatar,
         time: '剛剛',
         text,
         media,
@@ -198,6 +200,14 @@
       renderFeed(demoPosts);
       this.reset();
       document.getElementById('mediaPreview').innerHTML = '';
+    });
+    // 載入 localStorage 頭像
+    window.addEventListener('DOMContentLoaded', function() {
+        const avatar = localStorage.getItem('profileAvatar');
+        if (avatar) {
+            var img = document.getElementById('home-avatar');
+            if (img) img.src = avatar;
+        }
     });
     </script>
 </body>
