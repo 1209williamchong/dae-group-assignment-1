@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>fresh - 帳戶設定</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ionicons@5.5.2/dist/ionicons/ionicons.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .account-settings {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .settings-card {
+            background: #1a1a1a;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid #333;
+        }
+        .settings-card h2 {
+            color: #ff6b00;
+            margin-bottom: 20px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #fff;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #333;
+            border-radius: 4px;
+            background: #2a2a2a;
+            color: #fff;
+        }
+        .form-group input:focus {
+            border-color: #ff6b00;
+            outline: none;
+        }
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .success-message {
+            color: #4CAF50;
+            margin-top: 10px;
+            display: none;
+        }
+        .error-message {
+            color: #f44336;
+            margin-top: 10px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 導航欄 -->
+        <nav class="nav">
+            <div class="nav-left">
+                <a href="home.html" class="logo">fresh</a>
+            </div>
+            <div class="nav-right">
+                <div class="home-avatar-wrap" style="display:inline-block;vertical-align:middle;margin-right:16px;">
+                    <img id="home-avatar" src="https://via.placeholder.com/100" alt="個人頭像" style="width:50px;height:50px;border-radius:50%;object-fit:cover;border:2px solid #ff6b00;">
+                </div>
+                <div class="auth-buttons" style="display:flex;align-items:center;gap:8px;vertical-align:middle;">
+                    <a href="home.html" class="nav-link">
+                        <ion-icon name="home-outline"></ion-icon>
+                        <span>首頁</span>
+                    </a>
+                    <a href="chat.html" class="nav-link">
+                        <ion-icon name="chatbubbles-outline"></ion-icon>
+                        <span>聊天室</span>
+                    </a>
+                    <a href="settings.html" class="nav-link">
+                        <ion-icon name="settings-outline"></ion-icon>
+                        <span>設定</span>
+                    </a>
+                    <a href="logout.html" class="nav-link">
+                        <ion-icon name="log-out-outline"></ion-icon>
+                        <span>登出</span>
+                    </a>
+                </div>
+            </div>
+        </nav>
+
+        <!-- 主內容區域 -->
+        <main class="main-content">
+            <div class="account-settings">
+                <h1>帳戶設定</h1>
+
+                <!-- 變更密碼卡片 -->
+                <div class="settings-card">
+                    <h2>變更密碼</h2>
+                    <form id="changePasswordForm">
+                        <div class="form-group">
+                            <label for="currentPassword">當前密碼</label>
+                            <input type="password" id="currentPassword" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="newPassword">新密碼</label>
+                            <input type="password" id="newPassword" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="confirmPassword">確認新密碼</label>
+                            <input type="password" id="confirmPassword" required>
+                        </div>
+                        <div class="btn-group">
+                            <button type="submit" class="btn-primary">更新密碼</button>
+                            <button type="reset" class="btn-secondary">重設</button>
+                        </div>
+                        <div id="passwordSuccess" class="success-message">密碼已成功更新！</div>
+                        <div id="passwordError" class="error-message"></div>
+                    </form>
+                </div>
+
+                <!-- 刪除帳戶卡片 -->
+                <div class="settings-card">
+                    <h2>刪除帳戶</h2>
+                    <p style="color: #ccc; margin-bottom: 20px;">警告：刪除帳戶是永久性的，無法復原。</p>
+                    <form id="deleteAccountForm">
+                        <div class="form-group">
+                            <label for="deletePassword">請輸入密碼確認</label>
+                            <input type="password" id="deletePassword" required>
+                        </div>
+                        <div class="btn-group">
+                            <button type="submit" class="btn-secondary" style="background-color: #dc3545;">刪除帳戶</button>
+                        </div>
+                        <div id="deleteError" class="error-message"></div>
+                    </form>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
+    <script>
+    // 載入 localStorage 頭像
+    window.addEventListener('DOMContentLoaded', function() {
+        const avatar = localStorage.getItem('profileAvatar');
+        if (avatar) {
+            var img = document.getElementById('home-avatar');
+            if (img) img.src = avatar;
+        }
+    });
+
+    // 變更密碼表單提交
+    document.getElementById('changePasswordForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const currentPassword = document.getElementById('currentPassword').value;
+        const newPassword = document.getElementById('newPassword').value;
+        const confirmPassword = document.getElementById('confirmPassword').value;
+        const successMessage = document.getElementById('passwordSuccess');
+        const errorMessage = document.getElementById('passwordError');
+
+        // 重置訊息
+        successMessage.style.display = 'none';
+        errorMessage.style.display = 'none';
+
+        if (!currentPassword || !newPassword || !confirmPassword) {
+            errorMessage.textContent = '請填寫所有欄位';
+            errorMessage.style.display = 'block';
+            return;
+        }
+
+        if (newPassword !== confirmPassword) {
+            errorMessage.textContent = '新密碼與確認密碼不符';
+            errorMessage.style.display = 'block';
+            return;
+        }
+
+        if (newPassword.length < 8) {
+            errorMessage.textContent = '新密碼長度必須至少為 8 個字符';
+            errorMessage.style.display = 'block';
+            return;
+        }
+
+        try {
+            const response = await fetch('/api/users/change-password', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
+                body: JSON.stringify({
+                    currentPassword,
+                    newPassword
+                })
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.message || '變更密碼失敗');
+            }
+
+            successMessage.style.display = 'block';
+            document.getElementById('changePasswordForm').reset();
+        } catch (error) {
+            console.error('變更密碼錯誤:', error);
+            errorMessage.textContent = error.message || '變更密碼失敗，請稍後再試';
+            errorMessage.style.display = 'block';
+        }
+    });
+
+    // 刪除帳戶表單提交
+    document.getElementById('deleteAccountForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const password = document.getElementById('deletePassword').value;
+        const errorMessage = document.getElementById('deleteError');
+
+        if (!password) {
+            errorMessage.textContent = '請輸入密碼確認';
+            errorMessage.style.display = 'block';
+            return;
+        }
+
+        if (!confirm('確定要刪除帳戶嗎？此操作無法復原。')) {
+            return;
+        }
+
+        try {
+            const response = await fetch('/api/users/delete-account', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
+                body: JSON.stringify({ password })
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.message || '刪除帳戶失敗');
+            }
+
+            // 清除本地儲存
+            localStorage.clear();
+            // 重定向到首頁
+            window.location.href = 'index.html';
+        } catch (error) {
+            console.error('刪除帳戶錯誤:', error);
+            errorMessage.textContent = error.message || '刪除帳戶失敗，請稍後再試';
+            errorMessage.style.display = 'block';
+        }
+    });
+    </script>
+</body>
+</html> 

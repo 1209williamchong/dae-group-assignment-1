@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>fresh - 通知設定</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ionicons@5.5.2/dist/ionicons/ionicons.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .notification-settings {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .settings-card {
+            background: #1a1a1a;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid #333;
+        }
+        .settings-card h2 {
+            color: #ff6b00;
+            margin-bottom: 20px;
+        }
+        .setting-item {
+            margin-bottom: 15px;
+            padding: 15px;
+            background: #2a2a2a;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .setting-item label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #fff;
+            cursor: pointer;
+        }
+        .setting-item input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+        .setting-description {
+            color: #ccc;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+        .success-message {
+            color: #4CAF50;
+            margin-top: 10px;
+            display: none;
+        }
+        .error-message {
+            color: #f44336;
+            margin-top: 10px;
+            display: none;
+        }
+        .notification-preview {
+            margin-top: 20px;
+            padding: 15px;
+            background: #2a2a2a;
+            border-radius: 4px;
+            display: none;
+        }
+        .notification-preview h3 {
+            color: #ff6b00;
+            margin-bottom: 10px;
+        }
+        .notification-preview p {
+            color: #ccc;
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 導航欄 -->
+        <nav class="nav">
+            <div class="nav-left">
+                <a href="home.html" class="logo">fresh</a>
+            </div>
+            <div class="nav-right">
+                <div class="home-avatar-wrap" style="display:inline-block;vertical-align:middle;margin-right:16px;">
+                    <img id="home-avatar" src="https://via.placeholder.com/100" alt="個人頭像" style="width:50px;height:50px;border-radius:50%;object-fit:cover;border:2px solid #ff6b00;">
+                </div>
+                <div class="auth-buttons" style="display:flex;align-items:center;gap:8px;vertical-align:middle;">
+                    <a href="home.html" class="nav-link">
+                        <ion-icon name="home-outline"></ion-icon>
+                        <span>首頁</span>
+                    </a>
+                    <a href="chat.html" class="nav-link">
+                        <ion-icon name="chatbubbles-outline"></ion-icon>
+                        <span>聊天室</span>
+                    </a>
+                    <a href="settings.html" class="nav-link">
+                        <ion-icon name="settings-outline"></ion-icon>
+                        <span>設定</span>
+                    </a>
+                    <a href="logout.html" class="nav-link">
+                        <ion-icon name="log-out-outline"></ion-icon>
+                        <span>登出</span>
+                    </a>
+                </div>
+            </div>
+        </nav>
+
+        <!-- 主內容區域 -->
+        <main class="main-content">
+            <div class="notification-settings">
+                <h1>通知設定</h1>
+
+                <!-- 通知偏好卡片 -->
+                <div class="settings-card">
+                    <h2>通知偏好</h2>
+                    <form id="notificationForm">
+                        <div class="setting-item">
+                            <label>
+                                <input type="checkbox" id="notifyLikes" checked>
+                                <div>
+                                    <div>收到讚好通知</div>
+                                    <div class="setting-description">當有人對您的貼文按讚時通知您</div>
+                                </div>
+                            </label>
+                        </div>
+                        <div class="setting-item">
+                            <label>
+                                <input type="checkbox" id="notifyComments" checked>
+                                <div>
+                                    <div>收到留言通知</div>
+                                    <div class="setting-description">當有人對您的貼文留言時通知您</div>
+                                </div>
+                            </label>
+                        </div>
+                        <div class="setting-item">
+                            <label>
+                                <input type="checkbox" id="notifyFollows" checked>
+                                <div>
+                                    <div>收到追蹤通知</div>
+                                    <div class="setting-description">當有人追蹤您時通知您</div>
+                                </div>
+                            </label>
+                        </div>
+                        <div class="setting-item">
+                            <label>
+                                <input type="checkbox" id="notifyMessages" checked>
+                                <div>
+                                    <div>收到訊息通知</div>
+                                    <div class="setting-description">當收到新訊息時通知您</div>
+                                </div>
+                            </label>
+                        </div>
+                        <button type="submit" class="btn-primary">儲存設定</button>
+                    </form>
+                    <div id="notificationSuccess" class="success-message">通知設定已更新！</div>
+                    <div id="notificationError" class="error-message"></div>
+                </div>
+
+                <!-- 通知預覽卡片 -->
+                <div class="settings-card">
+                    <h2>通知預覽</h2>
+                    <button class="btn-secondary" onclick="toggleNotificationPreview()">顯示/隱藏預覽</button>
+                    <div id="notificationPreview" class="notification-preview">
+                        <h3>通知範例</h3>
+                        <p>👍 小明 對您的貼文按讚</p>
+                        <p>💬 小華 在您的貼文留言：「真棒！」</p>
+                        <p>👥 小美 開始追蹤您</p>
+                        <p>💌 小強 傳送了一則新訊息給您</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
+    <script>
+    // 載入 localStorage 頭像
+    window.addEventListener('DOMContentLoaded', function() {
+        const avatar = localStorage.getItem('profileAvatar');
+        if (avatar) {
+            var img = document.getElementById('home-avatar');
+            if (img) img.src = avatar;
+        }
+
+        // 載入已儲存的通知設定
+        const savedSettings = localStorage.getItem('notificationSettings');
+        if (savedSettings) {
+            const settings = JSON.parse(savedSettings);
+            document.getElementById('notifyLikes').checked = settings.likes;
+            document.getElementById('notifyComments').checked = settings.comments;
+            document.getElementById('notifyFollows').checked = settings.follows;
+            document.getElementById('notifyMessages').checked = settings.messages;
+        }
+    });
+
+    // 儲存通知設定
+    document.getElementById('notificationForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const settings = {
+            likes: document.getElementById('notifyLikes').checked,
+            comments: document.getElementById('notifyComments').checked,
+            follows: document.getElementById('notifyFollows').checked,
+            messages: document.getElementById('notifyMessages').checked
+        };
+
+        const successMessage = document.getElementById('notificationSuccess');
+        const errorMessage = document.getElementById('notificationError');
+
+        // 重置訊息
+        successMessage.style.display = 'none';
+        errorMessage.style.display = 'none';
+
+        try {
+            const response = await fetch('/api/users/notification-settings', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
+                body: JSON.stringify(settings)
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.message || '儲存通知設定失敗');
+            }
+
+            // 同時儲存到 localStorage 作為備份
+            localStorage.setItem('notificationSettings', JSON.stringify(settings));
+            successMessage.style.display = 'block';
+        } catch (error) {
+            console.error('儲存通知設定錯誤:', error);
+            errorMessage.textContent = error.message || '儲存通知設定失敗，請稍後再試';
+            errorMessage.style.display = 'block';
+        }
+    });
+
+    // 切換通知預覽顯示
+    function toggleNotificationPreview() {
+        const preview = document.getElementById('notificationPreview');
+        preview.style.display = preview.style.display === 'none' ? 'block' : 'none';
+    }
+    </script>
+</body>
+</html> 

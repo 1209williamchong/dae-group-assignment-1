@@ -3,98 +3,281 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>設定 - fresh</title>
-    <link rel="stylesheet" href="styles/main.css">
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', Arial, sans-serif;
-            background-color: #121212;
-            color: #ffffff;
-        }
-        .header {
-            background-color: #1a1a1a;
-            padding: 15px 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid #333;
-        }
-        .logo {
-            font-size: 1.8em;
-            font-weight: bold;
-            color: #ff6b00;
-            text-decoration: none;
-        }
-        .nav-buttons {
-            display: flex;
-            gap: 15px;
-        }
-        .nav-button {
-            padding: 8px 15px;
-            background-color: #333;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            text-decoration: none;
-            font-size: 0.9em;
-        }
-        .nav-button:hover {
-            background-color: #444;
-        }
-        .container {
-            max-width: 800px;
-            margin: 40px auto;
-            padding: 0 20px;
-        }
-        .settings-section {
-            background-color: #1a1a1a;
-            padding: 30px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-        }
-        .settings-section h2 {
-            color: #ff6b00;
-            margin-bottom: 20px;
-        }
-        .settings-button {
-            display: block;
-            width: 100%;
-            padding: 15px;
-            background-color: #333;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            text-align: left;
-            margin-bottom: 10px;
-            font-size: 1em;
-            transition: background-color 0.3s;
-        }
-        .settings-button:hover {
-            background-color: #444;
-        }
-    </style>
+    <title>fresh - 設定</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ionicons@5.5.2/dist/ionicons/ionicons.min.css">
+    <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-    <header class="header">
-        <a href="home.html" class="logo">fresh</a>
-        <div class="nav-buttons">
-            <a href="chat.html" class="nav-button">聊天室</a>
-            <a href="logout.html" class="nav-button">登出</a>
-        </div>
-    </header>
-
     <div class="container">
-        <div class="settings-section">
-            <h2>帳號設定</h2>
-            <a href="profile.html" class="settings-button">個人資料</a>
-            <a href="edit-profile.html" class="settings-button">編輯個人資料</a>
+        <!-- 導航欄 -->
+        <nav class="nav">
+            <div class="nav-left">
+                <a href="home.html" class="logo">fresh</a>
+            </div>
+            <div class="nav-right">
+                <div class="home-avatar-wrap" style="display:inline-block;vertical-align:middle;margin-right:16px;">
+                    <img id="home-avatar" src="https://via.placeholder.com/100" alt="個人頭像" style="width:50px;height:50px;border-radius:50%;object-fit:cover;border:2px solid #ff6b00;">
+                </div>
+                <div class="auth-buttons" style="display:flex;align-items:center;gap:8px;vertical-align:middle;">
+                    <a href="home.html" class="nav-link">
+                        <ion-icon name="home-outline"></ion-icon>
+                        <span>首頁</span>
+                    </a>
+                    <a href="chat.html" class="nav-link">
+                        <ion-icon name="chatbubbles-outline"></ion-icon>
+                        <span>聊天室</span>
+                    </a>
+                    <a href="logout.html" class="nav-link">
+                        <ion-icon name="log-out-outline"></ion-icon>
+                        <span>登出</span>
+                    </a>
+                </div>
+            </div>
+        </nav>
+
+        <!-- 主內容區域 -->
+        <main class="main-content">
+            <div class="settings-container">
+                <h1>設定</h1>
+                
+                <div class="settings-section">
+                    <h2>個人資料</h2>
+                    <div class="settings-item">
+                        <div class="settings-item-info">
+                            <h3>編輯個人資料</h3>
+                            <p>更新您的個人資料、頭像和個人簡介</p>
+                        </div>
+                        <a href="edit.html" class="btn-primary">
+                            <ion-icon name="create-outline"></ion-icon>
+                            編輯
+                        </a>
+                    </div>
+                </div>
+
+                <div class="settings-section">
+                    <h2>帳戶設定</h2>
+                    <div class="settings-item">
+                        <div class="settings-item-info">
+                            <h3>變更密碼</h3>
+                            <p>更新您的登入密碼</p>
+                        </div>
+                        <a href="account-settings.html" class="btn-secondary">
+                            <ion-icon name="key-outline"></ion-icon>
+                            變更
+                        </a>
+                    </div>
+                </div>
+
+                <div class="settings-section">
+                    <h2>通知設定</h2>
+                    <div class="settings-item">
+                        <div class="settings-item-info">
+                            <h3>通知偏好</h3>
+                            <p>管理您想要接收的通知類型</p>
+                        </div>
+                        <a href="notification-settings.html" class="btn-secondary">
+                            <ion-icon name="notifications-outline"></ion-icon>
+                            設定
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- 變更密碼模態框 -->
+    <div id="changePasswordModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>變更密碼</h2>
+                <button class="close-modal">&times;</button>
+            </div>
+            <form id="changePasswordForm">
+                <div class="form-group">
+                    <label for="currentPassword">當前密碼</label>
+                    <input type="password" id="currentPassword" required>
+                </div>
+                <div class="form-group">
+                    <label for="newPassword">新密碼</label>
+                    <input type="password" id="newPassword" required>
+                </div>
+                <div class="form-group">
+                    <label for="confirmPassword">確認新密碼</label>
+                    <input type="password" id="confirmPassword" required>
+                </div>
+                <button type="submit" class="btn-primary">更新密碼</button>
+            </form>
         </div>
     </div>
 
-    <script src="src/settings.js"></script>
+    <!-- 通知設定模態框 -->
+    <div id="notificationSettingsModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>通知設定</h2>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="notification-settings">
+                <div class="setting-item">
+                    <label>
+                        <input type="checkbox" id="notifyLikes" checked>
+                        收到讚好通知
+                    </label>
+                </div>
+                <div class="setting-item">
+                    <label>
+                        <input type="checkbox" id="notifyComments" checked>
+                        收到留言通知
+                    </label>
+                </div>
+                <div class="setting-item">
+                    <label>
+                        <input type="checkbox" id="notifyFollows" checked>
+                        收到追蹤通知
+                    </label>
+                </div>
+                <div class="setting-item">
+                    <label>
+                        <input type="checkbox" id="notifyMessages" checked>
+                        收到訊息通知
+                    </label>
+                </div>
+                <button class="btn-primary" onclick="saveNotificationSettings()">儲存設定</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
+    <script>
+    // 載入 localStorage 頭像
+    window.addEventListener('DOMContentLoaded', function() {
+        const avatar = localStorage.getItem('profileAvatar');
+        if (avatar) {
+            var img = document.getElementById('home-avatar');
+            if (img) img.src = avatar;
+        }
+
+        // 載入已儲存的通知設定
+        const savedSettings = localStorage.getItem('notificationSettings');
+        if (savedSettings) {
+            const settings = JSON.parse(savedSettings);
+            document.getElementById('notifyLikes').checked = settings.likes;
+            document.getElementById('notifyComments').checked = settings.comments;
+            document.getElementById('notifyFollows').checked = settings.follows;
+            document.getElementById('notifyMessages').checked = settings.messages;
+        }
+    });
+
+    // 顯示變更密碼模態框
+    function showChangePasswordModal() {
+        document.getElementById('changePasswordModal').style.display = 'block';
+    }
+
+    // 顯示通知設定模態框
+    function showNotificationSettingsModal() {
+        document.getElementById('notificationSettingsModal').style.display = 'block';
+    }
+
+    // 關閉模態框
+    document.querySelectorAll('.close-modal').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.modal').forEach(modal => {
+                modal.style.display = 'none';
+            });
+        });
+    });
+
+    // 儲存通知設定
+    async function saveNotificationSettings() {
+        try {
+            const settings = {
+                likes: document.getElementById('notifyLikes').checked,
+                comments: document.getElementById('notifyComments').checked,
+                follows: document.getElementById('notifyFollows').checked,
+                messages: document.getElementById('notifyMessages').checked
+            };
+            
+            const response = await fetch('/api/users/notification-settings', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
+                body: JSON.stringify(settings)
+            });
+
+            if (!response.ok) {
+                throw new Error('儲存通知設定失敗');
+            }
+
+            // 同時儲存到 localStorage 作為備份
+            localStorage.setItem('notificationSettings', JSON.stringify(settings));
+            alert('通知設定已更新');
+            document.getElementById('notificationSettingsModal').style.display = 'none';
+        } catch (error) {
+            console.error('儲存通知設定錯誤:', error);
+            alert('儲存通知設定失敗，請稍後再試');
+        }
+    }
+
+    // 變更密碼表單提交
+    document.getElementById('changePasswordForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const currentPassword = document.getElementById('currentPassword').value;
+        const newPassword = document.getElementById('newPassword').value;
+        const confirmPassword = document.getElementById('confirmPassword').value;
+
+        if (!currentPassword || !newPassword || !confirmPassword) {
+            alert('請填寫所有欄位');
+            return;
+        }
+
+        if (newPassword !== confirmPassword) {
+            alert('新密碼與確認密碼不符');
+            return;
+        }
+
+        if (newPassword.length < 8) {
+            alert('新密碼長度必須至少為 8 個字符');
+            return;
+        }
+
+        try {
+            const response = await fetch('/api/users/change-password', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
+                body: JSON.stringify({
+                    currentPassword,
+                    newPassword
+                })
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.message || '變更密碼失敗');
+            }
+
+            alert('密碼已成功更新');
+            document.getElementById('changePasswordModal').style.display = 'none';
+            document.getElementById('changePasswordForm').reset();
+        } catch (error) {
+            console.error('變更密碼錯誤:', error);
+            alert(error.message || '變更密碼失敗，請稍後再試');
+        }
+    });
+
+    // 點擊模態框外部關閉
+    window.addEventListener('click', (e) => {
+        if (e.target.classList.contains('modal')) {
+            e.target.style.display = 'none';
+        }
+    });
+    </script>
 </body>
 </html> 
