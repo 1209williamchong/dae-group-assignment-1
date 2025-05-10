@@ -88,16 +88,20 @@ function handleKeyboardEvents() {
 // 表單事件處理
 function handleFormEvents() {
     // 創建評論輸入框
-    function createCommentInput(post) {
+    function createCommentInput(post, parentId = null) {
         const commentInput = document.createElement('div');
         commentInput.className = 'comment-input';
         commentInput.innerHTML = `
-            <textarea placeholder="輸入留言..."></textarea>
-            <button class="submit-comment">發布</button>
+            <textarea placeholder="${parentId ? '回覆留言...' : '輸入留言...'}"></textarea>
+            <div class="comment-actions">
+                <button class="cancel-comment">取消</button>
+                <button class="submit-comment" disabled>發布</button>
+            </div>
         `;
 
         const textarea = commentInput.querySelector('textarea');
-        const submitBtn = commentInput.querySelector('button');
+        const submitBtn = commentInput.querySelector('.submit-comment');
+        const cancelBtn = commentInput.querySelector('.cancel-comment');
 
         // 輸入事件
         textarea.addEventListener('input', function() {
@@ -105,13 +109,38 @@ function handleFormEvents() {
         });
 
         // 提交事件
-        submitBtn.addEventListener('click', function() {
+        submitBtn.addEventListener('click', async function() {
             const comment = textarea.value.trim();
             if (comment) {
-                const commentSection = post.querySelector('.comments') || createCommentSection(post);
-                addComment(commentSection, comment);
-                commentInput.remove();
+                try {
+                    const response = await fetch('/api/comments', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            postId: post.dataset.postId,
+                            content: comment,
+                            parentId: parentId
+                        })
+                    });
+
+                    if (!response.ok) throw new Error('發布評論失敗');
+
+                    const newComment = await response.json();
+                    const commentSection = post.querySelector('.comments') || createCommentSection(post);
+                    addComment(commentSection, newComment);
+                    commentInput.remove();
+                } catch (error) {
+                    console.error('發布評論失敗:', error);
+                    alert('發布評論失敗，請稍後再試');
+                }
             }
+        });
+
+        // 取消事件
+        cancelBtn.addEventListener('click', () => {
+            commentInput.remove();
         });
 
         return commentInput;
@@ -203,18 +232,91 @@ function handleEventBubbling() {
 
         // 點讚按鈕點擊事件
         const likeBtn = post.querySelector('.like-btn');
-        likeBtn.addEventListener('click', function(e) {
+        likeBtn.addEventListener('click', async function(e) {
             e.stopPropagation(); // 阻止事件冒泡
-            this.classList.toggle('liked');
-            
-            if (this.classList.contains('liked')) {
-                this.textContent = '❤️ 已讚';
-                this.style.color = '#ff0000';
-            } else {
-                this.textContent = '❤️ 讚';
-                this.style.color = '';
+            try {
+                const response = await fetch(`/api/posts/${post.dataset.postId}/like`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (!response.ok) throw new Error('點讚失敗');
+                
+                const result = await response.json();
+                this.classList.toggle('liked');
+                
+                if (this.classList.contains('liked')) {
+                    this.textContent = `❤️ ${result.likes}`;
+                    this.style.color = '#e0245e';
+                } else {
+                    this.textContent = `❤️ ${result.likes}`;
+                    this.style.color = '';
+                }
+                
+                // 更新點讚數顯示
+                const likeCount = this.querySelector('.like-count');
+                if (likeCount) {
+                    likeCount.textContent = result.likes;
+                }
+            } catch (error) {
+                console.error('點讚失敗:', error);
+                alert('點讚失敗，請稍後再試');
             }
         });
+
+        // 點擊點讚數顯示點讚用戶列表
+        const likeCount = post.querySelector('.like-count');
+        if (likeCount) {
+            likeCount.addEventListener('click', async function(e) {
+                e.stopPropagation();
+                try {
+                    const response = await fetch(`/api/posts/${post.dataset.postId}/likes`);
+                    if (!response.ok) throw new Error('獲取點讚用戶失敗');
+                    
+                    const likes = await response.json();
+                    
+                    // 創建點讚用戶列表彈窗
+                    const modal = document.createElement('div');
+                    modal.className = 'likes-modal';
+                    modal.innerHTML = `
+                        <div class="likes-modal-content">
+                            <div class="likes-modal-header">
+                                <h3>點讚用戶</h3>
+                                <button class="close-modal">&times;</button>
+                            </div>
+                            <div class="likes-modal-body">
+                                ${likes.map(like => `
+                                    <div class="like-user">
+                                        <img src="${like.avatar || '/images/default-avatar.png'}" alt="${like.username}" class="like-user-avatar">
+                                        <span class="like-username">${like.username}</span>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    `;
+                    
+                    document.body.appendChild(modal);
+                    
+                    // 關閉按鈕事件
+                    const closeBtn = modal.querySelector('.close-modal');
+                    closeBtn.addEventListener('click', () => {
+                        modal.remove();
+                    });
+                    
+                    // 點擊外部關閉
+                    modal.addEventListener('click', (e) => {
+                        if (e.target === modal) {
+                            modal.remove();
+                        }
+                    });
+                } catch (error) {
+                    console.error('獲取點讚用戶失敗:', error);
+                    alert('獲取點讚用戶失敗，請稍後再試');
+                }
+            });
+        }
     });
 }
 
@@ -257,18 +359,90 @@ function addPostEventListeners(post) {
     const shareBtn = post.querySelector('.share-btn');
     
     // 點讚功能
-    likeBtn.addEventListener('click', function() {
-        // 使用 classList 切換類別
-        this.classList.toggle('liked');
-        
-        if (this.classList.contains('liked')) {
-            this.textContent = '❤️ 已讚';
-            this.style.color = '#ff0000';
-        } else {
-            this.textContent = '❤️ 讚';
-            this.style.color = '';
+    likeBtn.addEventListener('click', async function() {
+        try {
+            const response = await fetch(`/api/posts/${post.dataset.postId}/like`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            
+            if (!response.ok) throw new Error('點讚失敗');
+            
+            const result = await response.json();
+            this.classList.toggle('liked');
+            
+            if (this.classList.contains('liked')) {
+                this.textContent = `❤️ ${result.likes}`;
+                this.style.color = '#e0245e';
+            } else {
+                this.textContent = `❤️ ${result.likes}`;
+                this.style.color = '';
+            }
+            
+            // 更新點讚數顯示
+            const likeCount = this.querySelector('.like-count');
+            if (likeCount) {
+                likeCount.textContent = result.likes;
+            }
+        } catch (error) {
+            console.error('點讚失敗:', error);
+            alert('點讚失敗，請稍後再試');
         }
     });
+    
+    // 點擊點讚數顯示點讚用戶列表
+    const likeCount = post.querySelector('.like-count');
+    if (likeCount) {
+        likeCount.addEventListener('click', async function(e) {
+            e.stopPropagation();
+            try {
+                const response = await fetch(`/api/posts/${post.dataset.postId}/likes`);
+                if (!response.ok) throw new Error('獲取點讚用戶失敗');
+                
+                const likes = await response.json();
+                
+                // 創建點讚用戶列表彈窗
+                const modal = document.createElement('div');
+                modal.className = 'likes-modal';
+                modal.innerHTML = `
+                    <div class="likes-modal-content">
+                        <div class="likes-modal-header">
+                            <h3>點讚用戶</h3>
+                            <button class="close-modal">&times;</button>
+                        </div>
+                        <div class="likes-modal-body">
+                            ${likes.map(like => `
+                                <div class="like-user">
+                                    <img src="${like.avatar || '/images/default-avatar.png'}" alt="${like.username}" class="like-user-avatar">
+                                    <span class="like-username">${like.username}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+                
+                document.body.appendChild(modal);
+                
+                // 關閉按鈕事件
+                const closeBtn = modal.querySelector('.close-modal');
+                closeBtn.addEventListener('click', () => {
+                    modal.remove();
+                });
+                
+                // 點擊外部關閉
+                modal.addEventListener('click', (e) => {
+                    if (e.target === modal) {
+                        modal.remove();
+                    }
+                });
+            } catch (error) {
+                console.error('獲取點讚用戶失敗:', error);
+                alert('獲取點讚用戶失敗，請稍後再試');
+            }
+        });
+    }
     
     // 分享功能
     shareBtn.addEventListener('click', () => {
@@ -314,27 +488,125 @@ function createCommentSection(post) {
 function addComment(commentSection, comment) {
     const commentElement = document.createElement('div');
     commentElement.className = 'comment';
+    commentElement.dataset.commentId = comment.id;
     
-    // 使用 textContent 設置純文本內容
-    const userName = document.createElement('strong');
-    userName.textContent = '當前用戶';
+    const isCurrentUser = comment.user_id === getCurrentUserId();
     
-    const commentText = document.createElement('p');
-    commentText.textContent = comment;
+    commentElement.innerHTML = `
+        <div class="comment-header">
+            <img src="${comment.avatar || '/images/default-avatar.png'}" alt="${comment.username}" class="comment-avatar">
+            <div class="comment-info">
+                <strong class="comment-username">${comment.username}</strong>
+                <span class="comment-time">${formatTime(comment.created_at)}</span>
+            </div>
+            ${isCurrentUser ? `
+                <div class="comment-actions">
+                    <button class="edit-comment-btn">
+                        <ion-icon name="create-outline"></ion-icon>
+                    </button>
+                    <button class="delete-comment-btn">
+                        <ion-icon name="trash-outline"></ion-icon>
+                    </button>
+                </div>
+            ` : ''}
+        </div>
+        <div class="comment-content">
+            <p>${comment.content}</p>
+        </div>
+        <div class="comment-footer">
+            <button class="reply-btn">回覆</button>
+        </div>
+        <div class="replies"></div>
+    `;
     
-    const commentContent = document.createElement('div');
-    commentContent.className = 'comment-content';
-    commentContent.appendChild(userName);
-    commentContent.appendChild(commentText);
+    // 添加回覆按鈕事件
+    const replyBtn = commentElement.querySelector('.reply-btn');
+    replyBtn.addEventListener('click', () => {
+        const replyInput = createCommentInput(commentElement.closest('.post'), comment.id);
+        commentElement.querySelector('.replies').appendChild(replyInput);
+        replyInput.querySelector('textarea').focus();
+    });
     
-    const avatar = document.createElement('img');
-    avatar.src = 'images/default-avatar.png';
-    avatar.alt = '用戶頭像';
-    avatar.className = 'comment-avatar';
+    // 添加編輯按鈕事件
+    if (isCurrentUser) {
+        const editBtn = commentElement.querySelector('.edit-comment-btn');
+        editBtn.addEventListener('click', () => {
+            const content = commentElement.querySelector('.comment-content p');
+            const currentText = content.textContent;
+            const editInput = document.createElement('textarea');
+            editInput.value = currentText;
+            editInput.className = 'edit-comment-input';
+            
+            content.replaceWith(editInput);
+            editInput.focus();
+            
+            const saveBtn = document.createElement('button');
+            saveBtn.textContent = '保存';
+            saveBtn.className = 'save-edit-btn';
+            
+            const cancelBtn = document.createElement('button');
+            cancelBtn.textContent = '取消';
+            cancelBtn.className = 'cancel-edit-btn';
+            
+            const editActions = document.createElement('div');
+            editActions.className = 'edit-actions';
+            editActions.appendChild(saveBtn);
+            editActions.appendChild(cancelBtn);
+            
+            commentElement.querySelector('.comment-content').appendChild(editActions);
+            
+            saveBtn.addEventListener('click', async () => {
+                try {
+                    const response = await fetch(`/api/comments/${comment.id}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            content: editInput.value.trim()
+                        })
+                    });
+                    
+                    if (!response.ok) throw new Error('編輯評論失敗');
+                    
+                    const updatedComment = await response.json();
+                    content.textContent = updatedComment.content;
+                    editInput.replaceWith(content);
+                    editActions.remove();
+                } catch (error) {
+                    console.error('編輯評論失敗:', error);
+                    alert('編輯評論失敗，請稍後再試');
+                }
+            });
+            
+            cancelBtn.addEventListener('click', () => {
+                editInput.replaceWith(content);
+                editActions.remove();
+            });
+        });
+        
+        // 添加刪除按鈕事件
+        const deleteBtn = commentElement.querySelector('.delete-comment-btn');
+        deleteBtn.addEventListener('click', async () => {
+            if (confirm('確定要刪除這條評論嗎？')) {
+                try {
+                    const response = await fetch(`/api/comments/${comment.id}`, {
+                        method: 'DELETE'
+                    });
+                    
+                    if (!response.ok) throw new Error('刪除評論失敗');
+                    
+                    commentElement.remove();
+                } catch (error) {
+                    console.error('刪除評論失敗:', error);
+                    alert('刪除評論失敗，請稍後再試');
+                }
+            }
+        });
+    }
     
-    commentElement.appendChild(avatar);
-    commentElement.appendChild(commentContent);
     commentSection.appendChild(commentElement);
+    return commentElement;
 }
 
 // 初始化

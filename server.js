@@ -491,6 +491,24 @@ app.patch('/api/posts/:postId/visibility', authenticateToken, (req, res) => {
     });
 });
 
+// 獲取貼文的點讚用戶列表
+app.get('/api/posts/:postId/likes', (req, res) => {
+    const { postId } = req.params;
+    
+    db.all(`
+        SELECT u.id, u.username, u.avatar
+        FROM likes l
+        JOIN users u ON l.user_id = u.id
+        WHERE l.post_id = ?
+        ORDER BY l.created_at DESC
+    `, [postId], (err, likes) => {
+        if (err) {
+            return res.status(500).json({ error: '獲取點讚用戶失敗' });
+        }
+        res.json(likes);
+    });
+});
+
 // 錯誤處理中間件
 app.use((err, req, res, next) => {
     console.error(err.stack);

@@ -590,4 +590,89 @@ nav a.active {
 .following-name {
     color: #657786;
     font-size: 0.9rem;
+}
+
+/* 點讚用戶列表樣式 */
+.likes-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.likes-modal-content {
+    background: white;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 400px;
+    max-height: 80vh;
+    overflow: hidden;
+}
+
+.likes-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    border-bottom: 1px solid #e1e8ed;
+}
+
+.likes-modal-header h3 {
+    margin: 0;
+    font-size: 1.2rem;
+}
+
+.close-modal {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: #666;
+}
+
+.likes-modal-body {
+    padding: 1rem;
+    overflow-y: auto;
+    max-height: calc(80vh - 60px);
+}
+
+.like-user {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+}
+
+.like-user:hover {
+    background-color: #f8f9fa;
+}
+
+.like-user-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.like-username {
+    font-weight: 500;
+    color: #1a1a1a;
+}
+
+.like-count {
+    cursor: pointer;
+    color: #666;
+    font-size: 0.9rem;
+}
+
+.like-count:hover {
+    text-decoration: underline;
 } 
