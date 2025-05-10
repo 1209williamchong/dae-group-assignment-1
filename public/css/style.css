@@ -1,4 +1,4 @@
-:root {
+oot {
     --primary-color: #1a1a1a;
     --secondary-color: #2a2a2a;
     --background-color: #000000;
@@ -869,4 +869,27 @@ nav a.active {
 
 #freshBtn:hover {
     background-color: #ff8533;
-} 
+}
+
+/* About 頁面樣式 */
+.about-section {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2rem;
+    background-color: #1a1a1a;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    color: #ffffff;
+    text-align: center;
+}
+
+.about-section h1 {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+}
+
+.about-section p {
+    font-size: 1.2rem;
+    line-height: 1.8;
+    margin-bottom: 1rem;
+}:r
