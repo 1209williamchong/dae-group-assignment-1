@@ -226,6 +226,11 @@
                 alert('登入時發生錯誤');
             }
         });
+
+        document.getElementById('createRoomBtn').addEventListener('click', () => {
+            document.getElementById('createRoomModal').style.display = 'block';
+            loadUsers();
+        });
     });
     </script>
 </body>
