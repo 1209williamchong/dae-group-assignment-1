@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>關於我們 - fresh</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="container">
+        <!-- 導航欄 -->
+        <nav class="nav">
+            <div class="nav-left">
+                <a href="home.html" class="logo">fresh</a>
+            </div>
+            <div class="nav-right">
+                <a href="home.html" class="nav-link">首頁</a>
+                <a href="profile.html" class="nav-link">個人檔案</a>
+                <a href="about.html" class="nav-link active">關於我們</a>
+                <a href="logout.html" class="nav-link">登出</a>
+            </div>
+        </nav>
+
+        <!-- 主內容區域 -->
+        <main class="main-content">
+            <section class="about-section">
+                <h1>關於我們</h1>
+                <p>fresh 是一個專注於圖片分享的社交平台，讓用戶輕鬆分享生活中的精彩瞬間。</p>
+                <p>我們的目標是建立一個充滿活力的社群，讓每個人都能找到屬於自己的聲音。</p>
+                <p>感謝您加入我們的旅程！</p>
+            </section>
+        </main>
+    </div>
+</body>
+</html>
