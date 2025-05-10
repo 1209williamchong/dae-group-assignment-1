@@ -111,6 +111,43 @@ db.serialize(() => {
             FOREIGN KEY (user_id) REFERENCES users (id)
         )
     `);
+
+    // 創建聊天室表
+    db.run(`
+        CREATE TABLE IF NOT EXISTS chat_rooms (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT,
+            type TEXT NOT NULL DEFAULT 'private',
+            created_by INTEGER NOT NULL,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (created_by) REFERENCES users (id)
+        )
+    `);
+
+    // 創建聊天室成員表
+    db.run(`
+        CREATE TABLE IF NOT EXISTS chat_room_members (
+            room_id INTEGER NOT NULL,
+            user_id INTEGER NOT NULL,
+            joined_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            PRIMARY KEY (room_id, user_id),
+            FOREIGN KEY (room_id) REFERENCES chat_rooms (id),
+            FOREIGN KEY (user_id) REFERENCES users (id)
+        )
+    `);
+
+    // 創建聊天訊息表
+    db.run(`
+        CREATE TABLE IF NOT EXISTS chat_messages (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            room_id INTEGER NOT NULL,
+            user_id INTEGER NOT NULL,
+            content TEXT NOT NULL,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (room_id) REFERENCES chat_rooms (id),
+            FOREIGN KEY (user_id) REFERENCES users (id)
+        )
+    `);
 });
 
 module.exports = db; 

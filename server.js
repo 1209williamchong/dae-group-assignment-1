@@ -762,6 +762,222 @@ app.put('/api/communities/:communityId', authenticateToken, upload.fields([
     );
 });
 
+// 創建聊天室
+app.post('/api/chat/rooms', authenticateToken, (req, res) => {
+    const { name, type, members } = req.body;
+    
+    if (!members || !Array.isArray(members) || members.length === 0) {
+        return res.status(400).json({ error: '必須指定聊天室成員' });
+    }
+
+    db.serialize(() => {
+        db.run('BEGIN TRANSACTION');
+
+        // 創建聊天室
+        db.run(
+            'INSERT INTO chat_rooms (name, type, created_by) VALUES (?, ?, ?)',
+            [name, type || 'private', req.user.id],
+            function(err) {
+                if (err) {
+                    db.run('ROLLBACK');
+                    return res.status(500).json({ error: '創建聊天室失敗' });
+                }
+
+                const roomId = this.lastID;
+                const allMembers = [...new Set([...members, req.user.id])];
+
+                // 添加成員
+                const stmt = db.prepare('INSERT INTO chat_room_members (room_id, user_id) VALUES (?, ?)');
+                allMembers.forEach(userId => {
+                    stmt.run([roomId, userId]);
+                });
+                stmt.finalize();
+
+                db.run('COMMIT');
+                res.json({
+                    id: roomId,
+                    name,
+                    type,
+                    created_by: req.user.id,
+                    members: allMembers
+                });
+            }
+        );
+    });
+});
+
+// 獲取用戶的聊天室列表
+app.get('/api/chat/rooms', authenticateToken, (req, res) => {
+    db.all(`
+        SELECT cr.*, 
+        (SELECT COUNT(*) FROM chat_room_members WHERE room_id = cr.id) as member_count,
+        (SELECT content FROM chat_messages WHERE room_id = cr.id ORDER BY created_at DESC LIMIT 1) as last_message,
+        (SELECT created_at FROM chat_messages WHERE room_id = cr.id ORDER BY created_at DESC LIMIT 1) as last_message_time
+        FROM chat_rooms cr
+        JOIN chat_room_members crm ON cr.id = crm.room_id
+        WHERE crm.user_id = ?
+        ORDER BY last_message_time DESC
+    `, [req.user.id], (err, rooms) => {
+        if (err) {
+            return res.status(500).json({ error: '獲取聊天室列表失敗' });
+        }
+        res.json(rooms);
+    });
+});
+
+// 獲取聊天室成員
+app.get('/api/chat/rooms/:roomId/members', authenticateToken, (req, res) => {
+    const { roomId } = req.params;
+    
+    db.all(`
+        SELECT u.id, u.username, u.avatar
+        FROM chat_room_members crm
+        JOIN users u ON crm.user_id = u.id
+        WHERE crm.room_id = ?
+    `, [roomId], (err, members) => {
+        if (err) {
+            return res.status(500).json({ error: '獲取聊天室成員失敗' });
+        }
+        res.json(members);
+    });
+});
+
+// 獲取聊天室訊息
+app.get('/api/chat/rooms/:roomId/messages', authenticateToken, (req, res) => {
+    const { roomId } = req.params;
+    const { before } = req.query;
+    
+    let query = `
+        SELECT cm.*, u.username, u.avatar
+        FROM chat_messages cm
+        JOIN users u ON cm.user_id = u.id
+        WHERE cm.room_id = ?
+    `;
+    
+    const params = [roomId];
+    if (before) {
+        query += ' AND cm.created_at < ?';
+        params.push(before);
+    }
+    
+    query += ' ORDER BY cm.created_at DESC LIMIT 50';
+    
+    db.all(query, params, (err, messages) => {
+        if (err) {
+            return res.status(500).json({ error: '獲取聊天訊息失敗' });
+        }
+        res.json(messages.reverse());
+    });
+});
+
+// 發送聊天訊息
+app.post('/api/chat/rooms/:roomId/messages', authenticateToken, (req, res) => {
+    const { roomId } = req.params;
+    const { content } = req.body;
+    
+    if (!content) {
+        return res.status(400).json({ error: '訊息內容不能為空' });
+    }
+
+    // 檢查是否為聊天室成員
+    db.get(
+        'SELECT * FROM chat_room_members WHERE room_id = ? AND user_id = ?',
+        [roomId, req.user.id],
+        (err, member) => {
+            if (err) {
+                return res.status(500).json({ error: '資料庫錯誤' });
+            }
+            if (!member) {
+                return res.status(403).json({ error: '您不是此聊天室的成員' });
+            }
+
+            db.run(
+                'INSERT INTO chat_messages (room_id, user_id, content) VALUES (?, ?, ?)',
+                [roomId, req.user.id, content],
+                function(err) {
+                    if (err) {
+                        return res.status(500).json({ error: '發送訊息失敗' });
+                    }
+
+                    // 獲取新訊息的完整資訊
+                    db.get(`
+                        SELECT cm.*, u.username, u.avatar
+                        FROM chat_messages cm
+                        JOIN users u ON cm.user_id = u.id
+                        WHERE cm.id = ?
+                    `, [this.lastID], (err, message) => {
+                        if (err) {
+                            return res.status(500).json({ error: '獲取訊息詳情失敗' });
+                        }
+                        res.json(message);
+                    });
+                }
+            );
+        }
+    );
+});
+
+// 添加聊天室成員
+app.post('/api/chat/rooms/:roomId/members', authenticateToken, (req, res) => {
+    const { roomId } = req.params;
+    const { userId } = req.body;
+
+    // 檢查是否為聊天室管理員
+    db.get(
+        'SELECT * FROM chat_rooms WHERE id = ? AND created_by = ?',
+        [roomId, req.user.id],
+        (err, room) => {
+            if (err) {
+                return res.status(500).json({ error: '資料庫錯誤' });
+            }
+            if (!room) {
+                return res.status(403).json({ error: '只有管理員才能添加成員' });
+            }
+
+            db.run(
+                'INSERT OR IGNORE INTO chat_room_members (room_id, user_id) VALUES (?, ?)',
+                [roomId, userId],
+                function(err) {
+                    if (err) {
+                        return res.status(500).json({ error: '添加成員失敗' });
+                    }
+                    res.json({ success: true });
+                }
+            );
+        }
+    );
+});
+
+// 移除聊天室成員
+app.delete('/api/chat/rooms/:roomId/members/:userId', authenticateToken, (req, res) => {
+    const { roomId, userId } = req.params;
+
+    // 檢查是否為聊天室管理員
+    db.get(
+        'SELECT * FROM chat_rooms WHERE id = ? AND created_by = ?',
+        [roomId, req.user.id],
+        (err, room) => {
+            if (err) {
+                return res.status(500).json({ error: '資料庫錯誤' });
+            }
+            if (!room) {
+                return res.status(403).json({ error: '只有管理員才能移除成員' });
+            }
+
+            db.run(
+                'DELETE FROM chat_room_members WHERE room_id = ? AND user_id = ?',
+                [roomId, userId],
+                function(err) {
+                    if (err) {
+                        return res.status(500).json({ error: '移除成員失敗' });
+                    }
+                    res.json({ success: true });
+                }
+            );
+        }
+    );
+});
+
 // 錯誤處理中間件
 app.use((err, req, res, next) => {
     console.error(err.stack);

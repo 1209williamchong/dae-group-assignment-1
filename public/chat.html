@@ -3,61 +3,108 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>聊天室 - fresh</title>
-    <link rel="stylesheet" href="/styles/chat.css">
-    <link rel="stylesheet" href="/styles/main.css">
-    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
-    <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+    <title>聊天室 - 社群平台</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/chat.css">
 </head>
 <body>
-    <nav class="nav">
-        <div class="nav-left">
-            <a href="/" class="logo">fresh</a>
-        </div>
-        <div class="nav-right">
-            <a href="chat.html" class="nav-link active">
-                <ion-icon name="chatbubbles-outline"></ion-icon>
-                <span>聊天室</span>
-            </a>
-            <a href="profile.html" class="nav-link">
-                <ion-icon name="person-outline"></ion-icon>
-                <span>個人檔案</span>
-            </a>
-            <button id="logout-btn" class="nav-link">
-                <ion-icon name="log-out-outline"></ion-icon>
-                <span>登出</span>
-            </button>
-        </div>
-    </nav>
+    <header>
+        <nav>
+            <div class="nav-container">
+                <a href="/" class="nav-link">首頁</a>
+                <a href="/communities.html" class="nav-link">社群</a>
+                <a href="/chat.html" class="nav-link active">聊天</a>
+                <a href="/profile.html" class="nav-link">個人資料</a>
+            </div>
+            <div class="user-info">
+                <span id="username"></span>
+                <button id="logoutBtn">登出</button>
+            </div>
+        </nav>
+    </header>
 
-    <div class="main-content">
+    <main>
         <div class="chat-container">
             <div class="chat-sidebar">
-                <div class="search-container">
-                    <input type="text" id="chat-search" placeholder="搜尋聊天室...">
-                    <span class="search-icon">🔍</span>
+                <div class="sidebar-header">
+                    <h2>聊天室</h2>
+                    <button id="createRoomBtn" class="btn-primary">新建聊天室</button>
                 </div>
-                <div class="chat-list" id="chat-list">
-                    <!-- 聊天室列表將由 JavaScript 動態生成 -->
+                <div class="room-list" id="roomList">
+                    <!-- 聊天室列表將在這裡動態生成 -->
                 </div>
             </div>
-            <div class="main-chat">
+            
+            <div class="chat-main">
                 <div class="chat-header">
-                    <div class="chat-title">選擇一個聊天室開始對話</div>
+                    <div class="room-info">
+                        <h3 id="currentRoomName">選擇聊天室</h3>
+                        <span id="memberCount"></span>
+                    </div>
+                    <div class="room-actions">
+                        <button id="showMembersBtn" class="btn-secondary">成員</button>
+                    </div>
                 </div>
-                <div class="chat-messages" id="chat-messages">
-                    <!-- 訊息將由 JavaScript 動態生成 -->
+                
+                <div class="messages-container" id="messagesContainer">
+                    <!-- 訊息將在這裡動態生成 -->
                 </div>
-                <div class="chat-input">
-                    <input type="text" id="message-input" placeholder="輸入訊息...">
-                    <button class="upload-button" id="upload-file">📎</button>
-                    <button class="send-button" id="send-message-btn">發送</button>
+                
+                <div class="message-input">
+                    <textarea id="messageInput" placeholder="輸入訊息..."></textarea>
+                    <button id="sendMessageBtn" class="btn-primary">發送</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- 新建聊天室模態框 -->
+    <div id="createRoomModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>新建聊天室</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="createRoomForm">
+                    <div class="form-group">
+                        <label for="roomName">聊天室名稱</label>
+                        <input type="text" id="roomName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="roomType">聊天室類型</label>
+                        <select id="roomType">
+                            <option value="private">私聊</option>
+                            <option value="group">群組</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>選擇成員</label>
+                        <div id="memberSelection" class="member-selection">
+                            <!-- 成員選擇列表將在這裡動態生成 -->
+                        </div>
+                    </div>
+                    <button type="submit" class="btn-primary">創建</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- 成員列表模態框 -->
+    <div id="membersModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>聊天室成員</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="membersList" class="members-list">
+                    <!-- 成員列表將在這裡動態生成 -->
                 </div>
             </div>
         </div>
     </div>
 
-    <script src="/src/main.js"></script>
-    <script src="/src/chat.js"></script>
+    <script src="js/chat.js"></script>
 </body>
 </html> 
