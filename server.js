@@ -509,6 +509,259 @@ app.get('/api/posts/:postId/likes', (req, res) => {
     });
 });
 
+// 創建社群
+app.post('/api/communities', authenticateToken, upload.fields([
+    { name: 'avatar', maxCount: 1 },
+    { name: 'cover_image', maxCount: 1 }
+]), (req, res) => {
+    const { name, description } = req.body;
+    const avatar = req.files.avatar ? `/uploads/${req.files.avatar[0].filename}` : null;
+    const cover_image = req.files.cover_image ? `/uploads/${req.files.cover_image[0].filename}` : null;
+
+    if (!name) {
+        return res.status(400).json({ error: '社群名稱不能為空' });
+    }
+
+    db.run(
+        'INSERT INTO communities (name, description, avatar, cover_image, created_by) VALUES (?, ?, ?, ?, ?)',
+        [name, description, avatar, cover_image, req.user.id],
+        function(err) {
+            if (err) {
+                return res.status(500).json({ error: '創建社群失敗' });
+            }
+
+            // 將創建者設為管理員
+            db.run(
+                'INSERT INTO community_members (community_id, user_id, role) VALUES (?, ?, ?)',
+                [this.lastID, req.user.id, 'admin'],
+                (err) => {
+                    if (err) {
+                        return res.status(500).json({ error: '設置管理員失敗' });
+                    }
+                    res.json({
+                        id: this.lastID,
+                        name,
+                        description,
+                        avatar,
+                        cover_image,
+                        created_by: req.user.id
+                    });
+                }
+            );
+        }
+    );
+});
+
+// 獲取社群列表
+app.get('/api/communities', (req, res) => {
+    db.all(`
+        SELECT c.*, u.username as creator_name,
+        (SELECT COUNT(*) FROM community_members WHERE community_id = c.id) as member_count
+        FROM communities c
+        JOIN users u ON c.created_by = u.id
+        ORDER BY c.created_at DESC
+    `, (err, communities) => {
+        if (err) {
+            return res.status(500).json({ error: '獲取社群列表失敗' });
+        }
+        res.json(communities);
+    });
+});
+
+// 獲取社群詳情
+app.get('/api/communities/:communityId', (req, res) => {
+    const { communityId } = req.params;
+    
+    db.get(`
+        SELECT c.*, u.username as creator_name,
+        (SELECT COUNT(*) FROM community_members WHERE community_id = c.id) as member_count
+        FROM communities c
+        JOIN users u ON c.created_by = u.id
+        WHERE c.id = ?
+    `, [communityId], (err, community) => {
+        if (err) {
+            return res.status(500).json({ error: '獲取社群詳情失敗' });
+        }
+        if (!community) {
+            return res.status(404).json({ error: '社群不存在' });
+        }
+        res.json(community);
+    });
+});
+
+// 加入社群
+app.post('/api/communities/:communityId/join', authenticateToken, (req, res) => {
+    const { communityId } = req.params;
+    
+    db.run(
+        'INSERT OR IGNORE INTO community_members (community_id, user_id) VALUES (?, ?)',
+        [communityId, req.user.id],
+        function(err) {
+            if (err) {
+                return res.status(500).json({ error: '加入社群失敗' });
+            }
+            res.json({ success: true });
+        }
+    );
+});
+
+// 退出社群
+app.delete('/api/communities/:communityId/leave', authenticateToken, (req, res) => {
+    const { communityId } = req.params;
+    
+    db.run(
+        'DELETE FROM community_members WHERE community_id = ? AND user_id = ?',
+        [communityId, req.user.id],
+        function(err) {
+            if (err) {
+                return res.status(500).json({ error: '退出社群失敗' });
+            }
+            res.json({ success: true });
+        }
+    );
+});
+
+// 獲取社群成員列表
+app.get('/api/communities/:communityId/members', (req, res) => {
+    const { communityId } = req.params;
+    
+    db.all(`
+        SELECT u.id, u.username, u.avatar, cm.role, cm.joined_at
+        FROM community_members cm
+        JOIN users u ON cm.user_id = u.id
+        WHERE cm.community_id = ?
+        ORDER BY cm.role DESC, cm.joined_at ASC
+    `, [communityId], (err, members) => {
+        if (err) {
+            return res.status(500).json({ error: '獲取成員列表失敗' });
+        }
+        res.json(members);
+    });
+});
+
+// 發布社群貼文
+app.post('/api/communities/:communityId/posts', authenticateToken, upload.single('media'), (req, res) => {
+    const { communityId } = req.params;
+    const { content } = req.body;
+    const media = req.file ? `/uploads/${req.file.filename}` : null;
+
+    if (!content) {
+        return res.status(400).json({ error: '貼文內容不能為空' });
+    }
+
+    // 檢查是否為社群成員
+    db.get(
+        'SELECT * FROM community_members WHERE community_id = ? AND user_id = ?',
+        [communityId, req.user.id],
+        (err, member) => {
+            if (err) {
+                return res.status(500).json({ error: '資料庫錯誤' });
+            }
+            if (!member) {
+                return res.status(403).json({ error: '只有社群成員才能發布貼文' });
+            }
+
+            db.run(
+                'INSERT INTO community_posts (community_id, user_id, content, media) VALUES (?, ?, ?, ?)',
+                [communityId, req.user.id, content, media],
+                function(err) {
+                    if (err) {
+                        return res.status(500).json({ error: '發布貼文失敗' });
+                    }
+                    res.json({
+                        id: this.lastID,
+                        community_id: communityId,
+                        user_id: req.user.id,
+                        content,
+                        media,
+                        created_at: new Date().toISOString()
+                    });
+                }
+            );
+        }
+    );
+});
+
+// 獲取社群貼文列表
+app.get('/api/communities/:communityId/posts', (req, res) => {
+    const { communityId } = req.params;
+    
+    db.all(`
+        SELECT cp.*, u.username, u.avatar,
+        (SELECT COUNT(*) FROM likes WHERE post_id = cp.id) as likes_count,
+        (SELECT COUNT(*) FROM comments WHERE post_id = cp.id) as comments_count
+        FROM community_posts cp
+        JOIN users u ON cp.user_id = u.id
+        WHERE cp.community_id = ?
+        ORDER BY cp.created_at DESC
+    `, [communityId], (err, posts) => {
+        if (err) {
+            return res.status(500).json({ error: '獲取社群貼文失敗' });
+        }
+        res.json(posts);
+    });
+});
+
+// 更新社群設定
+app.put('/api/communities/:communityId', authenticateToken, upload.fields([
+    { name: 'avatar', maxCount: 1 },
+    { name: 'cover_image', maxCount: 1 }
+]), (req, res) => {
+    const { communityId } = req.params;
+    const { name, description } = req.body;
+    const avatar = req.files.avatar ? `/uploads/${req.files.avatar[0].filename}` : null;
+    const cover_image = req.files.cover_image ? `/uploads/${req.files.cover_image[0].filename}` : null;
+
+    // 檢查是否為社群管理員
+    db.get(
+        'SELECT * FROM community_members WHERE community_id = ? AND user_id = ? AND role = "admin"',
+        [communityId, req.user.id],
+        (err, admin) => {
+            if (err) {
+                return res.status(500).json({ error: '資料庫錯誤' });
+            }
+            if (!admin) {
+                return res.status(403).json({ error: '只有管理員才能修改社群設定' });
+            }
+
+            const updates = [];
+            const params = [];
+            if (name) {
+                updates.push('name = ?');
+                params.push(name);
+            }
+            if (description) {
+                updates.push('description = ?');
+                params.push(description);
+            }
+            if (avatar) {
+                updates.push('avatar = ?');
+                params.push(avatar);
+            }
+            if (cover_image) {
+                updates.push('cover_image = ?');
+                params.push(cover_image);
+            }
+
+            if (updates.length === 0) {
+                return res.status(400).json({ error: '沒有提供要更新的內容' });
+            }
+
+            params.push(communityId);
+            db.run(
+                `UPDATE communities SET ${updates.join(', ')} WHERE id = ?`,
+                params,
+                function(err) {
+                    if (err) {
+                        return res.status(500).json({ error: '更新社群設定失敗' });
+                    }
+                    res.json({ success: true });
+                }
+            );
+        }
+    );
+});
+
 // 錯誤處理中間件
 app.use((err, req, res, next) => {
     console.error(err.stack);

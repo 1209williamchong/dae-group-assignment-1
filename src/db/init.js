@@ -70,6 +70,47 @@ db.serialize(() => {
             FOREIGN KEY (followed_id) REFERENCES users (id)
         )
     `);
+
+    // 創建社群表
+    db.run(`
+        CREATE TABLE IF NOT EXISTS communities (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT UNIQUE NOT NULL,
+            description TEXT,
+            avatar TEXT,
+            cover_image TEXT,
+            created_by INTEGER NOT NULL,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (created_by) REFERENCES users (id)
+        )
+    `);
+
+    // 創建社群成員表
+    db.run(`
+        CREATE TABLE IF NOT EXISTS community_members (
+            community_id INTEGER NOT NULL,
+            user_id INTEGER NOT NULL,
+            role TEXT NOT NULL DEFAULT 'member',
+            joined_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            PRIMARY KEY (community_id, user_id),
+            FOREIGN KEY (community_id) REFERENCES communities (id),
+            FOREIGN KEY (user_id) REFERENCES users (id)
+        )
+    `);
+
+    // 創建社群貼文表
+    db.run(`
+        CREATE TABLE IF NOT EXISTS community_posts (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            community_id INTEGER NOT NULL,
+            user_id INTEGER NOT NULL,
+            content TEXT NOT NULL,
+            media TEXT,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (community_id) REFERENCES communities (id),
+            FOREIGN KEY (user_id) REFERENCES users (id)
+        )
+    `);
 });
 
 module.exports = db; 
