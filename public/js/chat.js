@@ -18,121 +18,82 @@ const currentRoomName = document.getElementById('currentRoomName');
 const memberCount = document.getElementById('memberCount');
 
 // 初始化
-document.addEventListener('DOMContentLoaded', async () => {
-    // 檢查登入狀態
-    const token = localStorage.getItem('token');
-    if (!token) {
-        window.location.href = '/login.html';
-        return;
-    }
-
+async function init() {
     try {
+        console.log('開始初始化聊天功能...');
+        
+        // 檢查登入狀態
+        const token = localStorage.getItem('token');
+        if (!token) {
+            console.log('未找到登入令牌，重定向到登入頁面');
+            window.location.href = '/login.html';
+            return;
+        }
+
         // 獲取當前用戶信息
         const response = await fetch('/api/users/me', {
             headers: {
                 'Authorization': `Bearer ${token}`
             }
         });
-        
+
         if (!response.ok) {
-            throw new Error('獲取用戶信息失敗');
+            const errorData = await response.json();
+            throw new Error(errorData.error || '獲取用戶信息失敗');
         }
 
         currentUser = await response.json();
-        document.getElementById('username').textContent = currentUser.username;
+        console.log('成功獲取用戶信息:', currentUser);
+
+        // 設置事件監聽器
+        document.getElementById('sendMessageBtn').addEventListener('click', sendMessage);
+        document.getElementById('messageInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+
+        document.getElementById('createRoomBtn').addEventListener('click', () => {
+            document.getElementById('createRoomModal').style.display = 'block';
+            loadUsers();
+        });
+
+        document.getElementById('createRoomForm').addEventListener('submit', createRoom);
+
+        document.querySelectorAll('.close-modal').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.getElementById('createRoomModal').style.display = 'none';
+                document.getElementById('membersModal').style.display = 'none';
+            });
+        });
+
+        document.getElementById('showMembersBtn').addEventListener('click', () => {
+            document.getElementById('membersModal').style.display = 'block';
+            loadRoomMembers();
+        });
 
         // 加載聊天室列表
-        loadRooms();
+        await loadRooms();
         
-        // 設置事件監聽器
-        setupEventListeners();
+        // 自動選擇第一個聊天室
+        const firstRoom = document.querySelector('.room-item');
+        if (firstRoom) {
+            firstRoom.click();
+        }
+        
+        console.log('聊天功能初始化完成');
     } catch (error) {
         console.error('初始化失敗:', error);
         alert('初始化失敗，請重新登入');
         window.location.href = '/login.html';
     }
-});
-
-// 設置事件監聽器
-function setupEventListeners() {
-    // 發送訊息
-    sendMessageBtn.addEventListener('click', sendMessage);
-    messageInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter' && !e.shiftKey) {
-            e.preventDefault();
-            sendMessage();
-        }
-    });
-
-    // 新建聊天室
-    createRoomBtn.addEventListener('click', () => {
-        createRoomModal.classList.add('active');
-        loadUserList();
-    });
-
-    // 關閉模態框
-    document.querySelectorAll('.close-modal').forEach(btn => {
-        btn.addEventListener('click', () => {
-            createRoomModal.classList.remove('active');
-            membersModal.classList.remove('active');
-        });
-    });
-
-    // 點擊模態框外部關閉
-    [createRoomModal, membersModal].forEach(modal => {
-        modal.addEventListener('click', (e) => {
-            if (e.target === modal) {
-                modal.classList.remove('active');
-            }
-        });
-    });
-
-    // 創建聊天室表單提交
-    createRoomForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const formData = new FormData(createRoomForm);
-        const selectedMembers = Array.from(document.querySelectorAll('.member-item.selected'))
-            .map(item => item.dataset.userId);
-
-        try {
-            const response = await fetch('/api/chat/rooms', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
-                },
-                body: JSON.stringify({
-                    name: formData.get('roomName'),
-                    type: formData.get('roomType'),
-                    members: selectedMembers
-                })
-            });
-
-            if (!response.ok) {
-                throw new Error('創建聊天室失敗');
-            }
-
-            createRoomModal.classList.remove('active');
-            createRoomForm.reset();
-            loadRooms();
-        } catch (error) {
-            console.error('創建聊天室失敗:', error);
-            alert('創建聊天室失敗');
-        }
-    });
-
-    // 顯示成員列表
-    showMembersBtn.addEventListener('click', () => {
-        if (currentRoom) {
-            loadRoomMembers();
-            membersModal.classList.add('active');
-        }
-    });
 }
 
 // 加載聊天室列表
 async function loadRooms() {
     try {
+        console.log('開始加載聊天室列表...');
         const response = await fetch('/api/chat/rooms', {
             headers: {
                 'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -140,13 +101,22 @@ async function loadRooms() {
         });
 
         if (!response.ok) {
-            throw new Error('獲取聊天室列表失敗');
+            const errorData = await response.json();
+            throw new Error(errorData.error || '獲取聊天室列表失敗');
         }
 
         const rooms = await response.json();
+        console.log('成功獲取聊天室列表:', rooms);
+        
+        if (rooms.length === 0) {
+            roomList.innerHTML = '<div class="no-rooms">尚無聊天室，點擊「新建聊天室」開始聊天</div>';
+            return;
+        }
+
         renderRoomList(rooms);
     } catch (error) {
         console.error('加載聊天室列表失敗:', error);
+        roomList.innerHTML = '<div class="error-message">加載聊天室失敗，請稍後再試</div>';
     }
 }
 
@@ -155,7 +125,7 @@ function renderRoomList(rooms) {
     roomList.innerHTML = rooms.map(room => `
         <div class="room-item" data-room-id="${room.id}">
             <div class="room-item-header">
-                <span class="room-name">${room.name}</span>
+                <span class="room-name">${room.name || '未命名聊天室'}</span>
                 <span class="room-time">${formatTime(room.last_message_time)}</span>
             </div>
             <div class="room-last-message">${room.last_message || '尚無訊息'}</div>
@@ -172,58 +142,53 @@ function renderRoomList(rooms) {
     });
 }
 
-// 加載聊天室
+// 加載聊天室訊息
 async function loadRoom(roomId) {
-    currentRoom = roomId;
-    messagesContainer.innerHTML = '';
-    
     try {
-        // 獲取聊天室信息
-        const roomResponse = await fetch(`/api/chat/rooms/${roomId}`, {
-            headers: {
-                'Authorization': `Bearer ${localStorage.getItem('token')}`
-            }
-        });
-
-        if (!roomResponse.ok) {
-            throw new Error('獲取聊天室信息失敗');
-        }
-
-        const room = await roomResponse.json();
-        currentRoomName.textContent = room.name;
-        memberCount.textContent = `${room.member_count} 位成員`;
-
+        console.log('開始加載聊天室訊息:', roomId);
+        currentRoom = roomId;
+        
+        // 更新聊天室標題
+        const roomName = document.querySelector(`.room-item[data-room-id="${roomId}"] .room-name`).textContent;
+        document.querySelector('.chat-header h2').textContent = roomName;
+        
         // 獲取訊息
-        const messagesResponse = await fetch(`/api/chat/rooms/${roomId}/messages`, {
+        const response = await fetch(`/api/chat/rooms/${roomId}/messages`, {
             headers: {
                 'Authorization': `Bearer ${localStorage.getItem('token')}`
             }
         });
 
-        if (!messagesResponse.ok) {
-            throw new Error('獲取訊息失敗');
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || '獲取聊天室訊息失敗');
         }
 
-        const messages = await messagesResponse.json();
+        const messages = await response.json();
+        console.log('成功獲取聊天室訊息:', messages);
+        
+        // 渲染訊息
         renderMessages(messages);
-
+        
         // 開始輪詢新訊息
-        if (messagePollingInterval) {
-            clearInterval(messagePollingInterval);
-        }
-        messagePollingInterval = setInterval(() => pollNewMessages(), 3000);
+        startMessagePolling();
     } catch (error) {
-        console.error('加載聊天室失敗:', error);
+        console.error('加載聊天室訊息失敗:', error);
+        messagesContainer.innerHTML = '<div class="error-message">加載訊息失敗，請稍後再試</div>';
     }
 }
 
-// 渲染訊息
+// 渲染訊息列表
 function renderMessages(messages) {
+    if (messages.length === 0) {
+        messagesContainer.innerHTML = '<div class="no-messages">尚無訊息，開始聊天吧！</div>';
+        return;
+    }
+
     messagesContainer.innerHTML = messages.map(message => `
         <div class="message ${message.user_id === currentUser.id ? 'sent' : 'received'}">
             <div class="message-header">
-                <img src="${message.avatar || '/images/default-avatar.png'}" alt="${message.username}" class="message-avatar">
-                <span class="message-username">${message.username}</span>
+                <span class="message-sender">${message.username}</span>
                 <span class="message-time">${formatTime(message.created_at)}</span>
             </div>
             <div class="message-content">${message.content}</div>
@@ -236,47 +201,45 @@ function renderMessages(messages) {
 
 // 發送訊息
 async function sendMessage() {
-    if (!currentRoom || !messageInput.value.trim()) return;
+    const content = messageInput.value.trim();
+    if (!content || !currentRoom) return;
 
     try {
+        console.log('開始發送訊息:', { roomId: currentRoom, content });
         const response = await fetch(`/api/chat/rooms/${currentRoom}/messages`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${localStorage.getItem('token')}`
             },
-            body: JSON.stringify({
-                content: messageInput.value.trim()
-            })
+            body: JSON.stringify({ content })
         });
 
         if (!response.ok) {
-            throw new Error('發送訊息失敗');
+            const errorData = await response.json();
+            throw new Error(errorData.error || '發送訊息失敗');
         }
 
-        messageInput.value = '';
         const message = await response.json();
-        appendMessage(message);
+        console.log('訊息發送成功:', message);
+        
+        // 清空輸入框
+        messageInput.value = '';
+        
+        // 重新加載訊息
+        await loadRoom(currentRoom);
     } catch (error) {
         console.error('發送訊息失敗:', error);
-        alert('發送訊息失敗');
+        alert('發送訊息失敗，請稍後再試');
     }
 }
 
-// 添加新訊息
-function appendMessage(message) {
-    const messageElement = document.createElement('div');
-    messageElement.className = `message ${message.user_id === currentUser.id ? 'sent' : 'received'}`;
-    messageElement.innerHTML = `
-        <div class="message-header">
-            <img src="${message.avatar || '/images/default-avatar.png'}" alt="${message.username}" class="message-avatar">
-            <span class="message-username">${message.username}</span>
-            <span class="message-time">${formatTime(message.created_at)}</span>
-        </div>
-        <div class="message-content">${message.content}</div>
-    `;
-    messagesContainer.appendChild(messageElement);
-    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+// 開始輪詢新訊息
+function startMessagePolling() {
+    if (messagePollingInterval) {
+        clearInterval(messagePollingInterval);
+    }
+    messagePollingInterval = setInterval(() => pollNewMessages(), 3000);
 }
 
 // 輪詢新訊息
@@ -284,21 +247,19 @@ async function pollNewMessages() {
     if (!currentRoom) return;
 
     try {
-        const lastMessage = messagesContainer.lastElementChild;
-        const before = lastMessage ? lastMessage.dataset.messageTime : null;
-
-        const response = await fetch(`/api/chat/rooms/${currentRoom}/messages${before ? `?before=${before}` : ''}`, {
+        const response = await fetch(`/api/chat/rooms/${currentRoom}/messages`, {
             headers: {
                 'Authorization': `Bearer ${localStorage.getItem('token')}`
             }
         });
 
         if (!response.ok) {
-            throw new Error('獲取新訊息失敗');
+            const errorData = await response.json();
+            throw new Error(errorData.error || '獲取新訊息失敗');
         }
 
         const messages = await response.json();
-        messages.forEach(message => appendMessage(message));
+        renderMessages(messages);
     } catch (error) {
         console.error('輪詢新訊息失敗:', error);
     }
@@ -344,6 +305,7 @@ async function loadRoomMembers() {
     if (!currentRoom) return;
 
     try {
+        console.log('開始加載聊天室成員:', currentRoom);
         const response = await fetch(`/api/chat/rooms/${currentRoom}/members`, {
             headers: {
                 'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -351,40 +313,131 @@ async function loadRoomMembers() {
         });
 
         if (!response.ok) {
-            throw new Error('獲取成員列表失敗');
+            const errorData = await response.json();
+            throw new Error(errorData.error || '獲取聊天室成員失敗');
         }
 
         const members = await response.json();
+        console.log('成功獲取聊天室成員:', members);
+        
+        const membersList = document.getElementById('membersList');
         membersList.innerHTML = members.map(member => `
-            <div class="member-card">
-                <img src="${member.avatar || '/images/default-avatar.png'}" alt="${member.username}" class="member-avatar">
+            <div class="member-item">
                 <span class="member-name">${member.username}</span>
+                <span class="member-role">${member.role}</span>
+                <span class="member-join-time">加入時間：${formatTime(member.joined_at)}</span>
             </div>
         `).join('');
     } catch (error) {
-        console.error('加載成員列表失敗:', error);
+        console.error('加載聊天室成員失敗:', error);
+        alert('加載聊天室成員失敗，請稍後再試');
     }
 }
 
 // 格式化時間
 function formatTime(timestamp) {
     if (!timestamp) return '';
-    
     const date = new Date(timestamp);
-    const now = new Date();
-    const diff = now - date;
-    
-    if (diff < 24 * 60 * 60 * 1000) {
-        return date.toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit' });
-    } else if (diff < 7 * 24 * 60 * 60 * 1000) {
-        return date.toLocaleDateString('zh-TW', { weekday: 'short' });
-    } else {
-        return date.toLocaleDateString('zh-TW', { month: 'short', day: 'numeric' });
-    }
+    return date.toLocaleString('zh-TW', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit'
+    });
 }
 
 // 登出
 document.getElementById('logoutBtn').addEventListener('click', () => {
     localStorage.removeItem('token');
     window.location.href = '/login.html';
-}); 
+});
+
+// 創建聊天室
+async function createRoom(event) {
+    event.preventDefault();
+    
+    const name = document.getElementById('roomName').value.trim();
+    const type = document.getElementById('roomType').value;
+    const members = Array.from(document.getElementById('roomMembers').selectedOptions).map(option => option.value);
+    
+    if (!name) {
+        alert('請輸入聊天室名稱');
+        return;
+    }
+    
+    if (members.length === 0) {
+        alert('請選擇至少一位成員');
+        return;
+    }
+
+    try {
+        console.log('開始創建聊天室:', { name, type, members });
+        const response = await fetch('/api/chat/rooms', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            },
+            body: JSON.stringify({ name, type, members })
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || '創建聊天室失敗');
+        }
+
+        const room = await response.json();
+        console.log('聊天室創建成功:', room);
+        
+        // 關閉模態框
+        document.getElementById('createRoomModal').style.display = 'none';
+        
+        // 清空表單
+        document.getElementById('createRoomForm').reset();
+        
+        // 重新加載聊天室列表
+        await loadRooms();
+        
+        // 自動選擇新創建的聊天室
+        const newRoomItem = document.querySelector(`.room-item[data-room-id="${room.id}"]`);
+        if (newRoomItem) {
+            newRoomItem.click();
+        }
+    } catch (error) {
+        console.error('創建聊天室失敗:', error);
+        alert('創建聊天室失敗，請稍後再試');
+    }
+}
+
+// 加載用戶列表
+async function loadUsers() {
+    try {
+        console.log('開始加載用戶列表...');
+        const response = await fetch('/api/users', {
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            }
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || '獲取用戶列表失敗');
+        }
+
+        const users = await response.json();
+        console.log('成功獲取用戶列表:', users);
+        
+        const memberSelect = document.getElementById('roomMembers');
+        memberSelect.innerHTML = users
+            .filter(user => user.id !== currentUser.id)
+            .map(user => `<option value="${user.id}">${user.username}</option>`)
+            .join('');
+    } catch (error) {
+        console.error('加載用戶列表失敗:', error);
+        alert('加載用戶列表失敗，請稍後再試');
+    }
+}
+
+// 啟動應用
+init(); 

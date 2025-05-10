@@ -978,6 +978,11 @@ app.delete('/api/chat/rooms/:roomId/members/:userId', authenticateToken, (req, r
     );
 });
 
+// 聊天室頁面路由
+app.get('/chat.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'chat.html'));
+});
+
 // 錯誤處理中間件
 app.use((err, req, res, next) => {
     console.error(err.stack);

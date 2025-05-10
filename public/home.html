@@ -6,7 +6,7 @@
     <title>fresh - 歡迎</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ionicons@5.5.2/dist/ionicons/ionicons.min.css">
-    <link rel="stylesheet" href="/styles/main.css">
+    <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
     <div class="container">
@@ -20,6 +20,10 @@
                     <img id="home-avatar" src="https://via.placeholder.com/100" alt="個人頭像" style="width:50px;height:50px;border-radius:50%;object-fit:cover;border:2px solid #ff6b00;">
                 </div>
                 <div class="auth-buttons" style="display:flex;align-items:center;gap:8px;vertical-align:middle;">
+                    <a href="chat.html" class="nav-link">
+                        <ion-icon name="chatbubbles-outline"></ion-icon>
+                        <span>聊天室</span>
+                    </a>
                     <a href="settings.html" class="nav-link">
                         <ion-icon name="settings-outline"></ion-icon>
                         <span>設定</span>
@@ -34,22 +38,25 @@
 
         <!-- 主內容區域 -->
         <main class="main-content">
-            <div class="welcome-section">
-                <h1>歡迎來到 fresh</h1>
-                <p>一個專注於圖片分享的社交平台</p>
-                
-                <div class="cta-buttons">
-                    <a href="share.html" class="cta-button primary" style="
-                        font-size:1.4em;
-                        font-weight:bold;
-                        color:#ff6b00;
-                        letter-spacing:2px;
-                        text-align:center;
-                        box-shadow:0 2px 8px rgba(255,107,0,0.10);
-                        text-shadow:0 2px 8px rgba(255,107,0,0.15);
-                        border-radius:8px;
-                        padding:16px 0;
-                    ">分享你的精彩瞬間</a>
+            <div class="content-wrapper">
+                <!-- 歡迎區 -->
+                <div class="welcome-section">
+                    <h1>歡迎來到 fresh</h1>
+                    <p>一個專注於圖片分享的社交平台</p>
+                    
+                    <div class="cta-buttons">
+                        <a href="share.html" class="cta-button primary" style="
+                            font-size:1.4em;
+                            font-weight:bold;
+                            color:#ff6b00;
+                            letter-spacing:2px;
+                            text-align:center;
+                            box-shadow:0 2px 8px rgba(255,107,0,0.10);
+                            text-shadow:0 2px 8px rgba(255,107,0,0.15);
+                            border-radius:8px;
+                            padding:16px 0;
+                        ">分享你的精彩瞬間</a>
+                    </div>
                 </div>
             </div>
         </main>
