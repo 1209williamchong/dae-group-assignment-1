@@ -3,74 +3,359 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>編輯個人資料 - fresh</title>
-    <link rel="stylesheet" href="styles/main.css">
-    <link rel="stylesheet" href="styles/edit-profile.css">
-    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
-    <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+    <title>fresh - 編輯個人資料</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ionicons@5.5.2/dist/ionicons/ionicons.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .edit-profile {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .profile-card {
+            background: #1a1a1a;
+            border-radius: 8px;
+            padding: 30px;
+            margin-bottom: 20px;
+            border: 1px solid #333;
+        }
+        .profile-header {
+            display: flex;
+            align-items: center;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        .avatar-section {
+            text-align: center;
+        }
+        .avatar-preview {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid #ff6b00;
+            margin-bottom: 15px;
+        }
+        .avatar-upload {
+            position: relative;
+            display: inline-block;
+        }
+        .avatar-upload input[type="file"] {
+            display: none;
+        }
+        .avatar-upload label {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: #2a2a2a;
+            color: #fff;
+            border: 1px solid #ff6b00;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .avatar-upload label:hover {
+            background: #ff6b00;
+            color: #fff;
+        }
+        .profile-info {
+            flex: 1;
+        }
+        .profile-info h2 {
+            color: #ff6b00;
+            margin-bottom: 20px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #fff;
+        }
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #333;
+            border-radius: 4px;
+            background: #2a2a2a;
+            color: #fff;
+            font-size: 16px;
+        }
+        .form-group input:focus,
+        .form-group textarea:focus {
+            border-color: #ff6b00;
+            outline: none;
+        }
+        .form-group textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+        .btn-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+        .success-message {
+            color: #4CAF50;
+            margin-top: 10px;
+            display: none;
+        }
+        .error-message {
+            color: #f44336;
+            margin-top: 10px;
+            display: none;
+        }
+        .preview-section {
+            margin-top: 20px;
+            padding: 20px;
+            background: #2a2a2a;
+            border-radius: 4px;
+            display: none;
+        }
+        .preview-section h3 {
+            color: #ff6b00;
+            margin-bottom: 15px;
+        }
+        .preview-content {
+            color: #ccc;
+            line-height: 1.6;
+        }
+        .preview-avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-bottom: 15px;
+        }
+        .preview-name {
+            font-size: 1.2em;
+            color: #fff;
+            margin-bottom: 10px;
+        }
+        .preview-bio {
+            color: #ccc;
+            margin-bottom: 15px;
+        }
+        .preview-stats {
+            display: flex;
+            gap: 20px;
+            color: #999;
+        }
+        .preview-stat {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+    </style>
 </head>
 <body>
-    <header class="header">
+    <div class="container">
+        <!-- 導航欄 -->
         <nav class="nav">
             <div class="nav-left">
                 <a href="home.html" class="logo">fresh</a>
             </div>
             <div class="nav-right">
-                <a href="logout.html" class="nav-link">
-                    <ion-icon name="log-out-outline"></ion-icon>
-                    <span>登出</span>
-                </a>
+                <div class="home-avatar-wrap" style="display:inline-block;vertical-align:middle;margin-right:16px;">
+                    <img id="home-avatar" src="https://via.placeholder.com/100" alt="個人頭像" style="width:50px;height:50px;border-radius:50%;object-fit:cover;border:2px solid #ff6b00;">
+                </div>
+                <div class="auth-buttons" style="display:flex;align-items:center;gap:8px;vertical-align:middle;">
+                    <a href="home.html" class="nav-link">
+                        <ion-icon name="home-outline"></ion-icon>
+                        <span>首頁</span>
+                    </a>
+                    <a href="communities.html" class="nav-link">
+                        <ion-icon name="people-outline"></ion-icon>
+                        <span>社群</span>
+                    </a>
+                    <a href="chat.html" class="nav-link">
+                        <ion-icon name="chatbubbles-outline"></ion-icon>
+                        <span>聊天室</span>
+                    </a>
+                    <a href="settings.html" class="nav-link">
+                        <ion-icon name="settings-outline"></ion-icon>
+                        <span>設定</span>
+                    </a>
+                    <a href="logout.html" class="nav-link">
+                        <ion-icon name="log-out-outline"></ion-icon>
+                        <span>登出</span>
+                    </a>
+                </div>
             </div>
         </nav>
-    </header>
 
-    <div class="container">
-        <div class="profile-form">
-            <h2>編輯個人資料</h2>
-            <form id="profileForm">
-                <div class="form-group">
-                    <label for="avatar">上傳頭像</label>
-                    <input type="file" id="avatar" name="avatar" accept="image/*">
-                    <div id="avatarPreview" style="margin-top:10px;"></div>
+        <!-- 主內容區域 -->
+        <main class="main-content">
+            <div class="edit-profile">
+                <h1>編輯個人資料</h1>
+
+                <div class="profile-card">
+                    <form id="editProfileForm">
+                        <div class="profile-header">
+                            <div class="avatar-section">
+                                <img id="avatarPreview" src="https://via.placeholder.com/150" alt="頭像預覽" class="avatar-preview">
+                                <div class="avatar-upload">
+                                    <input type="file" id="avatarInput" accept="image/*">
+                                    <label for="avatarInput">
+                                        <ion-icon name="camera-outline"></ion-icon>
+                                        更換頭像
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="profile-info">
+                                <h2>基本資料</h2>
+                                <div class="form-group">
+                                    <label for="displayName">顯示名稱</label>
+                                    <input type="text" id="displayName" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="bio">個人簡介</label>
+                                    <textarea id="bio" placeholder="分享一些關於您的事..."></textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="btn-group">
+                            <button type="submit" class="btn-primary">儲存更改</button>
+                            <button type="button" class="btn-secondary" onclick="togglePreview()">預覽</button>
+                        </div>
+                    </form>
+                    <div id="successMessage" class="success-message">個人資料已成功更新！</div>
+                    <div id="errorMessage" class="error-message"></div>
                 </div>
-                <div class="form-group">
-                    <label for="username">用戶名</label>
-                    <input type="text" id="username" name="username" required>
+
+                <!-- 預覽區域 -->
+                <div id="previewSection" class="preview-section">
+                    <h3>個人資料預覽</h3>
+                    <div class="preview-content">
+                        <img id="previewAvatar" src="https://via.placeholder.com/100" alt="頭像" class="preview-avatar">
+                        <div class="preview-name" id="previewName">顯示名稱</div>
+                        <div class="preview-bio" id="previewBio">個人簡介</div>
+                        <div class="preview-stats">
+                            <div class="preview-stat">
+                                <ion-icon name="people-outline"></ion-icon>
+                                <span>0 位追蹤者</span>
+                            </div>
+                            <div class="preview-stat">
+                                <ion-icon name="heart-outline"></ion-icon>
+                                <span>0 個讚</span>
+                            </div>
+                            <div class="preview-stat">
+                                <ion-icon name="chatbubble-outline"></ion-icon>
+                                <span>0 則留言</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label for="email">電子郵件</label>
-                    <input type="email" id="email" name="email" required>
-                </div>
-                <div class="form-group">
-                    <label for="bio">個人簡介</label>
-                    <textarea id="bio" name="bio"></textarea>
-                </div>
-                <button type="submit" class="save-button">儲存變更</button>
-            </form>
-        </div>
+            </div>
+        </main>
     </div>
 
-    <script src="src/edit-profile.js"></script>
+    <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
     <script>
-    document.getElementById('avatar').addEventListener('change', function(e) {
-        const preview = document.getElementById('avatarPreview');
-        preview.innerHTML = '';
+    // 載入 localStorage 頭像
+    window.addEventListener('DOMContentLoaded', function() {
+        const avatar = localStorage.getItem('profileAvatar');
+        if (avatar) {
+            var img = document.getElementById('home-avatar');
+            if (img) img.src = avatar;
+            
+            var previewImg = document.getElementById('avatarPreview');
+            if (previewImg) previewImg.src = avatar;
+        }
+
+        // 載入已儲存的個人資料
+        const savedProfile = localStorage.getItem('userProfile');
+        if (savedProfile) {
+            const profile = JSON.parse(savedProfile);
+            document.getElementById('displayName').value = profile.displayName || '';
+            document.getElementById('bio').value = profile.bio || '';
+        }
+    });
+
+    // 頭像預覽
+    document.getElementById('avatarInput').addEventListener('change', function(e) {
         const file = e.target.files[0];
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onload = function(evt) {
-            const base64 = evt.target.result;
-            preview.innerHTML = `<img src="${base64}" alt="頭像預覽" style="max-width:120px;max-height:120px;border-radius:50%;">`;
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('avatarPreview').src = e.target.result;
+                document.getElementById('previewAvatar').src = e.target.result;
+            }
+            reader.readAsDataURL(file);
+        }
+    });
+
+    // 表單提交
+    document.getElementById('editProfileForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const displayName = document.getElementById('displayName').value;
+        const bio = document.getElementById('bio').value;
+        const avatar = document.getElementById('avatarPreview').src;
+        const successMessage = document.getElementById('successMessage');
+        const errorMessage = document.getElementById('errorMessage');
+
+        // 重置訊息
+        successMessage.style.display = 'none';
+        errorMessage.style.display = 'none';
+
+        if (!displayName) {
+            errorMessage.textContent = '請輸入顯示名稱';
+            errorMessage.style.display = 'block';
+            return;
+        }
+
+        try {
+            const response = await fetch('/api/users/profile', {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
+                body: JSON.stringify({
+                    displayName,
+                    bio,
+                    avatar
+                })
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.message || '更新個人資料失敗');
+            }
+
             // 儲存到 localStorage
-            localStorage.setItem('profileAvatar', base64);
-        };
-        reader.readAsDataURL(file);
+            localStorage.setItem('profileAvatar', avatar);
+            localStorage.setItem('userProfile', JSON.stringify({
+                displayName,
+                bio
+            }));
+
+            successMessage.style.display = 'block';
+        } catch (error) {
+            console.error('更新個人資料錯誤:', error);
+            errorMessage.textContent = error.message || '更新個人資料失敗，請稍後再試';
+            errorMessage.style.display = 'block';
+        }
     });
-    // 儲存個人簡介到 localStorage
-    document.getElementById('profileForm').addEventListener('submit', function(e) {
-        var bio = document.getElementById('bio').value;
-        localStorage.setItem('profileBio', bio);
-    });
+
+    // 切換預覽
+    function togglePreview() {
+        const previewSection = document.getElementById('previewSection');
+        const displayName = document.getElementById('displayName').value;
+        const bio = document.getElementById('bio').value;
+
+        document.getElementById('previewName').textContent = displayName || '顯示名稱';
+        document.getElementById('previewBio').textContent = bio || '個人簡介';
+        
+        previewSection.style.display = previewSection.style.display === 'none' ? 'block' : 'none';
+    }
     </script>
 </body>
 </html> 
