@@ -384,6 +384,113 @@ app.get('/storage-test', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'storage-test.html'));
 });
 
+// 編輯貼文
+app.put('/api/posts/:postId', authenticateToken, (req, res) => {
+    const { postId } = req.params;
+    const { content, media, youtube_url, visibility } = req.body;
+
+    // 檢查貼文是否存在且屬於當前用戶
+    db.get('SELECT * FROM posts WHERE id = ? AND user_id = ?', [postId, req.user.id], (err, post) => {
+        if (err) {
+            return res.status(500).json({ error: '資料庫錯誤' });
+        }
+        if (!post) {
+            return res.status(404).json({ error: '貼文不存在或無權限編輯' });
+        }
+
+        // 更新貼文
+        db.run(
+            'UPDATE posts SET content = ?, media = ?, youtube_url = ?, visibility = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
+            [content, media, youtube_url, visibility, postId],
+            function(err) {
+                if (err) {
+                    return res.status(500).json({ error: '更新貼文失敗' });
+                }
+                res.json({
+                    id: postId,
+                    content,
+                    media,
+                    youtube_url,
+                    visibility,
+                    updated_at: new Date().toISOString()
+                });
+            }
+        );
+    });
+});
+
+// 刪除貼文
+app.delete('/api/posts/:postId', authenticateToken, (req, res) => {
+    const { postId } = req.params;
+
+    // 檢查貼文是否存在且屬於當前用戶
+    db.get('SELECT * FROM posts WHERE id = ? AND user_id = ?', [postId, req.user.id], (err, post) => {
+        if (err) {
+            return res.status(500).json({ error: '資料庫錯誤' });
+        }
+        if (!post) {
+            return res.status(404).json({ error: '貼文不存在或無權限刪除' });
+        }
+
+        // 刪除貼文相關的數據（點讚、評論等）
+        db.serialize(() => {
+            db.run('BEGIN TRANSACTION');
+            
+            // 刪除點讚
+            db.run('DELETE FROM likes WHERE post_id = ?', [postId]);
+            
+            // 刪除評論
+            db.run('DELETE FROM comments WHERE post_id = ?', [postId]);
+            
+            // 刪除書籤
+            db.run('DELETE FROM bookmarks WHERE post_id = ?', [postId]);
+            
+            // 刪除貼文
+            db.run('DELETE FROM posts WHERE id = ?', [postId], function(err) {
+                if (err) {
+                    db.run('ROLLBACK');
+                    return res.status(500).json({ error: '刪除貼文失敗' });
+                }
+                
+                db.run('COMMIT');
+                res.json({ success: true });
+            });
+        });
+    });
+});
+
+// 更新貼文權限
+app.patch('/api/posts/:postId/visibility', authenticateToken, (req, res) => {
+    const { postId } = req.params;
+    const { visibility } = req.body;
+
+    // 檢查貼文是否存在且屬於當前用戶
+    db.get('SELECT * FROM posts WHERE id = ? AND user_id = ?', [postId, req.user.id], (err, post) => {
+        if (err) {
+            return res.status(500).json({ error: '資料庫錯誤' });
+        }
+        if (!post) {
+            return res.status(404).json({ error: '貼文不存在或無權限修改' });
+        }
+
+        // 更新貼文權限
+        db.run(
+            'UPDATE posts SET visibility = ? WHERE id = ?',
+            [visibility, postId],
+            function(err) {
+                if (err) {
+                    return res.status(500).json({ error: '更新貼文權限失敗' });
+                }
+                res.json({
+                    id: postId,
+                    visibility,
+                    updated_at: new Date().toISOString()
+                });
+            }
+        );
+    });
+});
+
 // 錯誤處理中間件
 app.use((err, req, res, next) => {
     console.error(err.stack);

@@ -670,40 +670,240 @@ async function handlePostSubmit(e) {
 function createPostElement(post) {
     const div = document.createElement('div');
     div.className = 'post';
+    div.dataset.postId = post.id;
+    
+    const isCurrentUser = post.user_id === getCurrentUserId();
+    
     div.innerHTML = `
         <div class="post-header">
-            <img src="${post.user.avatar}" alt="${post.user.username}" class="avatar">
+            <img src="${post.avatar || '/images/default-avatar.png'}" alt="${post.username}" class="post-avatar">
             <div class="post-info">
-                <h3>${post.user.username}</h3>
-                <span class="time">${formatTime(post.createdAt)}</span>
+                <span class="post-username">${post.username}</span>
+                <span class="post-time">${formatTime(post.created_at)}</span>
             </div>
+            ${isCurrentUser ? `
+                <div class="post-actions-menu">
+                    <button class="post-action-btn">
+                        <ion-icon name="ellipsis-horizontal"></ion-icon>
+                    </button>
+                    <div class="post-actions-dropdown">
+                        <button class="edit-post-btn">
+                            <ion-icon name="create-outline"></ion-icon>
+                            編輯貼文
+                        </button>
+                        <button class="delete-post-btn">
+                            <ion-icon name="trash-outline"></ion-icon>
+                            刪除貼文
+                        </button>
+                        <button class="visibility-btn">
+                            <ion-icon name="eye-outline"></ion-icon>
+                            權限設定
+                        </button>
+                    </div>
+                </div>
+            ` : ''}
         </div>
         <div class="post-content">${post.content}</div>
-        ${post.youtubeLink ? `
-            <div class="youtube-embed">
-                <iframe 
-                    width="100%" 
-                    height="315" 
-                    src="https://www.youtube.com/embed/${extractYoutubeId(post.youtubeLink)}" 
-                    frameborder="0" 
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                    allowfullscreen>
-                </iframe>
-            </div>
-        ` : ''}
+        ${post.media ? `<img src="${post.media}" alt="貼文圖片" class="post-media">` : ''}
+        ${post.youtube_url ? createYoutubeEmbed(post.youtube_url) : ''}
         <div class="post-actions">
-            <button class="like-btn" data-post-id="${post.id}">
-                <i class="fas fa-heart"></i> ${post.likes}
+            <button class="post-action" data-action="like">
+                <ion-icon name="heart-outline"></ion-icon>
+                <span>${post.likes_count || 0}</span>
             </button>
-            <button class="comment-btn" data-post-id="${post.id}">
-                <i class="fas fa-comment"></i> ${post.comments}
+            <button class="post-action" data-action="comment">
+                <ion-icon name="chatbubble-outline"></ion-icon>
+                <span>${post.comments_count || 0}</span>
             </button>
-            <button class="bookmark-btn" data-post-id="${post.id}">
-                <i class="fas fa-bookmark"></i>
+            <button class="post-action" data-action="share">
+                <ion-icon name="share-outline"></ion-icon>
             </button>
         </div>
     `;
+
+    // 添加事件監聽器
+    if (isCurrentUser) {
+        const actionBtn = div.querySelector('.post-action-btn');
+        const dropdown = div.querySelector('.post-actions-dropdown');
+        const editBtn = div.querySelector('.edit-post-btn');
+        const deleteBtn = div.querySelector('.delete-post-btn');
+        const visibilityBtn = div.querySelector('.visibility-btn');
+
+        // 顯示/隱藏下拉選單
+        actionBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            dropdown.classList.toggle('show');
+        });
+
+        // 點擊其他地方關閉下拉選單
+        document.addEventListener('click', (e) => {
+            if (!dropdown.contains(e.target) && e.target !== actionBtn) {
+                dropdown.classList.remove('show');
+            }
+        });
+
+        // 編輯貼文
+        editBtn.addEventListener('click', () => {
+            showEditPostModal(post);
+        });
+
+        // 刪除貼文
+        deleteBtn.addEventListener('click', () => {
+            if (confirm('確定要刪除這則貼文嗎？此操作無法復原。')) {
+                deletePost(post.id);
+            }
+        });
+
+        // 權限設定
+        visibilityBtn.addEventListener('click', () => {
+            showVisibilityModal(post);
+        });
+    }
+
     return div;
+}
+
+// 顯示編輯貼文模態框
+function showEditPostModal(post) {
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+    modal.innerHTML = `
+        <div class="modal-content">
+            <h2>編輯貼文</h2>
+            <form id="edit-post-form">
+                <textarea name="content" required>${post.content}</textarea>
+                <div class="form-actions">
+                    <button type="button" class="cancel-btn">取消</button>
+                    <button type="submit" class="save-btn">儲存</button>
+                </div>
+            </form>
+        </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    const form = modal.querySelector('#edit-post-form');
+    const cancelBtn = modal.querySelector('.cancel-btn');
+
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const content = form.querySelector('textarea').value;
+
+        try {
+            const response = await fetch(`/api/posts/${post.id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
+                body: JSON.stringify({ content })
+            });
+
+            if (response.ok) {
+                modal.remove();
+                loadPosts(); // 重新載入貼文
+            } else {
+                const error = await response.json();
+                alert(error.error || '編輯貼文失敗');
+            }
+        } catch (error) {
+            console.error('編輯貼文錯誤:', error);
+            alert('編輯貼文時發生錯誤');
+        }
+    });
+
+    cancelBtn.addEventListener('click', () => {
+        modal.remove();
+    });
+}
+
+// 刪除貼文
+async function deletePost(postId) {
+    try {
+        const response = await fetch(`/api/posts/${postId}`, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            }
+        });
+
+        if (response.ok) {
+            loadPosts(); // 重新載入貼文
+        } else {
+            const error = await response.json();
+            alert(error.error || '刪除貼文失敗');
+        }
+    } catch (error) {
+        console.error('刪除貼文錯誤:', error);
+        alert('刪除貼文時發生錯誤');
+    }
+}
+
+// 顯示權限設定模態框
+function showVisibilityModal(post) {
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+    modal.innerHTML = `
+        <div class="modal-content">
+            <h2>貼文權限設定</h2>
+            <form id="visibility-form">
+                <div class="visibility-options">
+                    <label>
+                        <input type="radio" name="visibility" value="public" ${post.visibility === 'public' ? 'checked' : ''}>
+                        公開
+                    </label>
+                    <label>
+                        <input type="radio" name="visibility" value="friends" ${post.visibility === 'friends' ? 'checked' : ''}>
+                        僅好友可見
+                    </label>
+                    <label>
+                        <input type="radio" name="visibility" value="private" ${post.visibility === 'private' ? 'checked' : ''}>
+                        僅自己可見
+                    </label>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="cancel-btn">取消</button>
+                    <button type="submit" class="save-btn">儲存</button>
+                </div>
+            </form>
+        </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    const form = modal.querySelector('#visibility-form');
+    const cancelBtn = modal.querySelector('.cancel-btn');
+
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const visibility = form.querySelector('input[name="visibility"]:checked').value;
+
+        try {
+            const response = await fetch(`/api/posts/${post.id}/visibility`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
+                body: JSON.stringify({ visibility })
+            });
+
+            if (response.ok) {
+                modal.remove();
+                loadPosts(); // 重新載入貼文
+            } else {
+                const error = await response.json();
+                alert(error.error || '更新權限失敗');
+            }
+        } catch (error) {
+            console.error('更新權限錯誤:', error);
+            alert('更新權限時發生錯誤');
+        }
+    });
+
+    cancelBtn.addEventListener('click', () => {
+        modal.remove();
+    });
 }
 
 // 格式化時間
