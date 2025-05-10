@@ -177,7 +177,7 @@
                 <button class="auth-button">登入</button>
                 <button class="auth-button secondary">使用 Microsoft 帳戶登入</button>
                 <div class="auth-links">
-                    <a href="register.html">註冊新帳戶</a>
+                    <a href="public/register.html">註冊新帳戶</a>
                     <a href="#">忘記密碼？</a>
                 </div>
             </div>
@@ -188,8 +188,43 @@
     <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
     <script>
     document.addEventListener('DOMContentLoaded', function() {
-        document.querySelector('.auth-button').addEventListener('click', function() {
-            window.location.href = 'home.html';
+        const loginForm = document.querySelector('.auth-form');
+        const emailInput = loginForm.querySelector('input[type="text"]');
+        const passwordInput = loginForm.querySelector('input[type="password"]');
+        const loginButton = loginForm.querySelector('.auth-button');
+
+        loginButton.addEventListener('click', async function() {
+            const email = emailInput.value;
+            const password = passwordInput.value;
+
+            if (!email || !password) {
+                alert('請填寫所有必填欄位');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    // 保存 token 到 localStorage
+                    localStorage.setItem('token', data.token);
+                    // 導向到首頁
+                    window.location.href = 'home.html';
+                } else {
+                    alert(data.error || '登入失敗');
+                }
+            } catch (error) {
+                console.error('登入錯誤:', error);
+                alert('登入時發生錯誤');
+            }
         });
     });
     </script>

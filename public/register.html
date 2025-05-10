@@ -87,6 +87,64 @@
         </div>
     </div>
 
-    <script src="src/register.js"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const registerForm = document.getElementById('register-form');
+        const avatarInput = document.getElementById('avatar');
+        const avatarPreview = document.querySelector('.avatar-preview');
+        const uploadBtn = document.querySelector('.upload-btn');
+
+        // 處理頭像上傳預覽
+        uploadBtn.addEventListener('click', () => {
+            avatarInput.click();
+        });
+
+        avatarInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    avatarPreview.innerHTML = `<img src="${e.target.result}" alt="頭像預覽">`;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // 處理註冊表單提交
+        registerForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const formData = new FormData(registerForm);
+            const password = formData.get('password');
+            const confirmPassword = formData.get('confirm-password');
+
+            if (password !== confirmPassword) {
+                alert('兩次輸入的密碼不一致');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/auth/register', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    // 保存 token 到 localStorage
+                    localStorage.setItem('token', data.token);
+                    // 導向到首頁
+                    window.location.href = 'home.html';
+                } else {
+                    alert(data.error || '註冊失敗');
+                }
+            } catch (error) {
+                console.error('註冊錯誤:', error);
+                alert('註冊時發生錯誤');
+            }
+        });
+    });
+    </script>
 </body>
 </html> 
