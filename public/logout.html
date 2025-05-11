@@ -69,17 +69,17 @@
         document.getElementById('logoutBtn').addEventListener('click', async () => {
             try {
                 // 呼叫登出 API
-                const response = await fetch('http://localhost:3000/api/auth/logout', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${localStorage.getItem('token')}`
-                    }
-                });
+                // const response = await fetch('http://localhost:3000/api/auth/logout', {
+                //     method: 'POST',
+                //     headers: {
+                //         'Content-Type': 'application/json',
+                //         'Authorization': `Bearer ${localStorage.getItem('token')}`
+                //     }
+                // });
 
-                if (!response.ok) {
-                    throw new Error('登出失敗');
-                }
+                // if (!response.ok) {
+                //     throw new Error('登出失敗');
+                // }
 
                 // 清除本地存儲的用戶信息
                 localStorage.removeItem('token');
