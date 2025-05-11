@@ -16,7 +16,7 @@ const storage = multer.diskStorage({
         cb(null, 'public/uploads/');
     },
     filename: function (req, file, cb) {
-        cb(null, Date.now() + '-' + file.originalname);
+        cb(null, Date.now() + '-' + file.fieldname + path.extname(file.originalname) );
     }
 });
 
@@ -50,20 +50,52 @@ function authenticateToken(req, res, next) {
     });
 }
 
+// 發布新貼文
+app.post('/api/posts', authenticateToken, upload.single('media'), (req, res) => {
+    const { content, media, youtube_url } = req.body;
+    let image_url = req.file ? `/uploads/${req.file.filename}` : null;
+
+    if (!content) {
+        return res.status(400).json({ error: '貼文內容不能為空' });
+    }
+
+    db.run(
+        'INSERT INTO posts (user_id, content, image_url) VALUES (?, ?, ?)',
+        [req.user.id, content, image_url],
+        function(err) {
+            if (err) {
+                return res.status(500).json({ error: '發布貼文失敗' });
+            }
+            res.json({
+                id: this.lastID,
+                user_id: req.user.id,
+                content,
+                media,
+                youtube_url,
+                created_at: new Date().toISOString()
+            });
+        }
+    );
+});
+
 // 獲取所有貼文
 app.get('/api/posts', (req, res) => {
-    db.all(`
-        SELECT p.*, u.username, u.avatar,
-        (SELECT COUNT(*) FROM likes WHERE post_id = p.id) as likes_count,
-        (SELECT COUNT(*) FROM comments WHERE post_id = p.id) as comments_count
-        FROM posts p
-        JOIN users u ON p.user_id = u.id
-        ORDER BY p.created_at DESC
+    db.all(/* sql */`
+      select
+        users.username as user
+      , users.avatar
+      , posts.created_at as time
+      , posts.content as text
+      , posts.image_url as media
+      , 'image' as mediaType
+      from posts
+      inner join users on posts.user_id = users.id
+      order by posts.created_at desc
     `, (err, posts) => {
         if (err) {
             return res.status(500).json({ error: '獲取貼文失敗' });
         }
-        res.json(posts);
+        res.json({posts});
     });
 });
 
@@ -84,32 +116,6 @@ app.get('/api/posts/following', authenticateToken, (req, res) => {
         }
         res.json(posts);
     });
-});
-
-// 發布新貼文
-app.post('/api/posts', authenticateToken, (req, res) => {
-    const { content, media, youtube_url } = req.body;
-    if (!content) {
-        return res.status(400).json({ error: '貼文內容不能為空' });
-    }
-
-    db.run(
-        'INSERT INTO posts (user_id, content, media, youtube_url) VALUES (?, ?, ?, ?)',
-        [req.user.id, content, media, youtube_url],
-        function(err) {
-            if (err) {
-                return res.status(500).json({ error: '發布貼文失敗' });
-            }
-            res.json({
-                id: this.lastID,
-                user_id: req.user.id,
-                content,
-                media,
-                youtube_url,
-                created_at: new Date().toISOString()
-            });
-        }
-    );
 });
 
 // 點讚貼文
@@ -190,6 +196,65 @@ app.delete('/api/follow/:userId', authenticateToken, (req, res) => {
     );
 });
 
+// 獲取個人資料
+app.get('/api/users/profile', authenticateToken, (req, res) => {
+    db.get(`
+        SELECT id, username, email, bio, avatar
+        FROM users
+        WHERE id = ?
+    `, [req.user.id], (err, user) => {
+        if (err) {
+            return res.status(500).json({ error: '獲取個人資料失敗' });
+        }
+        if (!user) {
+            return res.status(404).json({ error: '用戶不存在' });
+        }
+        res.json(user);
+    });
+});
+
+// 更新個人資料
+app.put('/api/users/profile', authenticateToken, (req, res) => {
+    const { username, email, bio } = req.body;
+
+    // 驗證輸入
+    if (!username || !email) {
+        return res.status(400).json({ error: '用戶名和電子郵件為必填項' });
+    }
+
+    // 檢查用戶名是否已被其他用戶使用
+    db.get('SELECT * FROM users WHERE username = ? AND id != ?', [username, req.user.id], (err, existingUser) => {
+        if (err) {
+            return res.status(500).json({ error: '資料庫錯誤' });
+        }
+        if (existingUser) {
+            return res.status(400).json({ error: '用戶名已被使用' });
+        }
+
+        // 檢查電子郵件是否已被其他用戶使用
+        db.get('SELECT * FROM users WHERE email = ? AND id != ?', [email, req.user.id], (err, existingUser) => {
+            if (err) {
+                return res.status(500).json({ error: '資料庫錯誤' });
+            }
+            if (existingUser) {
+                return res.status(400).json({ error: '電子郵件已被使用' });
+            }
+
+            // 更新用戶資料
+            db.run(
+                'UPDATE users SET username = ?, email = ?, bio = ? WHERE id = ?',
+                [username, email, bio, req.user.id],
+                function(err) {
+                    if (err) {
+                        return res.status(500).json({ error: '更新個人資料失敗' });
+                    }
+                    res.json({ success: true });
+                }
+            );
+        });
+    });
+});
+
 // 註冊新用戶
 app.post('/api/auth/register', upload.single('avatar'), async (req, res) => {
     console.log('收到註冊請求:', req.body); // 添加日誌
@@ -255,65 +320,6 @@ app.post('/api/auth/register', upload.single('avatar'), async (req, res) => {
     });
 });
 
-// 獲取個人資料
-app.get('/api/users/profile', authenticateToken, (req, res) => {
-    db.get(`
-        SELECT id, username, email, bio, avatar
-        FROM users
-        WHERE id = ?
-    `, [req.user.id], (err, user) => {
-        if (err) {
-            return res.status(500).json({ error: '獲取個人資料失敗' });
-        }
-        if (!user) {
-            return res.status(404).json({ error: '用戶不存在' });
-        }
-        res.json(user);
-    });
-});
-
-// 更新個人資料
-app.put('/api/users/profile', authenticateToken, (req, res) => {
-    const { username, email, bio } = req.body;
-
-    // 驗證輸入
-    if (!username || !email) {
-        return res.status(400).json({ error: '用戶名和電子郵件為必填項' });
-    }
-
-    // 檢查用戶名是否已被其他用戶使用
-    db.get('SELECT * FROM users WHERE username = ? AND id != ?', [username, req.user.id], (err, existingUser) => {
-        if (err) {
-            return res.status(500).json({ error: '資料庫錯誤' });
-        }
-        if (existingUser) {
-            return res.status(400).json({ error: '用戶名已被使用' });
-        }
-
-        // 檢查電子郵件是否已被其他用戶使用
-        db.get('SELECT * FROM users WHERE email = ? AND id != ?', [email, req.user.id], (err, existingUser) => {
-            if (err) {
-                return res.status(500).json({ error: '資料庫錯誤' });
-            }
-            if (existingUser) {
-                return res.status(400).json({ error: '電子郵件已被使用' });
-            }
-
-            // 更新用戶資料
-            db.run(
-                'UPDATE users SET username = ?, email = ?, bio = ? WHERE id = ?',
-                [username, email, bio, req.user.id],
-                function(err) {
-                    if (err) {
-                        return res.status(500).json({ error: '更新個人資料失敗' });
-                    }
-                    res.json({ success: true });
-                }
-            );
-        });
-    });
-});
-
 // 用戶登入
 app.post('/api/auth/login', async (req, res) => {
     const { email, password } = req.body;
@@ -362,6 +368,20 @@ app.post('/api/auth/logout', authenticateToken, (req, res) => {
     // 3. 記錄登出時間
     // 但在這個簡單的實現中，我們只需要返回成功訊息
     res.json({ success: true });
+});
+
+app.get('/api/auth/profile', authenticateToken, (req, res) => {
+    if (!req.user) {
+        return res.status(401).json({ error: '未授權' });
+    }
+    let user_id = req.user.id;
+    // 從資料庫中獲取用戶資料
+    db.get('SELECT username, email, avatar, bio FROM users WHERE id = ?', [user_id], (err, profile) => {
+        if (err) {
+            return res.status(500).json({ error: '資料庫錯誤' });
+        }
+        res.json({ profile });
+    });
 });
 
 // 主頁路由

@@ -71,7 +71,13 @@ export const authApi = {
             method: 'POST',
             body: JSON.stringify({ email, password })
         });
-    }
+    },
+
+    async getProfile() {
+        return apiRequest('/auth/profile', {
+            method: 'GET'
+        });
+    },
 };
 
 // 書籤相關 API

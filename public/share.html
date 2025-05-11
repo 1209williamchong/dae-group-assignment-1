@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -15,21 +16,25 @@
             background-color: #121212;
             color: #ffffff;
         }
+
         .share-container {
             max-width: 540px;
             margin: 40px auto 0 auto;
         }
+
         .share-form {
             background: #1a1a1a;
             border-radius: 10px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
             padding: 24px 20px 16px 20px;
             margin-bottom: 32px;
         }
+
         .share-form label {
             font-weight: bold;
             color: #ff6b00;
         }
+
         .custom-upload-btn {
             display: inline-block;
             background: #ff6b00;
@@ -42,45 +47,105 @@
             transition: background 0.2s;
             margin-top: 64px;
         }
-        .share-form input[type="file"] { display: none; }
+
+        .share-form input[type="file"] {
+            display: none;
+        }
+
         .share-form textarea {
-            width: 100%; min-height: 60px; margin-bottom: 16px; padding: 8px;
-            border-radius: 4px; border: 1px solid #333; resize: vertical;
-            background: #2a2a2a; color: #fff;
+            width: 100%;
+            min-height: 60px;
+            margin-bottom: 16px;
+            padding: 8px;
+            border-radius: 4px;
+            border: 1px solid #333;
+            resize: vertical;
+            background: #2a2a2a;
+            color: #fff;
         }
-        .preview { margin-bottom: 16px; text-align: center; }
-        .preview img, .preview video {
-            max-width: 100%; max-height: 180px; border-radius: 8px;
+
+        .preview {
+            margin-bottom: 16px;
+            text-align: center;
         }
+
+        .preview img,
+        .preview video {
+            max-width: 100%;
+            max-height: 180px;
+            border-radius: 8px;
+        }
+
         .share-form button {
-            background: #ff6b00; color: #fff; border: none; padding: 12px 0;
-            border-radius: 4px; font-size: 1em; cursor: pointer; width: 100%;
+            background: #ff6b00;
+            color: #fff;
+            border: none;
+            padding: 12px 0;
+            border-radius: 4px;
+            font-size: 1em;
+            cursor: pointer;
+            width: 100%;
             margin-top: 12px;
             transition: background 0.3s;
         }
-        .share-form button:hover { background: #ff8533; }
-        .feed {
-            display: flex; flex-direction: column; gap: 24px;
+
+        .share-form button:hover {
+            background: #ff8533;
         }
+
+        .feed {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
         .post {
-            background: #1a1a1a; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            background: #1a1a1a;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
             padding: 18px 18px 12px 18px;
         }
+
         .post-header {
-            display: flex; align-items: center; margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
         }
+
         .post-avatar {
-            width: 38px; height: 38px; border-radius: 50%; margin-right: 12px; object-fit: cover;
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            margin-right: 12px;
+            object-fit: cover;
             border: 2px solid #ff6b00;
         }
-        .post-user { font-weight: bold; margin-right: 8px; color: #ff6b00; }
-        .post-time { color: #aaa; font-size: 0.95em; }
-        .post-content { margin: 8px 0 0 0; color: #fff; }
-        .post-media img, .post-media video {
-            margin-top: 10px; max-width: 100%; border-radius: 8px;
+
+        .post-user {
+            font-weight: bold;
+            margin-right: 8px;
+            color: #ff6b00;
+        }
+
+        .post-time {
+            color: #aaa;
+            font-size: 0.95em;
+        }
+
+        .post-content {
+            margin: 8px 0 0 0;
+            color: #fff;
+        }
+
+        .post-media img,
+        .post-media video {
+            margin-top: 10px;
+            max-width: 100%;
+            border-radius: 8px;
         }
     </style>
 </head>
+
 <body>
     <nav class="nav">
         <div class="nav-left">
@@ -88,7 +153,8 @@
         </div>
         <div class="nav-right">
             <div class="home-avatar-wrap" style="display:inline-block;vertical-align:middle;margin-right:16px;">
-                <img id="home-avatar" src="https://via.placeholder.com/100" alt="個人頭像" style="width:50px;height:50px;border-radius:50%;object-fit:cover;border:2px solid #ff6b00;">
+                <img id="home-avatar" src="https://via.placeholder.com/100" alt="個人頭像"
+                    style="width:50px;height:50px;border-radius:50%;object-fit:cover;border:2px solid #ff6b00;">
             </div>
             <a href="home.html" class="nav-link">首頁</a>
             <a href="profile.html" class="nav-link">個人檔案</a>
@@ -98,13 +164,15 @@
     </nav>
     <div class="share-container">
         <!-- 發佈區 -->
-        <div class="share-title" style="font-size:2.2em;font-weight:bold;color:#ff6b00;text-align:center;margin-bottom:28px;letter-spacing:2px;">分享你的精彩瞬間</div>
-        <form class="share-form" id="shareForm">
+        <div class="share-title"
+            style="font-size:2.2em;font-weight:bold;color:#ff6b00;text-align:center;margin-bottom:28px;letter-spacing:2px;">
+            分享你的精彩瞬間</div>
+        <form class="share-form" id="shareForm" enctype="multipart/form-data">
             <label for="media" class="custom-upload-btn">分享你的相片/影片</label>
-            <input type="file" id="media" name="media" accept="image/*,video/*">
+            <input type="file" id="media" name="media" accept="image/*,video/*" multiple>
             <div class="preview" id="mediaPreview"></div>
             <label for="text">分享內容</label>
-            <textarea id="text" name="text" placeholder="寫下你的想法..."></textarea>
+            <textarea id="text" name="content" placeholder="寫下你的想法..."></textarea>
             <button type="submit">發佈</button>
         </form>
         <!-- 動態牆 -->
@@ -112,104 +180,7 @@
             <!-- 貼文會由 JS 動態產生 -->
         </div>
     </div>
-    <script>
-    // 假資料
-    const demoPosts = [
-      {
-        user: '小明',
-        avatar: 'https://randomuser.me/api/portraits/men/32.jpg',
-        time: '1 分鐘前',
-        text: '今日天氣好正，去咗海邊玩！',
-        media: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=80',
-        mediaType: 'image'
-      },
-      {
-        user: '阿花',
-        avatar: 'https://randomuser.me/api/portraits/women/65.jpg',
-        time: '5 分鐘前',
-        text: '第一次試下拍片分享，大家多多支持！',
-        media: 'https://www.w3schools.com/html/mov_bbb.mp4',
-        mediaType: 'video'
-      },
-      {
-        user: 'fresh官方',
-        avatar: 'https://randomuser.me/api/portraits/men/1.jpg',
-        time: '10 分鐘前',
-        text: '歡迎大家嚟 fresh 分享生活點滴！',
-        media: '',
-        mediaType: ''
-      }
-    ];
-    // 動態牆渲染
-    function renderFeed(posts) {
-      const feed = document.getElementById('feed');
-      feed.innerHTML = '';
-      posts.forEach(post => {
-        const div = document.createElement('div');
-        div.className = 'post';
-        div.innerHTML = `
-          <div class="post-header">
-            <img class="post-avatar" src="${post.avatar}" alt="${post.user}">
-            <span class="post-user">${post.user}</span>
-            <span class="post-time">${post.time}</span>
-          </div>
-          <div class="post-content">${post.text ? post.text.replace(/\n/g, '<br>') : ''}</div>
-          <div class="post-media">
-            ${post.mediaType === 'image' ? `<img src="${post.media}" alt="貼文圖片">` : ''}
-            ${post.mediaType === 'video' ? `<video src="${post.media}" controls></video>` : ''}
-          </div>
-        `;
-        feed.appendChild(div);
-      });
-    }
-    renderFeed(demoPosts);
-    // 發佈區預覽
-    document.getElementById('media').addEventListener('change', function(e) {
-        const preview = document.getElementById('mediaPreview');
-        preview.innerHTML = '';
-        const file = e.target.files[0];
-        if (!file) return;
-        const url = URL.createObjectURL(file);
-        if (file.type.startsWith('image/')) {
-            preview.innerHTML = `<img src="${url}" alt="預覽">`;
-        } else if (file.type.startsWith('video/')) {
-            preview.innerHTML = `<video src="${url}" controls></video>`;
-        }
-    });
-    // 處理發佈（前端示範）
-    document.getElementById('shareForm').addEventListener('submit', function(e) {
-      e.preventDefault();
-      const text = document.getElementById('text').value.trim();
-      const fileInput = document.getElementById('media');
-      const file = fileInput.files[0];
-      let media = '', mediaType = '';
-      if (file) {
-        media = URL.createObjectURL(file);
-        if (file.type.startsWith('image/')) mediaType = 'image';
-        else if (file.type.startsWith('video/')) mediaType = 'video';
-      }
-      // 取得用戶頭像
-      let avatar = localStorage.getItem('profileAvatar') || 'https://via.placeholder.com/100';
-      demoPosts.unshift({
-        user: '你',
-        avatar: avatar,
-        time: '剛剛',
-        text,
-        media,
-        mediaType
-      });
-      renderFeed(demoPosts);
-      this.reset();
-      document.getElementById('mediaPreview').innerHTML = '';
-    });
-    // 載入 localStorage 頭像
-    window.addEventListener('DOMContentLoaded', function() {
-        const avatar = localStorage.getItem('profileAvatar');
-        if (avatar) {
-            var img = document.getElementById('home-avatar');
-            if (img) img.src = avatar;
-        }
-    });
-    </script>
+    <script type="module" src="/js/share.js"></script>
 </body>
+
 </html>
