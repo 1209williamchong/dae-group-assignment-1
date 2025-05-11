@@ -106,6 +106,10 @@ document.getElementById('shareForm').addEventListener('submit', async function (
 
     if (response.ok) {
         alert('已成功發佈到伺服器！');
+        loadPosts();
+        shareForm.reset()
+        const preview = document.getElementById('mediaPreview');
+        preview.innerHTML = '';
     } else {
         alert('發佈失敗');
     }
