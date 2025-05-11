@@ -170,7 +170,42 @@ class ApiService {
     async getBookmarks() {
         return this.request('/bookmarks');
     }
+
+    // 好友請求相關 API
+    async getFriendRequests() {
+        return this.request('/friend-requests');
+    }
+
+    async acceptFriendRequest(userId) {
+        return this.request(`/friend-requests/${userId}/accept`, {
+            method: 'POST'
+        });
+    }
+
+    async rejectFriendRequest(userId) {
+        return this.request(`/friend-requests/${userId}/reject`, {
+            method: 'POST'
+        });
+    }
+
+    // 建議用戶相關 API
+    async getSuggestions() {
+        return this.request('/suggestions');
+    }
+
+    // 關注相關 API
+    async followUser(userId) {
+        return this.request(`/follow/${userId}`, {
+            method: 'POST'
+        });
+    }
+
+    async unfollowUser(userId) {
+        return this.request(`/follow/${userId}`, {
+            method: 'DELETE'
+        });
+    }
 }
 
 // 創建全局 API 實例
-const api = new ApiService(); 
+const api = new ApiService()

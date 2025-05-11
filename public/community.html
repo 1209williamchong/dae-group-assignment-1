@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>社群關係管理</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .main-content {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2rem;
+            justify-content: space-between;
+        }
+
+        .section {
+            flex: 1 1 calc(50% - 1rem);
+            background: #f9f9f9;
+            padding: 1rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .section h2 {
+            margin-bottom: 1rem;
+            color: #488AFF;
+        }
+
+        .list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .list li {
+            padding: 0.5rem;
+            margin-bottom: 0.5rem;
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .form {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .form input {
+            flex: 1;
+            padding: 0.5rem;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        .btn-primary {
+            background-color: #488AFF;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .btn-primary:hover {
+            background-color: #357AE8;
+        }
+
+        .btn-secondary {
+            background-color: #f1f1f1;
+            color: #333;
+            border: 1px solid #ccc;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .btn-secondary:hover {
+            background-color: #e1e1e1;
+        }
+
+        .collapsible {
+            background-color: #f9f9f9;
+            color: #333;
+            cursor: pointer;
+            padding: 1rem;
+            border: none;
+            text-align: left;
+            outline: none;
+            font-size: 1.2rem;
+            width: 100%;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-bottom: 1rem;
+        }
+
+        .collapsible.active {
+            background-color: #e1e1e1;
+        }
+
+        .content {
+            padding: 0 1rem;
+            display: none;
+            overflow: hidden;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .content ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .content ul li {
+            padding: 0.5rem;
+            margin-bottom: 0.5rem;
+            background: #f1f1f1;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 導航欄 -->
+        <nav class="nav">
+            <div class="nav-left">
+                <a href="home.html" class="logo">fresh</a>
+            </div>
+            <div class="nav-right">
+                <a href="home.html" class="nav-link">首頁</a>
+                <a href="community.html" class="nav-link active">社群管理</a>
+                <a href="settings.html" class="nav-link">設定</a>
+                <a href="about.html" class="nav-link">關於</a>
+                <a href="logout.html" class="nav-link">登出</a>
+            </div>
+        </nav>
+
+        <!-- 主內容區域 -->
+        <main class="main-content">
+            <button class="collapsible">好友列表</button>
+            <div class="content">
+                <ul id="friend-list" class="list">
+                    <!-- 好友列表將由 JavaScript 動態生成 -->
+                </ul>
+            </div>
+
+            <button class="collapsible">邀請好友</button>
+            <div class="content">
+                <form id="invite-form" class="form">
+                    <input type="email" id="friend-email" placeholder="輸入好友的電子郵件" required>
+                    <button type="submit" class="btn-primary">邀請</button>
+                </form>
+            </div>
+
+            <button class="collapsible">關注建議</button>
+            <div class="content">
+                <ul id="suggested-users" class="list">
+                    <!-- 建議用戶列表將由 JavaScript 動態生成 -->
+                </ul>
+            </div>
+
+            <button class="collapsible">好友請求</button>
+            <div class="content">
+                <ul id="friend-requests" class="list">
+                    <!-- 好友請求列表將由 JavaScript 動態生成 -->
+                </ul>
+            </div>
+        </main>
+    </div>
+
+    <script type="module" src="/js/community.js"></script>
+        
+</body>
+</html>

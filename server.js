@@ -983,6 +983,30 @@ app.get('/chat.html', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'chat.html'));
 });
 
+// Community Routes
+app.get('/api/community/suggestions', 
+    // authenticateToken,
+     (req, res) => {
+        let user_id = req.user ? req.user.id : null;
+        // user_id = 4
+    db.all(`
+        select
+          id
+        , username as name
+        from users
+    `, [], (err, suggestions) => {
+        if (err) {
+            console.error('獲取社群建議失敗:', err);
+            return res.status(500).json({ error: '獲取社群建議失敗' });
+        }
+        if(user_id){
+            suggestions = suggestions.filter(suggestion => suggestion.id !== user_id);
+        }
+        res.json(suggestions);
+    });
+    // res.json([{id:1,name:'Alice Wong'},{id:2,name:'Bob Lee'},{id:3,name:'Charlie Chen'}]);
+});
+
 // 錯誤處理中間件
 app.use((err, req, res, next) => {
     console.error(err.stack);

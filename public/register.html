@@ -3,90 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>註冊 - fresh</title>
-    <link rel="stylesheet" href="styles/register.css">
+    <title>註冊帳號</title>
+    <link rel="stylesheet" href="css/style.css">
     <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
     <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
 </head>
 <body>
-    <div class="register-container">
-        <div class="register-box">
-            <div class="register-header">
-                <h1>fresh</h1>
-                <p>加入我們，開始分享你的生活</p>
-            </div>
-            
-            <form id="register-form" class="register-form">
+    <div class="container">
+        <header>
+            <h1>註冊帳號</h1>
+        </header>
+        <main>
+            <form action="/register" method="POST" class="auth-form">
                 <div class="form-group">
                     <label for="username">用戶名</label>
-                    <div class="input-group">
-                        <ion-icon name="person-outline"></ion-icon>
-                        <input type="text" id="username" name="username" placeholder="輸入用戶名" required>
-                    </div>
+                    <input type="text" id="username" name="username" required>
                 </div>
-
                 <div class="form-group">
                     <label for="email">電子郵件</label>
-                    <div class="input-group">
-                        <ion-icon name="mail-outline"></ion-icon>
-                        <input type="email" id="email" name="email" placeholder="輸入電子郵件" required>
-                    </div>
+                    <input type="email" id="email" name="email" required>
                 </div>
-
                 <div class="form-group">
                     <label for="password">密碼</label>
-                    <div class="input-group">
-                        <ion-icon name="lock-closed-outline"></ion-icon>
-                        <input type="password" id="password" name="password" placeholder="輸入密碼" required>
-                    </div>
+                    <input type="password" id="password" name="password" required>
                 </div>
-
-                <div class="form-group">
-                    <label for="confirm-password">確認密碼</label>
-                    <div class="input-group">
-                        <ion-icon name="lock-closed-outline"></ion-icon>
-                        <input type="password" id="confirm-password" name="confirm-password" placeholder="再次輸入密碼" required>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label for="avatar">頭像</label>
-                    <div class="avatar-upload">
-                        <input type="file" id="avatar" name="avatar" accept="image/*" hidden>
-                        <div class="avatar-preview">
-                            <ion-icon name="person-circle-outline"></ion-icon>
-                        </div>
-                        <button type="button" class="upload-btn">上傳頭像</button>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label for="bio">個人簡介</label>
-                    <div class="input-group">
-                        <ion-icon name="pencil-outline"></ion-icon>
-                        <textarea id="bio" name="bio" placeholder="簡單介紹一下自己..." rows="3"></textarea>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label class="checkbox-label">
-                        <input type="checkbox" name="terms" required>
-                        <span>我已閱讀並同意 <a href="#">服務條款</a> 和 <a href="#">隱私政策</a></span>
-                    </label>
-                </div>
-
-                <button type="submit" class="register-btn">
-                    <span>註冊</span>
-                    <ion-icon name="arrow-forward-outline"></ion-icon>
-                </button>
+                <button type="submit" class="btn-primary">註冊</button>
             </form>
-
-            <div class="login-link">
-                已經有帳號？ <a href="login.html">登入</a>
-            </div>
-        </div>
+        </main>
     </div>
-
     <script>
     document.addEventListener('DOMContentLoaded', function() {
         const registerForm = document.getElementById('register-form');
@@ -147,4 +91,4 @@
     });
     </script>
 </body>
-</html> 
+</html>

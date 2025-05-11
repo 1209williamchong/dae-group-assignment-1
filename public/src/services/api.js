@@ -164,3 +164,41 @@ export const usersApi = {
         });
     }
 }; 
+
+export const communityApi = {
+    // 獲取好友列表
+    async getFriends() {
+        return apiRequest('/friends', {
+            method: 'GET'
+        });
+    },
+    
+    // 獲取建議關注的用戶
+    async getSuggestions() {
+        return apiRequest('/community/suggestions', {
+            method: 'GET'
+        });
+    },
+    
+    // 邀請好友
+    async inviteFriend(email) {
+        return apiRequest('/invite', {
+            method: 'POST',
+            body: JSON.stringify({ email })
+        });
+    },
+    
+    // 接受好友請求
+    async acceptFriendRequest(requestId) {
+        return apiRequest(`/friend-requests/${requestId}/accept`, {
+            method: 'POST'
+        });
+    },
+    
+    // 拒絕好友請求
+    async rejectFriendRequest(requestId) {
+        return apiRequest(`/friend-requests/${requestId}/reject`, {
+            method: 'POST'
+        });
+    }
+}
