@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>關於 Fresh 社交平台</title>
+    <link rel="stylesheet" href="/styles.css"> <!-- 假設有全局樣式表 -->
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        header {
+            background-color: #488AFF;
+            color: white;
+            text-align: center;
+            padding: 2rem;
+        }
+        .container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+        h1, h2 {
+            color: #488AFF;
+        }
+        p {
+            line-height: 1.6;
+            margin-bottom: 1rem;
+        }
+        .team {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+        .team-member {
+            flex: 1 1 200px;
+            text-align: center;
+        }
+        .team-member img {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        footer {
+            text-align: center;
+            padding: 1rem;
+            background-color: #488AFF;
+            color: white;
+            position: relative;
+            bottom: 0;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>關於 Fresh 社交平台</h1>
+    </header>
+
+    <div class="container">
+        <section>
+            <h2>我們的使命</h2>
+            <p>Fresh 是一個以圖片為核心的社交平台，專為熱愛分享與創意的社群打造。我們的使命是為特定興趣群體（如美甲設計、時尚穿搭、畫作展示）提供一個專屬的空間，讓用戶可以輕鬆分享圖片、交流靈感，並建立有意義的聯繫。</p>
+        </section>
+
+        <section>
+            <h2>平台特色</h2>
+            <p>Fresh 提供多樣化的功能，讓用戶的社交體驗更加豐富：</p>
+            <ul>
+                <li><strong>貼文分享</strong>：輕鬆發布圖片貼文，添加文字描述，並與他人互動（按讚、評論、收藏）。</li>
+                <li><strong>社交互動</strong>：關注感興趣的用戶，管理個人檔案，探索朋友的最新動態。</li>
+                <li><strong>社群功能</strong>：創建或加入專屬社群，與志同道合的人分享內容。</li>
+                <li><strong>即時通訊</strong>：透過私訊功能與好友保持聯繫，隨時分享想法。</li>
+                <li><strong>行動優先</strong>：支援相機、地理定位與本地通知，讓行動體驗更直觀。</li>
+            </ul>
+        </section>
+
+        <section>
+            <h2>技術架構</h2>
+            <p>Fresh 採用現代化的技術棧，確保流暢且安全的用戶體驗：</p>
+            <ul>
+                <li><strong>前端</strong>：使用 HTML5、CSS3 和 JavaScript (ES6+)，搭配 Ionic 框架與 Vue.js 提供響應式介面。</li>
+                <li><strong>後端</strong>：基於 Node.js 和 Express 框架，高效處理請求與資料。</li>
+                <li><strong>資料庫</strong>：採用 SQLite，輕量且適合快速開發。</li>
+                <li><strong>認證</strong>：使用 JWT（JSON Web Tokens）確保用戶資料安全。</li>
+                <li><strong>圖片上傳</strong>：整合 Multer 實現高效的檔案上傳功能。</li>
+            </ul>
+        </section>
+
+        <section>
+            <h2>我們的團隊</h2>
+            <p>Fresh 由一群充滿熱情的開發者打造，致力於為用戶提供最佳的社交體驗。</p>
+            <div class="team">
+                <div class="team-member">
+                    <p>莊偉倫</p>
+                </div>
+                <div class="team-member">
+                    <p>招允之</p>
+                </div>
+                <div class="team-member">
+                    <p>紀嘉麗</p>
+                </div>
+                <div class="team-member">
+                     <p>吳浩賢</p>   
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <h2>聯繫我們</h2>
+            <p>有任何問題或建議？歡迎透過我們的 <a href="https://github.com/1209williamchong/dae-group-assignment-1">GitHub 頁面</a> 與我們聯繫，或直接在平台上發送訊息給我們！</p>
+        </section>
+    </div>
+
+    <footer>
+        <p>&copy; 2025 Fresh 社交平台. 版權所有. MIT License.</p>
+    </footer>
+</body>
+</html>
