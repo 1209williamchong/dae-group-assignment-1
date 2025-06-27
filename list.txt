@@ -1,0 +1,4 @@
+pet
+food
+travel
+selfie

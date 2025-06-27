@@ -3,3 +3,7 @@ dist
 package-lock.json
 database.sqlite
 public/uploads
+classified
+downloaded
+db.sqlite3*
+.DS_Store

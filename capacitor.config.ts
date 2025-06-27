@@ -5,6 +5,8 @@ const config: CapacitorConfig = {
   appName: 'My Capacitor App',
   webDir: 'www',
   server: {
+    url: 'http://localhost:3000',
+    cleartext: true,
     androidScheme: 'https'
   },
   plugins: {
