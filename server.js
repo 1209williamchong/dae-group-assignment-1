@@ -59,9 +59,11 @@ app.post('/api/posts', authenticateToken, upload.single('media'), (req, res) => 
         return res.status(400).json({ error: '貼文內容不能為空' });
     }
 
+    let food = 0.5
+
     db.run(
-        'INSERT INTO posts (user_id, content, image_url) VALUES (?, ?, ?)',
-        [req.user.id, content, image_url],
+        'INSERT INTO posts (user_id, content, image_url, food) VALUES (?, ?, ?, ?)',
+        [req.user.id, content, image_url, food],
         function(err) {
             if (err) {
                 return res.status(500).json({ error: '發布貼文失敗' });

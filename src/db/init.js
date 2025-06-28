@@ -8,8 +8,19 @@ const db = new sqlite3.Database(dbPath);
 
 // 初始化資料庫表
 db.serialize(() => {
-    // 創建用戶表
+
     db.run(`
+        create table if not exists db_version (
+          version integer
+        );
+    `)
+
+   
+
+    let updates = []
+
+    // 創建用戶表
+    updates[0] = `
         CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             username TEXT UNIQUE NOT NULL,
@@ -19,10 +30,10 @@ db.serialize(() => {
             bio TEXT,
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP
         )
-    `);
+    `
 
     // 創建貼文表
-    db.run(`
+    updates[1] = `
         CREATE TABLE IF NOT EXISTS posts (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             user_id INTEGER NOT NULL,
@@ -31,10 +42,10 @@ db.serialize(() => {
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (user_id) REFERENCES users (id)
         )
-    `);
+    `
 
     // 創建點讚表
-    db.run(`
+    updates[2] = (`
         CREATE TABLE IF NOT EXISTS likes (
             user_id INTEGER NOT NULL,
             post_id INTEGER NOT NULL,
@@ -46,7 +57,7 @@ db.serialize(() => {
     `);
 
     // 創建評論表
-    db.run(`
+    updates[3] = (`
         CREATE TABLE IF NOT EXISTS comments (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             user_id INTEGER NOT NULL,
@@ -61,7 +72,7 @@ db.serialize(() => {
     `);
 
     // 創建關注表
-    db.run(`
+    updates[4] = (`
         CREATE TABLE IF NOT EXISTS follows (
             follower_id INTEGER NOT NULL,
             followed_id INTEGER NOT NULL,
@@ -73,7 +84,7 @@ db.serialize(() => {
     `);
 
     // 創建社群表
-    db.run(`
+    updates[5] = (`
         CREATE TABLE IF NOT EXISTS communities (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT UNIQUE NOT NULL,
@@ -87,7 +98,7 @@ db.serialize(() => {
     `);
 
     // 創建社群成員表
-    db.run(`
+    updates[6] = (`
         CREATE TABLE IF NOT EXISTS community_members (
             community_id INTEGER NOT NULL,
             user_id INTEGER NOT NULL,
@@ -100,7 +111,7 @@ db.serialize(() => {
     `);
 
     // 創建社群貼文表
-    db.run(`
+    updates[7] = (`
         CREATE TABLE IF NOT EXISTS community_posts (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             community_id INTEGER NOT NULL,
@@ -114,7 +125,7 @@ db.serialize(() => {
     `);
 
     // 創建聊天室表
-    db.run(`
+    updates[8] = (`
         CREATE TABLE IF NOT EXISTS chat_rooms (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT,
@@ -126,7 +137,7 @@ db.serialize(() => {
     `);
 
     // 創建聊天室成員表
-    db.run(`
+    updates[9] = (`
         CREATE TABLE IF NOT EXISTS chat_room_members (
             room_id INTEGER NOT NULL,
             user_id INTEGER NOT NULL,
@@ -138,7 +149,7 @@ db.serialize(() => {
     `);
 
     // 創建聊天訊息表
-    db.run(`
+    updates[10] = (`
         CREATE TABLE IF NOT EXISTS chat_messages (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             room_id INTEGER NOT NULL,
@@ -149,6 +160,34 @@ db.serialize(() => {
             FOREIGN KEY (user_id) REFERENCES users (id)
         )
     `);
+
+
+    db.get('select * from db_version', (err, row)=>{
+        let version
+        if (!row){
+            db.run('insert into db_version (version) values (0)')
+            version = 0
+        } else {
+            version = row.version
+        }
+        function upgrade() {
+            if (!(version in updates)) {
+                console.log('[database] already upgraded to latest version')
+                return
+            }
+            console.log('[database] upgrade from version:', version)
+            let sql = updates[version]
+            db.run(sql, err => {
+                if (err){
+                    console.log('failed to update database', {version, sql, err})
+                } else {
+                    version++
+                    upgrade()
+                }
+            })
+        }
+        upgrade()
+    })
 
     // 初始化範例資料
     initSampleData(db);
