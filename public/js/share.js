@@ -70,6 +70,9 @@ function renderFeed(posts) {
     ${post.mediaType === 'image' ? `<img src="${post.media}" alt="貼文圖片">` : ''}
     ${post.mediaType === 'video' ? `<video src="${post.media}" controls></video>` : ''}
   </div>
+  <div>
+    <pre><code>${JSON.stringify(post, null, 2)}</code></pre>
+  </div>
 `;
         feed.appendChild(div);
     });

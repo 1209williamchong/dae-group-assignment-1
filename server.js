@@ -117,7 +117,8 @@ app.post('/api/posts', authenticateToken, upload.single('media'), async (req, re
                 content,
                 media,
                 youtube_url,
-                created_at: new Date().toISOString()
+                created_at: new Date().toISOString(),
+                food, others, pet, selfie, travel,
             });
         }
     );
@@ -133,6 +134,7 @@ app.get('/api/posts', (req, res) => {
       , posts.content as text
       , posts.image_url as media
       , 'image' as mediaType
+      , food, others, pet, selfie, travel
       from posts
       inner join users on posts.user_id = users.id
       order by posts.created_at desc

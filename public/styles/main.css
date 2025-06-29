@@ -300,7 +300,6 @@ body {
 
 .post-media {
     width: 100%;
-    max-height: 400px;
     object-fit: cover;
     border-radius: 5px;
     margin: 0.5rem 0;
