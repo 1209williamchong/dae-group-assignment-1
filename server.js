@@ -4,35 +4,36 @@ const cors = require('cors');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const multer = require('multer');
-const db = require('./src/db/init');
+const {db,database_init_promise} = require('./src/db/init');
 const AISystem = require('./src/ai');
 
+
 // 嘗試引入 image-dataset，如果失敗則使用模擬版本
-let ImageDataset;
-try {
-    ImageDataset = require('image-dataset');
-    console.log('✅ image-dataset 載入成功');
-} catch (error) {
-    console.log('⚠️ image-dataset 載入失敗，使用模擬版本');
-    // 模擬 ImageDataset 類別
-    ImageDataset = {
-        Classifier: {
-            loadOrCreate: async (modelPath) => {
-                return {
-                    predict: async (imagePath) => {
-                        // 模擬分類結果
-                        const categories = ['pet', 'food', 'travel', 'selfie'];
-                        const randomScores = categories.map(cat => ({
-                            category: cat,
-                            confidence: Math.random()
-                        }));
-                        return randomScores.sort((a, b) => b.confidence - a.confidence);
-                    }
-                };
-            }
-        }
-    };
-}
+// let ImageDataset;
+// try {
+//     ImageDataset = require('image-dataset');
+//     console.log('✅ image-dataset 載入成功');
+// } catch (error) {
+//     console.log('⚠️ image-dataset 載入失敗，使用模擬版本');
+//     // 模擬 ImageDataset 類別
+//     ImageDataset = {
+//         Classifier: {
+//             loadOrCreate: async (modelPath) => {
+//                 return {
+//                     predict: async (imagePath) => {
+//                         // 模擬分類結果
+//                         const categories = ['pet', 'food', 'travel', 'selfie'];
+//                         const randomScores = categories.map(cat => ({
+//                             category: cat,
+//                             confidence: Math.random()
+//                         }));
+//                         return randomScores.sort((a, b) => b.confidence - a.confidence);
+//                     }
+//                 };
+//             }
+//         }
+//     };
+// }
 
 const app = express();
 const port = 3000;
@@ -1295,6 +1296,7 @@ app.listen(port, async () => {
     
     // 啟動時初始化 AI 系統
     try {
+        await database_init_promise;
         await aiSystem.initialize();
         console.log('AI 系統初始化完成');
     } catch (error) {

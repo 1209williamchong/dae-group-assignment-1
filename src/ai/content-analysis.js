@@ -1,4 +1,4 @@
-const db = require('../db/init');
+const {db,database_init_promise} = require('../db/init');
 
 class ContentAnalysis {
     constructor() {
@@ -23,6 +23,10 @@ class ContentAnalysis {
 
     // 分析貼文內容並生成標籤
     async analyzePostContent(postId, content) {
+        if ('dev') {
+            // TODO image ai
+            return  ''
+        }
         try {
             const tags = this.extractTags(content);
             const category = this.categorizeContent(content);

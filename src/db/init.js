@@ -6,7 +6,9 @@ const dbPath = path.join(__dirname, '../../database.sqlite');
 console.log({dbPath})
 const db = new sqlite3.Database(dbPath);
 
-// 初始化資料庫表
+let database_init_promise = new Promise((resolve, reject) => {
+    
+    // 初始化資料庫表
 db.serialize(() => {
 
     db.run(`
@@ -39,7 +41,7 @@ db.serialize(() => {
             user_id INTEGER NOT NULL,
             content TEXT NOT NULL,
             image_url TEXT,
-            food FLOAT DEFAULT 0.5,
+            -- food FLOAT DEFAULT 0.5,
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (user_id) REFERENCES users (id)
         )
@@ -237,7 +239,7 @@ db.serialize(() => {
 
     // 為現有貼文添加 AI 分析欄位
     updates[17] = (`
-        ALTER TABLE posts ADD COLUMN ai_category TEXT DEFAULT NULL
+        ALTER TABLE posts ADD COLUMN  TEXT DEFAULT NULL
     `);
 
     updates[18] = (`
@@ -247,6 +249,10 @@ db.serialize(() => {
     updates[19] = (`
         ALTER TABLE posts ADD COLUMN ai_engagement_score REAL DEFAULT 0.0
     `);
+
+
+    // all ai tags: food, others, pet, selfie
+    
 
     db.get('select * from db_version', (err, row)=>{
         let version
@@ -261,6 +267,7 @@ db.serialize(() => {
                 console.log('[database] already upgraded to latest version')
                 // 所有 upgrade 完成後再初始化 sample data
                 initSampleData(db);
+                resolve()
                 return
             }
             console.log('[database] upgrade from version:', version)
@@ -270,6 +277,7 @@ db.serialize(() => {
                     console.log('failed to update database', {version, sql, err})
                 } else {
                     version++
+                    db.run(`update db_version set version = ?`, version)
                     upgrade()
                 }
             })
@@ -277,5 +285,9 @@ db.serialize(() => {
         upgrade()
     })
 });
+})
 
-module.exports = db; 
+module.exports = {
+    db,
+    database_init_promise,
+}; 

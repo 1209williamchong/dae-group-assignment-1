@@ -1,4 +1,4 @@
-const db = require('../db/init');
+const {db,database_init_promise} = require('../db/init');
 
 class AIRecommendationSystem {
     constructor() {
