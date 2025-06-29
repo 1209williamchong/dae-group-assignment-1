@@ -439,7 +439,7 @@
         async function loadRecommendations() {
             try {
                 const token = localStorage.getItem('token');
-                const response = await fetch('/api/ai/recommendations?limit=12', {
+                const response = await fetch('/api/posts/recommendations?limit=12', {
                     headers: {
                         'Authorization': `Bearer ${token}`
                     }
@@ -447,7 +447,7 @@
                 
                 if (response.ok) {
                     const data = await response.json();
-                    displayPosts(data.recommendations, 'recommendations');
+                    displayPosts(data.posts, 'recommendations');
                 }
             } catch (error) {
                 console.error('載入推薦失敗:', error);
@@ -520,8 +520,8 @@
                         <div class="post-text">${post.content}</div>
                         <div class="post-meta">
                             <span>${new Date(post.created_at).toLocaleDateString()}</span>
-                            ${post.recommendation_score ? 
-                                `<span class="ai-score">推薦分數: ${(post.recommendation_score * 100).toFixed(0)}%</span>` : 
+                            ${post.score ? 
+                                `<span class="ai-score">推薦分數: ${(post.score * 100).toFixed(0)}%</span>` : 
                                 post.interaction_count ? 
                                 `<span class="ai-score">互動: ${post.interaction_count}</span>` : ''
                             }

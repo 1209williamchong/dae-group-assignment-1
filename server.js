@@ -1275,7 +1275,7 @@ app.get('/api/posts/recommendations', authenticateToken, (req, res) => {
             if (err) {
                 return res.status(500).json({ error: '獲取推薦失敗' });
             }
-            res.json(posts);
+            res.json({posts});
         }
     );
 });
