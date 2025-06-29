@@ -5,10 +5,41 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const multer = require('multer');
 const db = require('./src/db/init');
+const AISystem = require('./src/ai');
+
+// 嘗試引入 image-dataset，如果失敗則使用模擬版本
+let ImageDataset;
+try {
+    ImageDataset = require('image-dataset');
+    console.log('✅ image-dataset 載入成功');
+} catch (error) {
+    console.log('⚠️ image-dataset 載入失敗，使用模擬版本');
+    // 模擬 ImageDataset 類別
+    ImageDataset = {
+        Classifier: {
+            loadOrCreate: async (modelPath) => {
+                return {
+                    predict: async (imagePath) => {
+                        // 模擬分類結果
+                        const categories = ['pet', 'food', 'travel', 'selfie'];
+                        const randomScores = categories.map(cat => ({
+                            category: cat,
+                            confidence: Math.random()
+                        }));
+                        return randomScores.sort((a, b) => b.confidence - a.confidence);
+                    }
+                };
+            }
+        }
+    };
+}
 
 const app = express();
 const port = 3000;
 const JWT_SECRET = 'your-secret-key'; // 在生產環境中應該使用環境變數
+
+// 初始化 AI 系統
+const aiSystem = new AISystem();
 
 // 配置 multer
 const storage = multer.diskStorage({
@@ -51,7 +82,7 @@ function authenticateToken(req, res, next) {
 }
 
 // 發布新貼文
-app.post('/api/posts', authenticateToken, upload.single('media'), (req, res) => {
+app.post('/api/posts', authenticateToken, upload.single('media'), async (req, res) => {
     const { content, media, youtube_url } = req.body;
     let image_url = req.file ? `/uploads/${req.file.filename}` : null;
 
@@ -64,12 +95,23 @@ app.post('/api/posts', authenticateToken, upload.single('media'), (req, res) => 
     db.run(
         'INSERT INTO posts (user_id, content, image_url, food) VALUES (?, ?, ?, ?)',
         [req.user.id, content, image_url, food],
-        function(err) {
+        async function(err) {
             if (err) {
                 return res.status(500).json({ error: '發布貼文失敗' });
             }
+            
+            const postId = this.lastID;
+            
+            // AI 分析新貼文內容
+            try {
+                const analysis = await aiSystem.processNewPost(postId, content);
+                console.log('AI 分析結果:', analysis);
+            } catch (error) {
+                console.error('AI 分析失敗:', error);
+            }
+            
             res.json({
-                id: this.lastID,
+                id: postId,
                 user_id: req.user.id,
                 content,
                 media,
@@ -121,15 +163,22 @@ app.get('/api/posts/following', authenticateToken, (req, res) => {
 });
 
 // 點讚貼文
-app.post('/api/posts/:postId/like', authenticateToken, (req, res) => {
+app.post('/api/posts/:postId/like', authenticateToken, async (req, res) => {
     const { postId } = req.params;
     
     db.run(
         'INSERT OR REPLACE INTO likes (user_id, post_id) VALUES (?, ?)',
         [req.user.id, postId],
-        function(err) {
+        async function(err) {
             if (err) {
                 return res.status(500).json({ error: '點讚失敗' });
+            }
+            
+            // AI 處理用戶行為
+            try {
+                await aiSystem.processUserBehavior(req.user.id, postId, 'like');
+            } catch (error) {
+                console.error('AI 行為處理失敗:', error);
             }
             
             // 獲取更新後的點讚數
@@ -1136,6 +1185,98 @@ app.get('/api/recommendations/popular', (req, res) => {
     });
 });
 
+// AI 圖片分類 API
+app.post('/api/classify-image', authenticateToken, upload.single('image'), async (req, res) => {
+    if (!req.file) {
+        return res.status(400).json({ error: '請上傳圖片' });
+    }
+    try {
+        // 取得圖片路徑
+        const imagePath = path.join(__dirname, 'public', 'uploads', req.file.filename);
+        // 載入模型（假設已經訓練好模型，這裡用預設）
+        // 你可以根據實際需求更改模型路徑
+        const classifier = await ImageDataset.Classifier.loadOrCreate('saved_models/classifier_model');
+        // 執行分類
+        const result = await classifier.predict(imagePath);
+        res.json({
+            filename: req.file.filename,
+            result
+        });
+    } catch (err) {
+        console.error('圖片分類失敗:', err);
+        res.status(500).json({ error: '圖片分類失敗' });
+    }
+});
+
+// 獲取用戶貼文歷史（用於分析興趣）
+app.get('/api/posts/user/:userId', authenticateToken, (req, res) => {
+    const { userId } = req.params;
+    const limit = req.query.limit || 25;
+    
+    db.all(
+        'SELECT * FROM posts WHERE user_id = ? ORDER BY created_at DESC LIMIT ?',
+        [userId, limit],
+        (err, posts) => {
+            if (err) {
+                return res.status(500).json({ error: '獲取用戶貼文失敗' });
+            }
+            res.json(posts);
+        }
+    );
+});
+
+// 計算用戶興趣偏好
+app.get('/api/users/:userId/preferences', authenticateToken, (req, res) => {
+    const { userId } = req.params;
+    
+    db.get(
+        'SELECT AVG(pet) as pet, AVG(food) as food, AVG(travel) as travel, AVG(selfie) as selfie FROM posts WHERE user_id = ?',
+        [userId],
+        (err, preferences) => {
+            if (err) {
+                return res.status(500).json({ error: '計算興趣偏好失敗' });
+            }
+            res.json(preferences);
+        }
+    );
+});
+
+// 獲取高食物相關度的其他用戶貼文
+app.get('/api/posts/food-recommendations', authenticateToken, (req, res) => {
+    db.all(
+        'SELECT * FROM posts WHERE user_id != ? AND food > 0.5 ORDER BY food DESC LIMIT 10',
+        [req.user.id],
+        (err, posts) => {
+            if (err) {
+                return res.status(500).json({ error: '獲取食物推薦失敗' });
+            }
+            res.json(posts);
+        }
+    );
+});
+
+// 基於興趣偏好的推薦系統
+app.get('/api/posts/recommendations', authenticateToken, (req, res) => {
+    const { petWeight = 0.31, foodWeight = 0.32, travelWeight = 0.28, selfieWeight = 0.1 } = req.query;
+    
+    db.all(
+        `SELECT 
+            *,
+            (pet * ? + food * ? + travel * ? + selfie * ?) as score
+        FROM posts 
+        WHERE user_id != ? 
+        ORDER BY score DESC 
+        LIMIT 10`,
+        [petWeight, foodWeight, travelWeight, selfieWeight, req.user.id],
+        (err, posts) => {
+            if (err) {
+                return res.status(500).json({ error: '獲取推薦失敗' });
+            }
+            res.json(posts);
+        }
+    );
+});
+
 // 錯誤處理中間件
 app.use((err, req, res, next) => {
     console.error(err.stack);
@@ -1148,7 +1289,15 @@ app.use((req, res) => {
 });
 
 // 啟動伺服器
-app.listen(port, () => {
+app.listen(port, async () => {
     console.log(`伺服器運行在 http://localhost:${port}`);
     console.log(`存儲測試頁面: http://localhost:${port}/storage-test`);
+    
+    // 啟動時初始化 AI 系統
+    try {
+        await aiSystem.initialize();
+        console.log('AI 系統初始化完成');
+    } catch (error) {
+        console.error('AI 系統初始化失敗:', error);
+    }
 }); 
