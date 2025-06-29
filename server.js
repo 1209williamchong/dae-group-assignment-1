@@ -5,6 +5,7 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const multer = require('multer');
 const db = require('./src/db/init');
+const AISystem = require('./src/ai');
 
 // 嘗試引入 image-dataset，如果失敗則使用模擬版本
 let ImageDataset;
@@ -36,6 +37,9 @@ try {
 const app = express();
 const port = 3000;
 const JWT_SECRET = 'your-secret-key'; // 在生產環境中應該使用環境變數
+
+// 初始化 AI 系統
+const aiSystem = new AISystem();
 
 // 配置 multer
 const storage = multer.diskStorage({
@@ -78,7 +82,7 @@ function authenticateToken(req, res, next) {
 }
 
 // 發布新貼文
-app.post('/api/posts', authenticateToken, upload.single('media'), (req, res) => {
+app.post('/api/posts', authenticateToken, upload.single('media'), async (req, res) => {
     const { content, media, youtube_url } = req.body;
     let image_url = req.file ? `/uploads/${req.file.filename}` : null;
 
@@ -91,12 +95,23 @@ app.post('/api/posts', authenticateToken, upload.single('media'), (req, res) => 
     db.run(
         'INSERT INTO posts (user_id, content, image_url, food) VALUES (?, ?, ?, ?)',
         [req.user.id, content, image_url, food],
-        function(err) {
+        async function(err) {
             if (err) {
                 return res.status(500).json({ error: '發布貼文失敗' });
             }
+            
+            const postId = this.lastID;
+            
+            // AI 分析新貼文內容
+            try {
+                const analysis = await aiSystem.processNewPost(postId, content);
+                console.log('AI 分析結果:', analysis);
+            } catch (error) {
+                console.error('AI 分析失敗:', error);
+            }
+            
             res.json({
-                id: this.lastID,
+                id: postId,
                 user_id: req.user.id,
                 content,
                 media,
@@ -148,15 +163,22 @@ app.get('/api/posts/following', authenticateToken, (req, res) => {
 });
 
 // 點讚貼文
-app.post('/api/posts/:postId/like', authenticateToken, (req, res) => {
+app.post('/api/posts/:postId/like', authenticateToken, async (req, res) => {
     const { postId } = req.params;
     
     db.run(
         'INSERT OR REPLACE INTO likes (user_id, post_id) VALUES (?, ?)',
         [req.user.id, postId],
-        function(err) {
+        async function(err) {
             if (err) {
                 return res.status(500).json({ error: '點讚失敗' });
+            }
+            
+            // AI 處理用戶行為
+            try {
+                await aiSystem.processUserBehavior(req.user.id, postId, 'like');
+            } catch (error) {
+                console.error('AI 行為處理失敗:', error);
             }
             
             // 獲取更新後的點讚數
@@ -1160,7 +1182,15 @@ app.use((req, res) => {
 });
 
 // 啟動伺服器
-app.listen(port, () => {
+app.listen(port, async () => {
     console.log(`伺服器運行在 http://localhost:${port}`);
     console.log(`存儲測試頁面: http://localhost:${port}/storage-test`);
+    
+    // 啟動時初始化 AI 系統
+    try {
+        await aiSystem.initialize();
+        console.log('AI 系統初始化完成');
+    } catch (error) {
+        console.error('AI 系統初始化失敗:', error);
+    }
 }); 
