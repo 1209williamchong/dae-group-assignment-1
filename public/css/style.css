@@ -893,3 +893,118 @@ nav a.active {
     line-height: 1.8;
     margin-bottom: 1rem;
 }
+
+.about-section p {
+    color: #ccc;
+    line-height: 1.6;
+}
+
+/* AI 推薦預覽區樣式 */
+.recommendations-preview {
+    background-color: #1a1a1a;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    border: 1px solid #333;
+    margin-top: 2rem;
+}
+
+.preview-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.preview-header h2 {
+    font-size: 1.8rem;
+    color: #fff;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.preview-header p {
+    color: #ccc;
+    font-size: 1.1rem;
+}
+
+.preview-content {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.preview-card {
+    background-color: #2a2a2a;
+    padding: 1.5rem;
+    border-radius: 8px;
+    text-align: center;
+    border: 1px solid #333;
+    transition: all 0.3s ease;
+}
+
+.preview-card:hover {
+    transform: translateY(-5px);
+    border-color: #ff6b00;
+    box-shadow: 0 5px 15px rgba(255, 107, 0, 0.2);
+}
+
+.preview-card ion-icon {
+    font-size: 2.5rem;
+    color: #ff6b00;
+    margin-bottom: 1rem;
+}
+
+.preview-card h3 {
+    color: #fff;
+    margin-bottom: 0.5rem;
+    font-size: 1.2rem;
+}
+
+.preview-card p {
+    color: #ccc;
+    font-size: 0.9rem;
+}
+
+.preview-cta {
+    text-align: center;
+}
+
+.cta-button.secondary {
+    background-color: #2a2a2a;
+    color: #ff6b00;
+    border: 2px solid #ff6b00;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 1rem 2rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+    text-decoration: none;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.cta-button.secondary:hover {
+    background-color: #ff6b00;
+    color: #fff;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(255, 107, 0, 0.3);
+}
+
+/* 響應式設計更新 */
+@media (max-width: 768px) {
+    .preview-content {
+        grid-template-columns: 1fr;
+    }
+    
+    .preview-header h2 {
+        font-size: 1.5rem;
+    }
+    
+    .preview-card {
+        padding: 1rem;
+    }
+}

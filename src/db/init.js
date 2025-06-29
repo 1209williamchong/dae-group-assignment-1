@@ -39,6 +39,7 @@ db.serialize(() => {
             user_id INTEGER NOT NULL,
             content TEXT NOT NULL,
             image_url TEXT,
+            food FLOAT DEFAULT 0.5,
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (user_id) REFERENCES users (id)
         )
@@ -161,6 +162,10 @@ db.serialize(() => {
         )
     `);
 
+    // 添加 food 欄位到 posts 表
+    updates[11] = `
+        ALTER TABLE posts ADD COLUMN food FLOAT DEFAULT 0.5
+    `;
 
     db.get('select * from db_version', (err, row)=>{
         let version
@@ -173,6 +178,8 @@ db.serialize(() => {
         function upgrade() {
             if (!(version in updates)) {
                 console.log('[database] already upgraded to latest version')
+                // 所有 upgrade 完成後再初始化 sample data
+                initSampleData(db);
                 return
             }
             console.log('[database] upgrade from version:', version)
@@ -188,9 +195,6 @@ db.serialize(() => {
         }
         upgrade()
     })
-
-    // 初始化範例資料
-    initSampleData(db);
 });
 
 module.exports = db; 

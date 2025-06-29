@@ -1005,6 +1005,11 @@ app.get('/chat.html', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'chat.html'));
 });
 
+// 推薦頁面路由
+app.get('/recommendations.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'recommendations.html'));
+});
+
 // Community Routes
 app.get('/api/community/suggestions', 
     // authenticateToken,
@@ -1027,6 +1032,108 @@ app.get('/api/community/suggestions',
         res.json(suggestions);
     });
     // res.json([{id:1,name:'Alice Wong'},{id:2,name:'Bob Lee'},{id:3,name:'Charlie Chen'}]);
+});
+
+// 獲取食物推薦貼文
+app.get('/api/recommendations/food', authenticateToken, (req, res) => {
+    const { limit = 10 } = req.query;
+    
+    // 基於用戶的歷史行為和AI分類結果推薦食物相關貼文
+    db.all(`
+        SELECT 
+            p.id,
+            p.content,
+            p.image_url,
+            p.food,
+            p.created_at,
+            u.username,
+            u.avatar,
+            (SELECT COUNT(*) FROM likes WHERE post_id = p.id) as likes_count,
+            (SELECT COUNT(*) FROM comments WHERE post_id = p.id) as comments_count
+        FROM posts p
+        JOIN users u ON p.user_id = u.id
+        WHERE p.food > 0.7  -- 高食物相關性的貼文
+        AND p.user_id != ?  -- 排除自己的貼文
+        ORDER BY p.food DESC, p.created_at DESC
+        LIMIT ?
+    `, [req.user.id, parseInt(limit)], (err, recommendations) => {
+        if (err) {
+            console.error('獲取食物推薦失敗:', err);
+            return res.status(500).json({ error: '獲取推薦失敗' });
+        }
+        res.json(recommendations);
+    });
+});
+
+// 獲取個性化推薦貼文
+app.get('/api/recommendations/personalized', authenticateToken, (req, res) => {
+    const { limit = 10 } = req.query;
+    
+    // 基於用戶關注的人和點讚歷史進行推薦
+    db.all(`
+        SELECT 
+            p.id,
+            p.content,
+            p.image_url,
+            p.food,
+            p.created_at,
+            u.username,
+            u.avatar,
+            (SELECT COUNT(*) FROM likes WHERE post_id = p.id) as likes_count,
+            (SELECT COUNT(*) FROM comments WHERE post_id = p.id) as comments_count,
+            CASE 
+                WHEN f.follower_id IS NOT NULL THEN 1 
+                ELSE 0 
+            END as is_following
+        FROM posts p
+        JOIN users u ON p.user_id = u.id
+        LEFT JOIN follows f ON f.follower_id = ? AND f.followed_id = p.user_id
+        WHERE p.user_id != ?
+        ORDER BY 
+            is_following DESC,
+            p.food DESC,
+            likes_count DESC,
+            p.created_at DESC
+        LIMIT ?
+    `, [req.user.id, req.user.id, parseInt(limit)], (err, recommendations) => {
+        if (err) {
+            console.error('獲取個性化推薦失敗:', err);
+            return res.status(500).json({ error: '獲取推薦失敗' });
+        }
+        res.json(recommendations);
+    });
+});
+
+// 獲取熱門推薦貼文
+app.get('/api/recommendations/popular', (req, res) => {
+    const { limit = 10 } = req.query;
+    
+    // 基於點讚數和評論數推薦熱門貼文
+    db.all(`
+        SELECT 
+            p.id,
+            p.content,
+            p.image_url,
+            p.food,
+            p.created_at,
+            u.username,
+            u.avatar,
+            (SELECT COUNT(*) FROM likes WHERE post_id = p.id) as likes_count,
+            (SELECT COUNT(*) FROM comments WHERE post_id = p.id) as comments_count
+        FROM posts p
+        JOIN users u ON p.user_id = u.id
+        ORDER BY 
+            likes_count DESC,
+            comments_count DESC,
+            p.created_at DESC
+        LIMIT ?
+    `, [parseInt(limit)], (err, recommendations) => {
+        if (err) {
+            console.error('獲取熱門推薦失敗:', err);
+            return res.status(500).json({ error: '獲取推薦失敗' });
+        }
+        res.json(recommendations);
+    });
 });
 
 // 錯誤處理中間件

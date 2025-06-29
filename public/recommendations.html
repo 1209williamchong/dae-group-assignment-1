@@ -3,10 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>fresh - 歡迎</title>
+    <title>fresh - AI 推薦</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ionicons@5.5.2/dist/ionicons/ionicons.min.css">
     <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/recommendations.css">
 </head>
 <body>
     <div class="container">
@@ -20,10 +21,6 @@
                     <img id="home-avatar" src="https://via.placeholder.com/100" alt="個人頭像" style="width:50px;height:50px;border-radius:50%;object-fit:cover;border:2px solid #ff6b00;">
                 </div>
                 <div class="auth-buttons" style="display:flex;align-items:center;gap:8px;vertical-align:middle;">
-                    <a href="recommendations.html" class="nav-link">
-                        <ion-icon name="sparkles-outline"></ion-icon>
-                        <span>AI 推薦</span>
-                    </a>
                     <a href="chat.html" class="nav-link">
                         <ion-icon name="chatbubbles-outline"></ion-icon>
                         <span>聊天室</span>
@@ -50,55 +47,62 @@
 
         <!-- 主內容區域 -->
         <main class="main-content">
-            <div class="content-wrapper">
-                <!-- 歡迎區 -->
-                <div class="welcome-section">
-                    <h1>歡迎來到 fresh</h1>
-                    <p>一個專注於圖片分享的社交平台</p>
-                    
-                    <div class="cta-buttons">
-                        <a href="share.html" class="cta-button primary" style="
-                            font-size:1.4em;
-                            font-weight:bold;
-                            color:#ff6b00;
-                            letter-spacing:2px;
-                            text-align:center;
-                            box-shadow:0 2px 8px rgba(255,107,0,0.10);
-                            text-shadow:0 2px 8px rgba(255,107,0,0.15);
-                            border-radius:8px;
-                            padding:16px 0;
-                        ">分享你的精彩瞬間</a>
-                    </div>
+            <div class="recommendations-container">
+                <!-- 推薦標題 -->
+                <div class="recommendations-header">
+                    <h1><ion-icon name="sparkles-outline"></ion-icon> AI 智能推薦</h1>
+                    <p>基於您的興趣和行為，為您推薦最相關的內容</p>
                 </div>
 
-                <!-- AI 推薦預覽區 -->
-                <div class="recommendations-preview">
-                    <div class="preview-header">
-                        <h2><ion-icon name="sparkles-outline"></ion-icon> AI 智能推薦</h2>
-                        <p>發現最適合您的內容</p>
-                    </div>
-                    <div class="preview-content">
-                        <div class="preview-card">
-                            <ion-icon name="person-outline"></ion-icon>
-                            <h3>個性化推薦</h3>
-                            <p>基於您的興趣和關注的人</p>
+                <!-- 推薦分類標籤 -->
+                <div class="recommendation-tabs">
+                    <button class="tab-button active" data-type="personalized">
+                        <ion-icon name="person-outline"></ion-icon>
+                        個性化推薦
+                    </button>
+                    <button class="tab-button" data-type="food">
+                        <ion-icon name="restaurant-outline"></ion-icon>
+                        美食推薦
+                    </button>
+                    <button class="tab-button" data-type="popular">
+                        <ion-icon name="trending-up-outline"></ion-icon>
+                        熱門推薦
+                    </button>
+                </div>
+
+                <!-- 推薦內容區域 -->
+                <div class="recommendations-content">
+                    <!-- 個性化推薦 -->
+                    <div class="recommendation-section active" id="personalized-section">
+                        <div class="section-header">
+                            <h2>為您推薦</h2>
+                            <p>基於您關注的人和興趣</p>
                         </div>
-                        <div class="preview-card">
-                            <ion-icon name="restaurant-outline"></ion-icon>
-                            <h3>美食發現</h3>
+                        <div class="posts-grid" id="personalized-posts">
+                            <div class="loading">載入中...</div>
+                        </div>
+                    </div>
+
+                    <!-- 美食推薦 -->
+                    <div class="recommendation-section" id="food-section">
+                        <div class="section-header">
+                            <h2>美食發現</h2>
                             <p>AI 識別的美食相關內容</p>
                         </div>
-                        <div class="preview-card">
-                            <ion-icon name="trending-up-outline"></ion-icon>
-                            <h3>熱門內容</h3>
-                            <p>最受歡迎的貼文推薦</p>
+                        <div class="posts-grid" id="food-posts">
+                            <div class="loading">載入中...</div>
                         </div>
                     </div>
-                    <div class="preview-cta">
-                        <a href="recommendations.html" class="cta-button secondary">
-                            <ion-icon name="arrow-forward-outline"></ion-icon>
-                            探索 AI 推薦
-                        </a>
+
+                    <!-- 熱門推薦 -->
+                    <div class="recommendation-section" id="popular-section">
+                        <div class="section-header">
+                            <h2>熱門內容</h2>
+                            <p>最受歡迎的貼文</p>
+                        </div>
+                        <div class="posts-grid" id="popular-posts">
+                            <div class="loading">載入中...</div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -107,6 +111,6 @@
 
     <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
     <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
-    <script type="module" src="/js/home.js"></script>
+    <script type="module" src="/js/recommendations.js"></script>
 </body>
-</html>
+</html> 
