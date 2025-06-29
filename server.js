@@ -4,7 +4,7 @@ const cors = require('cors');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const multer = require('multer');
-const {db,database_init_promise} = require('./src/db/init');
+const { db, database_init_promise } = require('./src/db/init');
 const AISystem = require('./src/ai');
 
 
@@ -48,7 +48,7 @@ const storage = multer.diskStorage({
         cb(null, 'public/uploads/');
     },
     filename: function (req, file, cb) {
-        cb(null, Date.now() + '-' + file.fieldname + path.extname(file.originalname) );
+        cb(null, Date.now() + '-' + file.fieldname + path.extname(file.originalname));
     }
 });
 
@@ -91,18 +91,18 @@ app.post('/api/posts', authenticateToken, upload.single('media'), async (req, re
         return res.status(400).json({ error: '貼文內容不能為空' });
     }
 
-    let food = 0.5
+    const { food, others, pet, selfie, travel } = await aiSystem.contentAnalysis.analyzeImageUrl(image_url)
 
     db.run(
-        'INSERT INTO posts (user_id, content, image_url, food) VALUES (?, ?, ?, ?)',
-        [req.user.id, content, image_url, food],
-        async function(err) {
+        'INSERT INTO posts (user_id, content, image_url, food, others, pet, selfie, travel) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+        [req.user.id, content, image_url, food, others, pet, selfie, travel],
+        async function (err) {
             if (err) {
                 return res.status(500).json({ error: '發布貼文失敗' });
             }
-            
+
             const postId = this.lastID;
-            
+
             // AI 分析新貼文內容
             try {
                 const analysis = await aiSystem.processNewPost(postId, content);
@@ -110,7 +110,7 @@ app.post('/api/posts', authenticateToken, upload.single('media'), async (req, re
             } catch (error) {
                 console.error('AI 分析失敗:', error);
             }
-            
+
             res.json({
                 id: postId,
                 user_id: req.user.id,
@@ -140,7 +140,7 @@ app.get('/api/posts', (req, res) => {
         if (err) {
             return res.status(500).json({ error: '獲取貼文失敗' });
         }
-        res.json({posts});
+        res.json({ posts });
     });
 });
 
@@ -166,22 +166,22 @@ app.get('/api/posts/following', authenticateToken, (req, res) => {
 // 點讚貼文
 app.post('/api/posts/:postId/like', authenticateToken, async (req, res) => {
     const { postId } = req.params;
-    
+
     db.run(
         'INSERT OR REPLACE INTO likes (user_id, post_id) VALUES (?, ?)',
         [req.user.id, postId],
-        async function(err) {
+        async function (err) {
             if (err) {
                 return res.status(500).json({ error: '點讚失敗' });
             }
-            
+
             // AI 處理用戶行為
             try {
                 await aiSystem.processUserBehavior(req.user.id, postId, 'like');
             } catch (error) {
                 console.error('AI 行為處理失敗:', error);
             }
-            
+
             // 獲取更新後的點讚數
             db.get(
                 'SELECT COUNT(*) as count FROM likes WHERE post_id = ?',
@@ -215,7 +215,7 @@ app.get('/api/following', authenticateToken, (req, res) => {
 // 關注用戶
 app.post('/api/follow/:userId', authenticateToken, (req, res) => {
     const { userId } = req.params;
-    
+
     if (userId === req.user.id) {
         return res.status(400).json({ error: '不能關注自己' });
     }
@@ -223,7 +223,7 @@ app.post('/api/follow/:userId', authenticateToken, (req, res) => {
     db.run(
         'INSERT OR IGNORE INTO follows (follower_id, followed_id) VALUES (?, ?)',
         [req.user.id, userId],
-        function(err) {
+        function (err) {
             if (err) {
                 return res.status(500).json({ error: '關注失敗' });
             }
@@ -235,11 +235,11 @@ app.post('/api/follow/:userId', authenticateToken, (req, res) => {
 // 取消關注
 app.delete('/api/follow/:userId', authenticateToken, (req, res) => {
     const { userId } = req.params;
-    
+
     db.run(
         'DELETE FROM follows WHERE follower_id = ? AND followed_id = ?',
         [req.user.id, userId],
-        function(err) {
+        function (err) {
             if (err) {
                 return res.status(500).json({ error: '取消關注失敗' });
             }
@@ -296,7 +296,7 @@ app.put('/api/users/profile', authenticateToken, (req, res) => {
             db.run(
                 'UPDATE users SET username = ?, email = ?, bio = ? WHERE id = ?',
                 [username, email, bio, req.user.id],
-                function(err) {
+                function (err) {
                     if (err) {
                         return res.status(500).json({ error: '更新個人資料失敗' });
                     }
@@ -344,7 +344,7 @@ app.post('/api/auth/register', upload.single('avatar'), async (req, res) => {
             db.run(
                 'INSERT INTO users (username, email, password, avatar, bio) VALUES (?, ?, ?, ?, ?)',
                 [username, email, hashedPassword, avatar, bio],
-                function(err) {
+                function (err) {
                     if (err) {
                         return res.status(500).json({ error: '註冊失敗' });
                     }
@@ -474,7 +474,7 @@ app.put('/api/posts/:postId', authenticateToken, (req, res) => {
         db.run(
             'UPDATE posts SET content = ?, media = ?, youtube_url = ?, visibility = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
             [content, media, youtube_url, visibility, postId],
-            function(err) {
+            function (err) {
                 if (err) {
                     return res.status(500).json({ error: '更新貼文失敗' });
                 }
@@ -507,23 +507,23 @@ app.delete('/api/posts/:postId', authenticateToken, (req, res) => {
         // 刪除貼文相關的數據（點讚、評論等）
         db.serialize(() => {
             db.run('BEGIN TRANSACTION');
-            
+
             // 刪除點讚
             db.run('DELETE FROM likes WHERE post_id = ?', [postId]);
-            
+
             // 刪除評論
             db.run('DELETE FROM comments WHERE post_id = ?', [postId]);
-            
+
             // 刪除書籤
             db.run('DELETE FROM bookmarks WHERE post_id = ?', [postId]);
-            
+
             // 刪除貼文
-            db.run('DELETE FROM posts WHERE id = ?', [postId], function(err) {
+            db.run('DELETE FROM posts WHERE id = ?', [postId], function (err) {
                 if (err) {
                     db.run('ROLLBACK');
                     return res.status(500).json({ error: '刪除貼文失敗' });
                 }
-                
+
                 db.run('COMMIT');
                 res.json({ success: true });
             });
@@ -549,7 +549,7 @@ app.patch('/api/posts/:postId/visibility', authenticateToken, (req, res) => {
         db.run(
             'UPDATE posts SET visibility = ? WHERE id = ?',
             [visibility, postId],
-            function(err) {
+            function (err) {
                 if (err) {
                     return res.status(500).json({ error: '更新貼文權限失敗' });
                 }
@@ -566,7 +566,7 @@ app.patch('/api/posts/:postId/visibility', authenticateToken, (req, res) => {
 // 獲取貼文的點讚用戶列表
 app.get('/api/posts/:postId/likes', (req, res) => {
     const { postId } = req.params;
-    
+
     db.all(`
         SELECT u.id, u.username, u.avatar
         FROM likes l
@@ -597,7 +597,7 @@ app.post('/api/communities', authenticateToken, upload.fields([
     db.run(
         'INSERT INTO communities (name, description, avatar, cover_image, created_by) VALUES (?, ?, ?, ?, ?)',
         [name, description, avatar, cover_image, req.user.id],
-        function(err) {
+        function (err) {
             if (err) {
                 return res.status(500).json({ error: '創建社群失敗' });
             }
@@ -643,7 +643,7 @@ app.get('/api/communities', (req, res) => {
 // 獲取社群詳情
 app.get('/api/communities/:communityId', (req, res) => {
     const { communityId } = req.params;
-    
+
     db.get(`
         SELECT c.*, u.username as creator_name,
         (SELECT COUNT(*) FROM community_members WHERE community_id = c.id) as member_count
@@ -664,11 +664,11 @@ app.get('/api/communities/:communityId', (req, res) => {
 // 加入社群
 app.post('/api/communities/:communityId/join', authenticateToken, (req, res) => {
     const { communityId } = req.params;
-    
+
     db.run(
         'INSERT OR IGNORE INTO community_members (community_id, user_id) VALUES (?, ?)',
         [communityId, req.user.id],
-        function(err) {
+        function (err) {
             if (err) {
                 return res.status(500).json({ error: '加入社群失敗' });
             }
@@ -680,11 +680,11 @@ app.post('/api/communities/:communityId/join', authenticateToken, (req, res) => 
 // 退出社群
 app.delete('/api/communities/:communityId/leave', authenticateToken, (req, res) => {
     const { communityId } = req.params;
-    
+
     db.run(
         'DELETE FROM community_members WHERE community_id = ? AND user_id = ?',
         [communityId, req.user.id],
-        function(err) {
+        function (err) {
             if (err) {
                 return res.status(500).json({ error: '退出社群失敗' });
             }
@@ -696,7 +696,7 @@ app.delete('/api/communities/:communityId/leave', authenticateToken, (req, res) 
 // 獲取社群成員列表
 app.get('/api/communities/:communityId/members', (req, res) => {
     const { communityId } = req.params;
-    
+
     db.all(`
         SELECT u.id, u.username, u.avatar, cm.role, cm.joined_at
         FROM community_members cm
@@ -736,7 +736,7 @@ app.post('/api/communities/:communityId/posts', authenticateToken, upload.single
             db.run(
                 'INSERT INTO community_posts (community_id, user_id, content, media) VALUES (?, ?, ?, ?)',
                 [communityId, req.user.id, content, media],
-                function(err) {
+                function (err) {
                     if (err) {
                         return res.status(500).json({ error: '發布貼文失敗' });
                     }
@@ -757,7 +757,7 @@ app.post('/api/communities/:communityId/posts', authenticateToken, upload.single
 // 獲取社群貼文列表
 app.get('/api/communities/:communityId/posts', (req, res) => {
     const { communityId } = req.params;
-    
+
     db.all(`
         SELECT cp.*, u.username, u.avatar,
         (SELECT COUNT(*) FROM likes WHERE post_id = cp.id) as likes_count,
@@ -823,7 +823,7 @@ app.put('/api/communities/:communityId', authenticateToken, upload.fields([
             db.run(
                 `UPDATE communities SET ${updates.join(', ')} WHERE id = ?`,
                 params,
-                function(err) {
+                function (err) {
                     if (err) {
                         return res.status(500).json({ error: '更新社群設定失敗' });
                     }
@@ -837,7 +837,7 @@ app.put('/api/communities/:communityId', authenticateToken, upload.fields([
 // 創建聊天室
 app.post('/api/chat/rooms', authenticateToken, (req, res) => {
     const { name, type, members } = req.body;
-    
+
     if (!members || !Array.isArray(members) || members.length === 0) {
         return res.status(400).json({ error: '必須指定聊天室成員' });
     }
@@ -849,7 +849,7 @@ app.post('/api/chat/rooms', authenticateToken, (req, res) => {
         db.run(
             'INSERT INTO chat_rooms (name, type, created_by) VALUES (?, ?, ?)',
             [name, type || 'private', req.user.id],
-            function(err) {
+            function (err) {
                 if (err) {
                     db.run('ROLLBACK');
                     return res.status(500).json({ error: '創建聊天室失敗' });
@@ -900,7 +900,7 @@ app.get('/api/chat/rooms', authenticateToken, (req, res) => {
 // 獲取聊天室成員
 app.get('/api/chat/rooms/:roomId/members', authenticateToken, (req, res) => {
     const { roomId } = req.params;
-    
+
     db.all(`
         SELECT u.id, u.username, u.avatar
         FROM chat_room_members crm
@@ -918,22 +918,22 @@ app.get('/api/chat/rooms/:roomId/members', authenticateToken, (req, res) => {
 app.get('/api/chat/rooms/:roomId/messages', authenticateToken, (req, res) => {
     const { roomId } = req.params;
     const { before } = req.query;
-    
+
     let query = `
         SELECT cm.*, u.username, u.avatar
         FROM chat_messages cm
         JOIN users u ON cm.user_id = u.id
         WHERE cm.room_id = ?
     `;
-    
+
     const params = [roomId];
     if (before) {
         query += ' AND cm.created_at < ?';
         params.push(before);
     }
-    
+
     query += ' ORDER BY cm.created_at DESC LIMIT 50';
-    
+
     db.all(query, params, (err, messages) => {
         if (err) {
             return res.status(500).json({ error: '獲取聊天訊息失敗' });
@@ -946,7 +946,7 @@ app.get('/api/chat/rooms/:roomId/messages', authenticateToken, (req, res) => {
 app.post('/api/chat/rooms/:roomId/messages', authenticateToken, (req, res) => {
     const { roomId } = req.params;
     const { content } = req.body;
-    
+
     if (!content) {
         return res.status(400).json({ error: '訊息內容不能為空' });
     }
@@ -966,7 +966,7 @@ app.post('/api/chat/rooms/:roomId/messages', authenticateToken, (req, res) => {
             db.run(
                 'INSERT INTO chat_messages (room_id, user_id, content) VALUES (?, ?, ?)',
                 [roomId, req.user.id, content],
-                function(err) {
+                function (err) {
                     if (err) {
                         return res.status(500).json({ error: '發送訊息失敗' });
                     }
@@ -1009,7 +1009,7 @@ app.post('/api/chat/rooms/:roomId/members', authenticateToken, (req, res) => {
             db.run(
                 'INSERT OR IGNORE INTO chat_room_members (room_id, user_id) VALUES (?, ?)',
                 [roomId, userId],
-                function(err) {
+                function (err) {
                     if (err) {
                         return res.status(500).json({ error: '添加成員失敗' });
                     }
@@ -1039,7 +1039,7 @@ app.delete('/api/chat/rooms/:roomId/members/:userId', authenticateToken, (req, r
             db.run(
                 'DELETE FROM chat_room_members WHERE room_id = ? AND user_id = ?',
                 [roomId, userId],
-                function(err) {
+                function (err) {
                     if (err) {
                         return res.status(500).json({ error: '移除成員失敗' });
                     }
@@ -1061,33 +1061,33 @@ app.get('/recommendations.html', (req, res) => {
 });
 
 // Community Routes
-app.get('/api/community/suggestions', 
+app.get('/api/community/suggestions',
     // authenticateToken,
-     (req, res) => {
+    (req, res) => {
         let user_id = req.user ? req.user.id : null;
         // user_id = 4
-    db.all(`
+        db.all(`
         select
           id
         , username as name
         from users
     `, [], (err, suggestions) => {
-        if (err) {
-            console.error('獲取社群建議失敗:', err);
-            return res.status(500).json({ error: '獲取社群建議失敗' });
-        }
-        if(user_id){
-            suggestions = suggestions.filter(suggestion => suggestion.id !== user_id);
-        }
-        res.json(suggestions);
+            if (err) {
+                console.error('獲取社群建議失敗:', err);
+                return res.status(500).json({ error: '獲取社群建議失敗' });
+            }
+            if (user_id) {
+                suggestions = suggestions.filter(suggestion => suggestion.id !== user_id);
+            }
+            res.json(suggestions);
+        });
+        // res.json([{id:1,name:'Alice Wong'},{id:2,name:'Bob Lee'},{id:3,name:'Charlie Chen'}]);
     });
-    // res.json([{id:1,name:'Alice Wong'},{id:2,name:'Bob Lee'},{id:3,name:'Charlie Chen'}]);
-});
 
 // 獲取食物推薦貼文
 app.get('/api/recommendations/food', authenticateToken, (req, res) => {
     const { limit = 10 } = req.query;
-    
+
     // 基於用戶的歷史行為和AI分類結果推薦食物相關貼文
     db.all(`
         SELECT 
@@ -1118,7 +1118,7 @@ app.get('/api/recommendations/food', authenticateToken, (req, res) => {
 // 獲取個性化推薦貼文
 app.get('/api/recommendations/personalized', authenticateToken, (req, res) => {
     const { limit = 10 } = req.query;
-    
+
     // 基於用戶關注的人和點讚歷史進行推薦
     db.all(`
         SELECT 
@@ -1157,7 +1157,7 @@ app.get('/api/recommendations/personalized', authenticateToken, (req, res) => {
 // 獲取熱門推薦貼文
 app.get('/api/recommendations/popular', (req, res) => {
     const { limit = 10 } = req.query;
-    
+
     // 基於點讚數和評論數推薦熱門貼文
     db.all(`
         SELECT 
@@ -1213,7 +1213,7 @@ app.post('/api/classify-image', authenticateToken, upload.single('image'), async
 app.get('/api/posts/user/:userId', authenticateToken, (req, res) => {
     const { userId } = req.params;
     const limit = req.query.limit || 25;
-    
+
     db.all(
         'SELECT * FROM posts WHERE user_id = ? ORDER BY created_at DESC LIMIT ?',
         [userId, limit],
@@ -1229,7 +1229,7 @@ app.get('/api/posts/user/:userId', authenticateToken, (req, res) => {
 // 計算用戶興趣偏好
 app.get('/api/users/:userId/preferences', authenticateToken, (req, res) => {
     const { userId } = req.params;
-    
+
     db.get(
         'SELECT AVG(pet) as pet, AVG(food) as food, AVG(travel) as travel, AVG(selfie) as selfie FROM posts WHERE user_id = ?',
         [userId],
@@ -1259,7 +1259,7 @@ app.get('/api/posts/food-recommendations', authenticateToken, (req, res) => {
 // 基於興趣偏好的推薦系統
 app.get('/api/posts/recommendations', authenticateToken, (req, res) => {
     const { petWeight = 0.31, foodWeight = 0.32, travelWeight = 0.28, selfieWeight = 0.1 } = req.query;
-    
+
     db.all(
         `SELECT 
             *,
@@ -1293,7 +1293,7 @@ app.use((req, res) => {
 app.listen(port, async () => {
     console.log(`伺服器運行在 http://localhost:${port}`);
     console.log(`存儲測試頁面: http://localhost:${port}/storage-test`);
-    
+
     // 啟動時初始化 AI 系統
     try {
         await database_init_promise;

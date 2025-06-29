@@ -50,7 +50,7 @@ class ContentAnalysis {
         return classifier
     }
 
-    async analyzePostImage(postId, imageUrl) {
+    async analyzeImageUrl(imageUrl) {
         let model = await this.model
         // TODO image ai
 
@@ -67,8 +67,7 @@ class ContentAnalysis {
             fs.writeFileSync(file, buffer)
         }
 
-        console.log('analyzePostImage', { postId, imageUrl, file })
-
+        console.log('analyzePostImage', { imageUrl, file })
         let classes = await model.classifyImageFile(file);
         let food = classes.find(cls => cls.label == 'food').confidence
         let others = classes.find(cls => cls.label == 'others').confidence
@@ -77,6 +76,13 @@ class ContentAnalysis {
         let travel = classes.find(cls => cls.label == 'travel').confidence
 
         console.log({ food, others, pet, selfie, travel })
+
+        return { food, others, pet, selfie, travel }
+    }
+
+    async analyzePostImage(postId, imageUrl) {
+
+        const { food, others, pet, selfie, travel } = await this.analyzeImageUrl(imageUrl)
 
         return await new Promise((resolve, reject) => {
             db.run(`
