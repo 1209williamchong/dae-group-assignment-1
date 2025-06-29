@@ -521,7 +521,7 @@
                         <div class="post-meta">
                             <span>${new Date(post.created_at).toLocaleDateString()}</span>
                             ${post.score ? 
-                                `<span class="ai-score">推薦分數: ${(post.score * 100).toFixed(0)}%</span>` : 
+                                `<span class="ai-score">推薦分數: ${(post.score * 100).toFixed(2)}%</span>` : 
                                 post.interaction_count ? 
                                 `<span class="ai-score">互動: ${post.interaction_count}</span>` : ''
                             }

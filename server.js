@@ -1261,23 +1261,38 @@ app.get('/api/posts/food-recommendations', authenticateToken, (req, res) => {
 // 基於興趣偏好的推薦系統
 app.get('/api/posts/recommendations', authenticateToken, (req, res) => {
     const { petWeight = 0.31, foodWeight = 0.32, travelWeight = 0.28, selfieWeight = 0.1 } = req.query;
+    db.get(`
+      select
+        avg(food) as food,
+        avg(pet) as pet,
+        avg(travel) as travel,
+        avg(selfie) as selfie,
+        avg(others) as others
+      from posts
+      where user_id = ?
+    `,[req.user.id],(err,row)=>{
+        // console.log({row})
 
-    db.all(
-        `SELECT 
-            *,
-            (pet * ? + food * ? + travel * ? + selfie * ?) as score
-        FROM posts 
-        WHERE user_id != ? 
-        ORDER BY score DESC 
-        LIMIT 10`,
-        [petWeight, foodWeight, travelWeight, selfieWeight, req.user.id],
-        (err, posts) => {
-            if (err) {
-                return res.status(500).json({ error: '獲取推薦失敗' });
+        db.all(
+            `SELECT 
+                *,
+                (pet * ? + food * ? + travel * ? + selfie * ? + others * ?) as score
+            FROM posts 
+            WHERE user_id != ? 
+            ORDER BY score DESC 
+            LIMIT 10`,
+            [row.pet, row.food, row.travel, row.selfie, row.others, req.user.id],
+            (err, posts) => {
+                if (err) {
+                    return res.status(500).json({ error: '獲取推薦失敗' });
+                }
+                res.json({posts});
             }
-            res.json({posts});
-        }
-    );
+        );
+
+    })
+
+   
 });
 
 // 錯誤處理中間件
