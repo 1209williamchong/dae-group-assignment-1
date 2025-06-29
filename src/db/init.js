@@ -161,6 +161,86 @@ db.serialize(() => {
         )
     `);
 
+    // AI 推薦系統相關資料表
+    
+    // 用戶行為追蹤表
+    updates[11] = (`
+        CREATE TABLE IF NOT EXISTS user_behaviors (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            post_id INTEGER NOT NULL,
+            behavior_type TEXT NOT NULL, -- 'view', 'like', 'comment', 'share', 'save'
+            duration INTEGER DEFAULT 0, -- 瀏覽時長（秒）
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users (id),
+            FOREIGN KEY (post_id) REFERENCES posts (id)
+        )
+    `);
+
+    // 內容標籤表
+    updates[12] = (`
+        CREATE TABLE IF NOT EXISTS content_tags (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            post_id INTEGER NOT NULL,
+            tag_name TEXT NOT NULL,
+            confidence_score REAL DEFAULT 1.0, -- AI 標籤置信度
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (post_id) REFERENCES posts (id)
+        )
+    `);
+
+    // 用戶興趣標籤表
+    updates[13] = (`
+        CREATE TABLE IF NOT EXISTS user_interests (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            tag_name TEXT NOT NULL,
+            interest_score REAL DEFAULT 0.0, -- 興趣分數 (0-1)
+            last_updated DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users (id)
+        )
+    `);
+
+    // 推薦結果表
+    updates[14] = (`
+        CREATE TABLE IF NOT EXISTS recommendations (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            post_id INTEGER NOT NULL,
+            recommendation_score REAL NOT NULL, -- 推薦分數
+            algorithm_type TEXT NOT NULL, -- 'collaborative', 'content_based', 'hybrid'
+            reason TEXT, -- 推薦原因
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users (id),
+            FOREIGN KEY (post_id) REFERENCES posts (id)
+        )
+    `);
+
+    // 用戶相似度表
+    updates[15] = (`
+        CREATE TABLE IF NOT EXISTS user_similarities (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id_1 INTEGER NOT NULL,
+            user_id_2 INTEGER NOT NULL,
+            similarity_score REAL NOT NULL, -- 相似度分數 (0-1)
+            last_calculated DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id_1) REFERENCES users (id),
+            FOREIGN KEY (user_id_2) REFERENCES users (id)
+        )
+    `);
+
+    // 為現有貼文添加 AI 分析欄位
+    updates[16] = (`
+        ALTER TABLE posts ADD COLUMN ai_category TEXT DEFAULT NULL
+    `);
+
+    updates[17] = (`
+        ALTER TABLE posts ADD COLUMN ai_sentiment REAL DEFAULT NULL
+    `);
+
+    updates[18] = (`
+        ALTER TABLE posts ADD COLUMN ai_engagement_score REAL DEFAULT 0.0
+    `);
 
     db.get('select * from db_version', (err, row)=>{
         let version

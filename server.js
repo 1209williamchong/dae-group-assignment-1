@@ -5,10 +5,14 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const multer = require('multer');
 const db = require('./src/db/init');
+const AISystem = require('./src/ai');
 
 const app = express();
 const port = 3000;
 const JWT_SECRET = 'your-secret-key'; // 在生產環境中應該使用環境變數
+
+// 初始化 AI 系統
+const aiSystem = new AISystem();
 
 // 配置 multer
 const storage = multer.diskStorage({
@@ -51,7 +55,7 @@ function authenticateToken(req, res, next) {
 }
 
 // 發布新貼文
-app.post('/api/posts', authenticateToken, upload.single('media'), (req, res) => {
+app.post('/api/posts', authenticateToken, upload.single('media'), async (req, res) => {
     const { content, media, youtube_url } = req.body;
     let image_url = req.file ? `/uploads/${req.file.filename}` : null;
 
@@ -64,12 +68,23 @@ app.post('/api/posts', authenticateToken, upload.single('media'), (req, res) => 
     db.run(
         'INSERT INTO posts (user_id, content, image_url, food) VALUES (?, ?, ?, ?)',
         [req.user.id, content, image_url, food],
-        function(err) {
+        async function(err) {
             if (err) {
                 return res.status(500).json({ error: '發布貼文失敗' });
             }
+            
+            const postId = this.lastID;
+            
+            // AI 分析新貼文內容
+            try {
+                const analysis = await aiSystem.processNewPost(postId, content);
+                console.log('AI 分析結果:', analysis);
+            } catch (error) {
+                console.error('AI 分析失敗:', error);
+            }
+            
             res.json({
-                id: this.lastID,
+                id: postId,
                 user_id: req.user.id,
                 content,
                 media,
@@ -121,15 +136,22 @@ app.get('/api/posts/following', authenticateToken, (req, res) => {
 });
 
 // 點讚貼文
-app.post('/api/posts/:postId/like', authenticateToken, (req, res) => {
+app.post('/api/posts/:postId/like', authenticateToken, async (req, res) => {
     const { postId } = req.params;
     
     db.run(
         'INSERT OR REPLACE INTO likes (user_id, post_id) VALUES (?, ?)',
         [req.user.id, postId],
-        function(err) {
+        async function(err) {
             if (err) {
                 return res.status(500).json({ error: '點讚失敗' });
+            }
+            
+            // AI 處理用戶行為
+            try {
+                await aiSystem.processUserBehavior(req.user.id, postId, 'like');
+            } catch (error) {
+                console.error('AI 行為處理失敗:', error);
             }
             
             // 獲取更新後的點讚數
@@ -1029,6 +1051,116 @@ app.get('/api/community/suggestions',
     // res.json([{id:1,name:'Alice Wong'},{id:2,name:'Bob Lee'},{id:3,name:'Charlie Chen'}]);
 });
 
+// AI 推薦系統 API 端點
+
+// 獲取個人化推薦
+app.get('/api/ai/recommendations', authenticateToken, async (req, res) => {
+    try {
+        const { limit = 10 } = req.query;
+        const recommendations = await aiSystem.getUserRecommendations(req.user.id, parseInt(limit));
+        res.json({ recommendations });
+    } catch (error) {
+        console.error('獲取推薦失敗:', error);
+        res.status(500).json({ error: '獲取推薦失敗' });
+    }
+});
+
+// 搜尋相關內容
+app.get('/api/ai/search', authenticateToken, async (req, res) => {
+    try {
+        const { query, limit = 20 } = req.query;
+        if (!query) {
+            return res.status(400).json({ error: '搜尋查詢不能為空' });
+        }
+        
+        const results = await aiSystem.searchRelatedContent(query, req.user.id, parseInt(limit));
+        res.json({ results });
+    } catch (error) {
+        console.error('搜尋失敗:', error);
+        res.status(500).json({ error: '搜尋失敗' });
+    }
+});
+
+// 獲取熱門內容
+app.get('/api/ai/trending', async (req, res) => {
+    try {
+        const { limit = 20 } = req.query;
+        const trending = await aiSystem.getTrendingContent(parseInt(limit));
+        res.json({ trending });
+    } catch (error) {
+        console.error('獲取熱門內容失敗:', error);
+        res.status(500).json({ error: '獲取熱門內容失敗' });
+    }
+});
+
+// 記錄用戶行為（瀏覽、評論等）
+app.post('/api/ai/behavior', authenticateToken, async (req, res) => {
+    try {
+        const { postId, behaviorType, duration = 0 } = req.body;
+        
+        if (!postId || !behaviorType) {
+            return res.status(400).json({ error: '缺少必要參數' });
+        }
+        
+        const success = await aiSystem.processUserBehavior(req.user.id, postId, behaviorType, duration);
+        
+        if (success) {
+            res.json({ success: true });
+        } else {
+            res.status(500).json({ error: '記錄行為失敗' });
+        }
+    } catch (error) {
+        console.error('記錄行為失敗:', error);
+        res.status(500).json({ error: '記錄行為失敗' });
+    }
+});
+
+// 獲取 AI 分析統計
+app.get('/api/ai/analytics', authenticateToken, async (req, res) => {
+    try {
+        const analytics = await aiSystem.getAIAnalytics();
+        res.json(analytics);
+    } catch (error) {
+        console.error('獲取 AI 統計失敗:', error);
+        res.status(500).json({ error: '獲取 AI 統計失敗' });
+    }
+});
+
+// 獲取用戶興趣標籤
+app.get('/api/ai/interests', authenticateToken, async (req, res) => {
+    try {
+        const interests = await aiSystem.recommendationSystem.calculateUserInterests(req.user.id);
+        res.json({ interests });
+    } catch (error) {
+        console.error('獲取用戶興趣失敗:', error);
+        res.status(500).json({ error: '獲取用戶興趣失敗' });
+    }
+});
+
+// 獲取熱門標籤
+app.get('/api/ai/popular-tags', async (req, res) => {
+    try {
+        const { limit = 20 } = req.query;
+        const tags = await aiSystem.contentAnalysis.getPopularTags(parseInt(limit));
+        res.json({ tags });
+    } catch (error) {
+        console.error('獲取熱門標籤失敗:', error);
+        res.status(500).json({ error: '獲取熱門標籤失敗' });
+    }
+});
+
+// 初始化 AI 系統（管理員功能）
+app.post('/api/ai/initialize', authenticateToken, async (req, res) => {
+    try {
+        // 這裡可以添加管理員權限檢查
+        await aiSystem.initialize();
+        res.json({ success: true, message: 'AI 系統初始化完成' });
+    } catch (error) {
+        console.error('AI 系統初始化失敗:', error);
+        res.status(500).json({ error: 'AI 系統初始化失敗' });
+    }
+});
+
 // 錯誤處理中間件
 app.use((err, req, res, next) => {
     console.error(err.stack);
@@ -1041,7 +1173,15 @@ app.use((req, res) => {
 });
 
 // 啟動伺服器
-app.listen(port, () => {
+app.listen(port, async () => {
     console.log(`伺服器運行在 http://localhost:${port}`);
     console.log(`存儲測試頁面: http://localhost:${port}/storage-test`);
+    
+    // 啟動時初始化 AI 系統
+    try {
+        await aiSystem.initialize();
+        console.log('AI 系統初始化完成');
+    } catch (error) {
+        console.error('AI 系統初始化失敗:', error);
+    }
 }); 
