@@ -1,5 +1,11 @@
-const {db,database_init_promise} = require('../db/init');
-
+const { db, database_init_promise } = require('../db/init');
+const fs = require('fs');
+const { join } = require('path');
+const {
+    loadImageModel,
+    loadImageClassifierModel,
+    PreTrainedImageModels,
+} = require("tensorflow-helpers");
 class ContentAnalysis {
     constructor() {
         // 預定義的內容類別和關鍵字
@@ -19,14 +25,84 @@ class ContentAnalysis {
             negative: ['難過', '傷心', '失望', '討厭', '糟糕', '痛苦', '煩惱', '生氣', '無聊', '討厭'],
             neutral: ['一般', '普通', '還好', '正常', '平常', '標準', '基本', '簡單', '一般般']
         };
+
+        this.model = this.loadModel()
     }
+
+    async loadModel() {
+        // auto cache locally
+        let baseModel = await loadImageModel({
+            spec: PreTrainedImageModels.mobilenet["mobilenet-v3-large-100"],
+            dir: "saved_models/base_model",
+        });
+        console.log("embedding features:", baseModel.spec.features);
+        // [print] embedding features: 1280
+
+        // restore or create new model
+        let classifier = await loadImageClassifierModel({
+            baseModel,
+            modelDir: "saved_models/classifier_model",
+            hiddenLayers: [128],
+            datasetDir: "dataset",
+            // classNames: ['anime', 'real', 'others'], // auto scan from datasetDir
+        });
+
+        return classifier
+    }
+
+    async analyzePostImage(postId, imageUrl) {
+        let model = await this.model
+        // TODO image ai
+
+        let file
+        if (imageUrl.startsWith('/uploads/')) {
+            // e.g. '/uploads/1751130750656-media.jpg'
+            file = join('public', imageUrl)
+        } else {
+            // e.g. 'https://sample.hkit.cc/image?keyword=Bob Lee+post&seed=post'
+            file = join('public', 'uploads', 'post-' + postId + '.jpg')
+            let res = await fetch(imageUrl)
+            let arrayBuffer = await res.arrayBuffer()
+            let buffer = Buffer.from(arrayBuffer)
+            fs.writeFileSync(file, buffer)
+        }
+
+        console.log('analyzePostImage', { postId, imageUrl, file })
+
+        let classes = await model.classifyImageFile(file);
+        let food = classes.find(cls => cls.label == 'food').confidence
+        let others = classes.find(cls => cls.label == 'others').confidence
+        let pet = classes.find(cls => cls.label == 'pet').confidence
+        let selfie = classes.find(cls => cls.label == 'selfie').confidence
+        let travel = classes.find(cls => cls.label == 'travel').confidence
+
+        console.log({ food, others, pet, selfie, travel })
+
+        return await new Promise((resolve, reject) => {
+            db.run(`
+                update posts
+                set food = ?,
+                    others = ?,
+                    pet = ?,
+                    selfie = ?,
+                    travel = ?
+                where id = ?
+            `, [food, others, pet, selfie, travel, postId], err => {
+                if (err) {
+                    reject(err)
+                } else {
+                    resolve({ food, others, pet, selfie, travel })
+                }
+            })
+        })
+
+
+        // throw new Error('TODO')
+    }
+
 
     // 分析貼文內容並生成標籤
     async analyzePostContent(postId, content) {
-        if ('dev') {
-            // TODO image ai
-            return  ''
-        }
         try {
             const tags = this.extractTags(content);
             const category = this.categorizeContent(content);
@@ -35,7 +111,7 @@ class ContentAnalysis {
 
             // 存儲標籤
             await this.storeTags(postId, tags);
-            
+
             // 更新貼文的 AI 分析結果
             await this.updatePostAnalysis(postId, category, sentiment, engagementScore);
 
@@ -55,7 +131,7 @@ class ContentAnalysis {
     extractTags(content) {
         const tags = new Set();
         const words = content.toLowerCase().split(/[\s,，。！？；：""''（）【】]/);
-        
+
         // 檢查每個類別的關鍵字
         for (const [category, keywords] of Object.entries(this.categories)) {
             for (const keyword of keywords) {
@@ -76,7 +152,7 @@ class ContentAnalysis {
     // 分類內容
     categorizeContent(content) {
         const scores = {};
-        
+
         for (const [category, keywords] of Object.entries(this.categories)) {
             scores[category] = 0;
             for (const keyword of keywords) {
@@ -89,7 +165,7 @@ class ContentAnalysis {
         // 找到最高分的類別
         const maxScore = Math.max(...Object.values(scores));
         const categories = Object.keys(scores).filter(cat => scores[cat] === maxScore);
-        
+
         return maxScore > 0 ? categories[0] : 'general';
     }
 
@@ -190,7 +266,7 @@ class ContentAnalysis {
     async analyzeAllPosts() {
         try {
             const posts = await new Promise((resolve, reject) => {
-                db.all('SELECT id, content FROM posts WHERE ai_category IS NULL', (err, results) => {
+                db.all('SELECT id, image_url FROM posts WHERE pet IS NULL and image_url is not null', (err, results) => {
                     if (err) reject(err);
                     else resolve(results);
                 });
@@ -199,7 +275,7 @@ class ContentAnalysis {
             console.log(`開始分析 ${posts.length} 個貼文...`);
 
             for (const post of posts) {
-                await this.analyzePostContent(post.id, post.content);
+                await this.analyzePostImage(post.id, post.image_url);
             }
 
             console.log('所有貼文分析完成');
@@ -221,7 +297,7 @@ class ContentAnalysis {
                 ORDER BY usage_count DESC, avg_confidence DESC
                 LIMIT ?
             `;
-            
+
             db.all(query, [limit], (err, results) => {
                 if (err) {
                     reject(err);
@@ -235,7 +311,7 @@ class ContentAnalysis {
     // 根據標籤搜尋貼文
     async searchPostsByTags(tags, limit = 20) {
         const placeholders = tags.map(() => '?').join(',');
-        
+
         return new Promise((resolve, reject) => {
             const query = `
                 SELECT DISTINCT
@@ -256,7 +332,7 @@ class ContentAnalysis {
                 ORDER BY p.ai_engagement_score DESC, p.created_at DESC
                 LIMIT ?
             `;
-            
+
             db.all(query, [...tags, limit], (err, results) => {
                 if (err) {
                     reject(err);

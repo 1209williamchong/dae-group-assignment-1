@@ -251,8 +251,14 @@ db.serialize(() => {
     `);
 
 
-    // all ai tags: food, others, pet, selfie
+    // all ai tags: [ 'food', 'others', 'pet', 'selfie', 'travel' ]
     
+    updates[20] = `ALTER TABLE posts ADD COLUMN others FLOAT DEFAULT NULL`;
+    updates[21] = `ALTER TABLE posts ADD COLUMN pet FLOAT DEFAULT NULL`;
+    updates[22] = `ALTER TABLE posts ADD COLUMN selfie FLOAT DEFAULT NULL`;
+    updates[23] = `ALTER TABLE posts ADD COLUMN travel FLOAT DEFAULT NULL`;
+
+
 
     db.get('select * from db_version', (err, row)=>{
         let version
